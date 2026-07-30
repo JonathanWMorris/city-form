@@ -45,7 +45,7 @@ Exit criteria:
 
 ## Stage 2: Logical Road Graph
 
-Status: In progress
+Status: Complete
 
 Completed:
 
@@ -56,9 +56,6 @@ Completed:
 - Tests for valid and invalid graph construction, deterministic traversal
   ordering, and headless repeatability
 - Millisecond timestamps and durations with subsystem-specific cadences
-
-Remaining:
-
 - Vehicle-aware, time-dependent A* using free-flow costs
 - Route tests for direct, multi-segment, disconnected, known-optimal, and
   equal-cost cases

@@ -5,9 +5,9 @@
 This document defines the architectural boundaries for City Form. The Stage 1
 `CitySimulation` module now implements the dependency boundary, deterministic
 primitives, simulation clock, validation, summary, regional road defaults,
-road-type and vehicle-class catalogs, and the logical road graph. Later systems
-may evolve the concrete APIs, but changes must preserve the responsibilities
-and dependency direction below.
+road-type and vehicle-class catalogs, the logical road graph, and
+time-dependent routing. Later systems may evolve the concrete APIs, but changes
+must preserve the responsibilities and dependency direction below.
 
 The concrete Stage 1–2 contract is documented in
 [Simulation Foundation](simulation-foundation.md). Accepted architectural
@@ -45,12 +45,10 @@ The authoritative simulation currently owns:
 
 - Simulation time and deterministic random state
 - Regional configuration and validated RoadType and VehicleClass catalogs
-- Logical road topology and commands
+- Logical road topology, commands, and routing
 - Validation and summary metrics
 
 As later milestones land, it will also own:
-
-- Routing data
 - Parcels, zoning, buildings, and capacities
 - Households, citizens, businesses, jobs, and assignments
 - Trips, routes, road usage, and abstract traffic state
@@ -149,7 +147,7 @@ speed, acceleration, and route progress.
 A rendered vehicle is an interpolated view. Destroying, culling, or unloading
 that representation must not destroy or pause its authoritative vehicle.
 
-Planned trips will use time-dependent A* with vehicle-aware traversal costs.
+Trips use time-dependent A* with vehicle-aware traversal costs.
 The traffic milestone will advance all active vehicles through one global
 fixed-step model and publish historical and live travel-time observations.
 Camera position, visibility, and loaded regions never select simulation

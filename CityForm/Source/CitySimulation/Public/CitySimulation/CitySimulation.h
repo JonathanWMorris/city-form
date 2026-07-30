@@ -6,6 +6,7 @@
 #include "CitySimulation/RegionProfile.h"
 #include "CitySimulation/RoadGraph.h"
 #include "CitySimulation/RoadType.h"
+#include "CitySimulation/Routing.h"
 #include "CitySimulation/SimulationTime.h"
 #include "CitySimulation/Validation.h"
 #include "CitySimulation/VehicleClass.h"
@@ -57,6 +58,7 @@ public:
 		FRoadNodeId EndpointA,
 		FRoadNodeId EndpointB,
 		FRoadSegmentDefinition Definition);
+	FRouteResult FindRoute(const FRouteQuery& Query) const;
 	FValidationReport Validate() const;
 	FCitySummary GetSummary() const;
 
