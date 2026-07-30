@@ -2,8 +2,8 @@
 
 ## Status
 
-The Stage 1 simulation skeleton in this document is implemented. The Stage 2
-logical road graph and time-dependent routing sections remain an implementation
+The Stage 1 simulation skeleton and Stage 2 logical road graph in this document
+are implemented. The time-dependent routing section remains an implementation
 contract, not a claim that those types already exist.
 
 ## Module Boundary
@@ -69,11 +69,13 @@ Overflow is a structured failure. It must not wrap into zero or an existing ID.
 
 ### `FSimulationConfig`
 
-Stage 1 configuration contains an explicit `uint64 Seed`. Construction does not
-read wall-clock time, process state, or platform randomness.
+Configuration contains an explicit `uint64 Seed` and an `FRegionProfile`
+snapshot. Construction does not read wall-clock time, process state, platform
+randomness, or global regional settings.
 
-Later configuration may add validated catalogs and system cadence values without
-changing the explicit-seed requirement.
+The default region is `US-CA`. Region data supplies applicable defaults to
+catalog construction and can be replaced per city without changing graph code.
+Future map setup may select another profile before constructing a City.
 
 ### `FSimulationTime`
 
@@ -147,6 +149,17 @@ deterministically ordered.
 
 ## Stage 2 Road Graph
 
+### Regional Defaults and Road Types
+
+Each City owns a read-only RoadType catalog constructed from its RegionProfile.
+The initial `BasicTwoWayRoad` has stable RoadType ID one. Under the California
+profile its default speed limit is 25 miles per hour, stored as exactly
+`11.176` meters per second.
+
+RoadSegments reference a valid RoadType and may store an optional speed-limit
+override. An absent override resolves to the RoadType default. Post-creation
+editing and additional regional profiles or road types remain deferred.
+
 ### Coordinates
 
 `FSimPoint2D` stores finite `double X` and `double Y` values in meters. v0.1 is
@@ -157,9 +170,10 @@ rather than an implicit Unreal Z coordinate.
 
 A RoadNode contains its `FRoadNodeId` and `FSimPoint2D`.
 
-A RoadSegment contains its `FRoadSegmentId`, two distinct endpoint IDs, and the
-vehicle-independent definition needed to determine free-flow traversal
-properties. Its length is the Euclidean endpoint distance.
+A RoadSegment contains its `FRoadSegmentId`, two distinct endpoint IDs, a valid
+RoadType ID, an optional speed-limit override, and a cached positive length in
+meters. Validation confirms that the cached length matches the Euclidean
+endpoint distance within a named tolerance.
 
 One two-way segment exposes two directional RoadTraversals. Directional
 traversal identity is the tuple of SegmentId, FromNodeId, and ToNodeId; v0.1

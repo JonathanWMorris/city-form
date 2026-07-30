@@ -4,9 +4,10 @@
 
 This document defines the architectural boundaries for City Form. The Stage 1
 `CitySimulation` module now implements the dependency boundary, deterministic
-primitives, simulation clock, validation, summary, and initial vehicle-class
-catalog. Later systems may evolve the concrete APIs, but changes must preserve
-the responsibilities and dependency direction below.
+primitives, simulation clock, validation, summary, regional road defaults,
+road-type and vehicle-class catalogs, and the logical road graph. Later systems
+may evolve the concrete APIs, but changes must preserve the responsibilities
+and dependency direction below.
 
 The concrete Stage 1–2 contract is documented in
 [Simulation Foundation](simulation-foundation.md). Accepted architectural
