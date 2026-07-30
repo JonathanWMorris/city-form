@@ -52,6 +52,16 @@ macOS on Apple Silicon is currently the verified environment. Windows
 contributors are welcome, but should describe their engine, compiler, GPU API,
 and test results because Windows has not yet been verified by the maintainer.
 
+### Optional Unreal editor automation
+
+The project includes an optional, editor-only Unreal Model Context Protocol
+(MCP) configuration for contributors using compatible development tools. It is
+not required to build, run, or contribute to City Form, and it is never a
+runtime dependency of the game or simulation.
+
+See [Unreal MCP Workflow](docs/unreal-mcp.md) for setup, security,
+troubleshooting, and automation-test instructions.
+
 ## Contribution Workflow
 
 1. Start from an up-to-date `main` branch.
@@ -118,6 +128,9 @@ configuration, before-and-after measurements, and any quality tradeoff.
 
 If a relevant test cannot be run locally, state that clearly in the pull
 request rather than implying success.
+
+Contributors using the optional Unreal MCP workflow can discover and run tests
+from a live editor as described in [Unreal MCP Workflow](docs/unreal-mcp.md).
 
 ## Documentation
 

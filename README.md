@@ -81,6 +81,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [Traffic Model](docs/traffic-model.md) | Mesoscopic traffic, prediction, and future microscopic fidelity |
 | [Decision Records](docs/decisions/README.md) | Context and consequences of accepted architecture choices |
 | [Roadmap](docs/roadmap.md) | Ordered milestones and exit criteria |
+| [Unreal MCP Workflow](docs/unreal-mcp.md) | Optional editor automation setup and troubleshooting |
 | [Contributing](CONTRIBUTING.md) | Setup, workflow, testing, and contribution expectations |
 
 Repository Markdown is the source of truth. GitHub issues can be used for
