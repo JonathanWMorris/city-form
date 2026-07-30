@@ -1,0 +1,54 @@
+name: Bug report
+description: Report reproducible behavior that differs from the documented intent.
+title: "[Bug] "
+labels:
+  - "type: bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve City Form. Remove private information and credentials from logs before submitting.
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest repeatable scenario you can.
+      placeholder: |
+        1. Open...
+        2. Run...
+        3. Observe...
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Revision
+      description: Commit SHA, branch, release, or pull request.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include Unreal version, OS, architecture, compiler, GPU API, and build configuration where relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or supporting material
+      description: Paste a focused log excerpt or attach screenshots and recordings.
+  - type: checkboxes
+    id: clean_checkout
+    attributes:
+      label: Clean-checkout verification
+      options:
+        - label: I tested from a clean checkout or explained why I could not.
+          required: true

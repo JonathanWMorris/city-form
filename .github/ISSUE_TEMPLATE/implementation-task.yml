@@ -1,0 +1,39 @@
+name: Implementation task
+description: Track a bounded implementation step within an accepted direction.
+title: "[Task] "
+labels:
+  - "type: chore"
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Link the accepted proposal, milestone, decision, or bug this task advances.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Describe the concrete work included in this task.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: Identify adjacent work that must remain outside this task.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List blocking issues, decisions, plugins, or external requirements.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use a checklist of verifiable results, including tests and documentation.
+    validations:
+      required: true
