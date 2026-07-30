@@ -1,2 +1,2 @@
-# city-form
-Cityform — an open-source city simulation game built with Unreal Engine
+# CityForm
+CityForm — an open-source city simulation game built with Unreal Engine
