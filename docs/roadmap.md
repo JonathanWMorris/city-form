@@ -183,3 +183,9 @@ visuals, and packaged releases.
 
 Their order is intentionally not fixed until v0.1 provides evidence about the
 simulation, player experience, performance, and contributor priorities.
+
+Accepted forward-looking constraints for calendar pacing, development, and
+transit are recorded in
+[Gameplay Time and Development Pacing](gameplay-pacing.md) and
+[Future Transit Foundation](transit-foundation.md). These documents preserve
+requirements without moving either system into the v0.1 milestone sequence.

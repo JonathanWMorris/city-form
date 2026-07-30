@@ -119,9 +119,16 @@ high-frequency update loop. Routing runs on demand, traffic uses an explicit
 fixed step, and slower systems use their own cadences or scheduled events.
 
 Rendering may interpolate or visualize snapshots, but it must not decide
-whether authoritative systems advance. A future gameplay calendar is a
-configurable projection of simulation time rather than the physical unit used
-by routing and movement.
+whether authoritative systems advance. Civil time, transit service time, and
+wall-clock playback are projections or controls around the authoritative
+timeline rather than replacements for the physical units used by routing and
+movement. Their accepted defaults are documented in
+[Gameplay Time and Development Pacing](gameplay-pacing.md) and
+[ADR 0009](decisions/0009-accelerated-civil-and-service-time.md).
+
+If a requested playback rate exceeds available simulation throughput, the
+simulation must fall behind that wall-clock target instead of skipping
+authoritative fixed steps or scheduled events.
 
 Deterministic behavior requires:
 
@@ -155,6 +162,23 @@ fidelity.
 
 The complete boundary is defined in
 [Global Microscopic Traffic Model](traffic-model.md).
+
+## Future Transit Boundary
+
+Public transit remains outside v0.1, but later systems must preserve the same
+simulation/presentation separation. Stops, scheduled runs, vehicle blocks,
+passenger itineraries, actual operation, and dispatch decisions are
+authoritative simulation records. Visible vehicles and passengers are derived
+representations.
+
+Buses may use time-dependent road routing and global road traffic. Rail and
+subway services require guideway topology, while passenger journey planning
+requires a schedule-aware multimodal layer rather than treating every problem
+as road A*. Overnight service uses extended service-day offsets without
+changing the 24-hour civil clock.
+
+The complete forward-looking constraints are documented in
+[Future Transit Foundation](transit-foundation.md).
 
 ## Performance Strategy
 

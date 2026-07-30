@@ -64,8 +64,12 @@ troubleshooting, and automation-test instructions.
 
 ## Contribution Workflow
 
-1. Start from an up-to-date `main` branch.
-2. Create a focused branch for one change.
+All changes, including maintainer and automated changes, must be developed on a
+non-`main` branch and merged through a pull request. Do not commit or push
+directly to `main`, and never force-push `main`.
+
+1. Start from an up-to-date local `main` branch.
+2. Create a focused non-`main` branch for one change.
 3. Keep commits understandable and avoid unrelated formatting or asset churn.
 4. Add or update tests and documentation with the behavior they cover.
 5. Build and run the relevant Unreal tests when possible.
