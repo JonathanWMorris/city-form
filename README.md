@@ -78,7 +78,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [v0.1 Product Scope](docs/product-scope.md) | Included features, non-goals, and definition of done |
 | [Domain Model](docs/domain-model.md) | Shared vocabulary, ownership, and entity relationships |
 | [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
-| [Simulation Foundation](docs/simulation-foundation.md) | Planned Stage 1–2 APIs and routing contract |
+| [Simulation Foundation](docs/simulation-foundation.md) | Current APIs and planned routing contract |
 | [Traffic Model](docs/traffic-model.md) | Mesoscopic traffic, prediction, and future microscopic fidelity |
 | [Decision Records](docs/decisions/README.md) | Context and consequences of accepted architecture choices |
 | [Roadmap](docs/roadmap.md) | Ordered milestones and exit criteria |

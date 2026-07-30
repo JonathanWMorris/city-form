@@ -52,6 +52,7 @@ types such as:
 
 - `FRoadNodeId`
 - `FRoadSegmentId`
+- `FRoadTypeId`
 - `FVehicleClassId`
 - Later v0.1 entity IDs listed in the
   [domain model](domain-model.md)
@@ -87,11 +88,15 @@ clock does not store floating-point elapsed time.
 
 ### `FCitySimulation`
 
-`FCitySimulation` is the authoritative facade and state owner. Stage 1 exposes:
+`FCitySimulation` is the authoritative facade and state owner. The current
+facade exposes:
 
 - Construction from a validated `FSimulationConfig`
-- Current seed and `FSimulationTime`
+- Read access to configuration, time, deterministic random state, the
+  VehicleClass and RoadType catalogs, and the RoadGraph
 - `AdvanceTicks(int64 Count)`
+- `AddRoadNode(...)`
+- `AddRoadSegment(...)`
 - `Validate()`
 - `GetSummary()`
 
@@ -143,8 +148,9 @@ loaded external data.
 stable code, entity category and ID when applicable, and an explanation.
 `IsValid()` is true when the report contains no error-severity issues.
 
-`FCitySummary` initially reports seed and current tick. Entity counts are added
-as their systems become authoritative. Summary generation is read-only and
+`FCitySummary` currently reports seed, current tick, VehicleClass count,
+RoadType count, RoadNode count, and RoadSegment count. Later systems add their
+own counts as they become authoritative. Summary generation is read-only and
 deterministically ordered.
 
 ## Stage 2 Road Graph
@@ -188,8 +194,10 @@ Commands return typed result records containing the created ID on success.
 Segment creation rejects:
 
 - Invalid or missing endpoint IDs
+- An invalid or missing RoadType ID
 - The same endpoint at both ends
 - Non-finite or zero-length geometry
+- A non-finite or non-positive speed-limit override
 - A duplicate connection between the same endpoints in v0.1
 - ID exhaustion
 
@@ -228,8 +236,9 @@ A traversal-cost provider evaluates expected travel ticks using:
 - VehicleClass
 - Available historical and live traffic forecast
 
-Stage 2 supplies a free-flow provider through this final time-aware interface.
-Congestion-aware providers arrive with the traffic milestone.
+The Stage 2 routing implementation will supply a free-flow provider through
+this final time-aware interface. Congestion-aware providers arrive with the
+traffic milestone.
 
 Costs must be non-negative and satisfy FIFO: entering the same traversal later
 cannot produce an earlier exit. The initial algorithm may reject a provider
@@ -266,15 +275,27 @@ therefore produce the same result for the same graph, query, and cost provider.
 
 ## Stage 1–2 Test Contract
 
-Unreal Automation Tests must cover:
+### Implemented Coverage
+
+Unreal Automation Tests currently cover:
 
 - Empty City construction, validation, and summary
 - Zero, positive, negative, and overflowing tick advancement
 - Known-seed RNG golden output
 - Strong-ID invalid state, uniqueness, category safety, and exhaustion behavior
+- Region, RoadType, and VehicleClass defaults and catalog validation
 - Headless advancement without a World or viewport
 - Valid and invalid RoadNode and RoadSegment commands
-- Duplicate connections and dangling endpoint validation
+- Atomic command rejection without ID or state mutation
+- Duplicate connections, dangling endpoints, cached lengths, and speed
+  overrides
+- Deterministic directional traversal ordering
+- Repeatable graph construction and summary output
+
+### Routing Coverage Required by Stage 2
+
+The routing implementation must add coverage for:
+
 - Direct, multi-segment, and disconnected routes
 - Known optimal A* routes
 - Equal-cost deterministic tie resolution
