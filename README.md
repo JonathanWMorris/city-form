@@ -1,8 +1,8 @@
 # City Form
 
 City Form is an open-source city-building and urban simulation project built
-with Unreal Engine. Its goal is to make the systems that shape a city coherent,
-inspectable, and scalable while presenting them through a modern 3D game.
+with Unreal Engine. It aims to make the systems that shape a city coherent,
+inspectable, scalable, and enjoyable to control.
 
 > [!IMPORTANT]
 > City Form is at the blank-project stage. The Unreal project opens and runs,
@@ -16,64 +16,68 @@ The first meaningful gameplay loop is intentionally focused:
 **Draw roads → zone parcels → buildings appear → households move in →
 businesses provide jobs → residents commute → traffic emerges**
 
-Longer term, City Form is intended to support editable transportation networks,
-procedural parcels and zoning, persistent households and businesses, traffic
-and public transportation, land value and employment systems, utilities and
-city services, large cities with scalable simulation detail, and modding or
-research-oriented interfaces.
+The immediate goal is not feature parity with an established city builder. A
+small, understandable simulation is more valuable than a broad collection of
+disconnected systems.
 
-The project is inspired by games such as *Cities: Skylines*, but the immediate
-goal is not feature parity. A small, understandable simulation is more valuable
-than a broad collection of disconnected systems.
+## Project Values
+
+- **Player and creator agency:** powerful editing, transparent rules, and
+  extensibility without requiring mods to make the base game usable.
+- **Long-term scalability:** architecture that can grow from a small prototype
+  to a large city without tying simulation truth to visual detail.
+- **Attainable performance:** strong performance on conventional consumer
+  gaming hardware, not only workstations or flagship machines.
+- **Community first:** public decisions, approachable documentation, reviewable
+  changes, contributor credit, and minimal unnecessary dependencies.
+
+Read the complete decision rules in [Project Values](docs/project-values.md).
+
+## v0.1 Technical Alpha
+
+The first release target is an unlimited, in-memory sandbox containing a flat
+prototype map, a city-builder camera, one road type, parcels, residential and
+commercial zoning, placeholder buildings, approximately 1,000 lightweight
+residents, employment, commuting, routing, and congestion visualization.
+
+Budgets, save files, public transit, utilities, detailed economics, polished
+graphics, and advanced editing or traffic-management tools are outside v0.1.
+Their future requirements still influence the foundational design.
+
+See [v0.1 Product Scope](docs/product-scope.md) for the complete boundary and
+acceptance criteria.
 
 ## Architecture
 
-City Form will use one Unreal project with a clear boundary between simulation
-truth and its visual presentation:
+City Form uses one Unreal project with a strict intended dependency direction:
 
 ```text
 CityForm (Unreal presentation and player tools)
     └── depends on CitySimulation (authoritative city state)
 ```
 
-The planned `CitySimulation` module will contain data-oriented C++ systems for
-roads, zoning, buildings, households, businesses, trips, the economy, and
-simulation time. It should be deterministic where practical and able to run
-without a loaded level or editor viewport.
+Persistent citizens, households, businesses, and trips will be compact
+simulation records rather than Actors. The Unreal layer will visualize that
+state and send commands back to the simulation. Simulation progress must not
+depend on a loaded level or editor viewport.
 
-The `CityForm` Unreal layer will handle cameras, input, terrain, meshes,
-procedural visuals, visible vehicles and pedestrians, effects, UI, and editing
-tools. It will read simulation snapshots or events and send player commands
-back to the simulation.
+See [Architecture](docs/architecture.md) for the module boundaries, data flow,
+determinism rules, performance strategy, and future persistence boundary.
 
-A persistent citizen or authoritative trip should not normally be an Unreal
-Actor. Nearby pedestrians and vehicles may temporarily visualize those records.
-MassEntity may be evaluated later if profiling demonstrates a need, but it is
-not part of the initial architecture.
+## Documentation
 
-## First Playable Milestone
+| Document | Purpose |
+| --- | --- |
+| [Project Values](docs/project-values.md) | Principles used to resolve design tradeoffs |
+| [v0.1 Product Scope](docs/product-scope.md) | Included features, non-goals, and definition of done |
+| [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
+| [Roadmap](docs/roadmap.md) | Ordered milestones and exit criteria |
+| [Contributing](CONTRIBUTING.md) | Setup, workflow, testing, and contribution expectations |
 
-The first milestone is a narrow vertical slice:
-
-- A flat prototype map and city-builder camera
-- One basic road type drawn between two points
-- A logical road graph independent of rendered geometry
-- Simple parcels beside roads
-- Residential and commercial zoning
-- Placeholder buildings with home or job capacity
-- Roughly 1,000 lightweight simulated residents
-- Employment assignment and home-to-work trips
-- Routing through the road graph
-- A visualization of road usage or congestion
-- A small number of visible placeholder vehicles after abstract trips work
-
-Detailed graphics, public transit, utilities, pedestrians, realistic vehicle
-physics, multiplayer, GIS imports, and a detailed economy are deliberately
-outside this milestone.
+Repository Markdown is the source of truth. GitHub issues can be used for
+proposals before accepted decisions are reflected here.
 
 ## Current Repository
-
-The repository currently contains:
 
 ```text
 CityForm/
@@ -85,8 +89,8 @@ CityForm/
 ```
 
 Generated directories such as `Binaries`, `DerivedDataCache`, `Intermediate`,
-and `Saved` are intentionally excluded from version control. Unreal binary
-assets and common large source-asset formats are configured for Git LFS.
+and `Saved` are excluded from version control. Unreal binary assets and common
+large source-asset formats use Git LFS.
 
 ## Getting Started
 
@@ -97,7 +101,7 @@ assets and common large source-asset formats are configured for Git LFS.
 - A C++ development toolchain supported by Unreal Engine on your platform
 
 The project is currently developed and verified on an Apple Silicon Mac.
-Windows is an intended development and release target, but has not yet been
+Windows portability is a design requirement, but Windows has not yet been
 verified against this baseline.
 
 ### Clone and open the project
@@ -113,24 +117,11 @@ Open `CityForm/CityForm.uproject` in Unreal Engine 5.8. If prompted, allow
 Unreal to generate platform-specific project files and build the `CityForm`
 module.
 
-## Development Principles
+## Contributing
 
-- Keep authoritative simulation state independent of rendering and loaded
-  levels.
-- Prefer compact persistent records over one heavyweight Actor per simulated
-  entity.
-- Keep systems inspectable, testable, and deterministic where practical.
-- Allow simulation and rendering to update at different rates.
-- Use C++ for simulation and reusable systems; use Blueprints where visual
-  assembly and rapid iteration are beneficial.
-- Keep changes small and avoid speculative frameworks.
-- Do not add dependencies, plugins, or platform-specific code without a clear
-  need and portability boundary.
-- Preserve compatibility with macOS on Apple Silicon and Windows.
-
-Contributions are welcome as the project takes shape. Before proposing a large
-feature, open an issue to align it with the current milestone and architectural
-direction.
+Contributions from programmers, designers, researchers, artists, testers, and
+technical writers are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
+before beginning substantial work.
 
 ## License
 
