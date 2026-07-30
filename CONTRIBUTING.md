@@ -132,6 +132,50 @@ request rather than implying success.
 Contributors using the optional Unreal MCP workflow can discover and run tests
 from a live editor as described in [Unreal MCP Workflow](docs/unreal-mcp.md).
 
+### Verified macOS commands
+
+From the repository root, set the path to your Unreal Engine 5.8 installation:
+
+```sh
+CITY_FORM_UE_ROOT="/Users/Shared/Epic Games/UE_5.8"
+```
+
+Build the editor target:
+
+```sh
+"$CITY_FORM_UE_ROOT/Engine/Build/BatchFiles/Mac/Build.sh" \
+  CityFormEditor Mac Development \
+  -Project="$PWD/CityForm/CityForm.uproject" \
+  -WaitMutex
+```
+
+Compile the game target without its Xcode post-build/deploy step:
+
+```sh
+"$CITY_FORM_UE_ROOT/Engine/Build/BatchFiles/Mac/Build.sh" \
+  CityForm Mac Development \
+  -Project="$PWD/CityForm/CityForm.uproject" \
+  -WaitMutex -NoLink
+```
+
+The compile-only form is temporary while
+[the macOS PostBuildSync failure](https://github.com/JonathanWMorris/city-form/issues/4)
+is investigated.
+
+Run the simulation-foundation tests without a viewport:
+
+```sh
+"$CITY_FORM_UE_ROOT/Engine/Binaries/Mac/UnrealEditor-Cmd" \
+  "$PWD/CityForm/CityForm.uproject" \
+  -NullRHI -unattended -nop4 -nosplash \
+  -ExecCmds="Automation RunTests CityForm.Simulation.Foundation; Quit" \
+  -TestExit="Automation Test Queue Empty" -log
+```
+
+The command must report six matching tests with successful results. An exit
+code of zero alone is not enough; review the automation result lines in the
+Unreal log.
+
 ## Documentation
 
 Repository Markdown is the source of truth. Update the relevant document when a

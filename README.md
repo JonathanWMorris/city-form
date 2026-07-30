@@ -5,9 +5,9 @@ with Unreal Engine. It aims to make the systems that shape a city coherent,
 inspectable, scalable, and enjoyable to control.
 
 > [!IMPORTANT]
-> City Form is at the blank-project stage. The Unreal project opens and runs,
-> but no gameplay systems, custom levels, simulation modules, or custom assets
-> have been implemented yet.
+> City Form is at the simulation-foundation stage. The headless
+> `CitySimulation` module is implemented and tested, but no gameplay systems,
+> custom levels, roads, routing, traffic flow, or custom assets exist yet.
 
 ## Vision
 
@@ -93,7 +93,8 @@ proposals before accepted decisions are reflected here.
 CityForm/
 ├── Build/Mac/Resources/   # Unreal-generated macOS project resources
 ├── Config/                # Initial Unreal project configuration
-├── Source/CityForm/       # Blank primary C++ game module
+├── Source/CityForm/       # Unreal presentation and gameplay module
+├── Source/CitySimulation/ # Headless authoritative simulation module
 ├── Source/*.Target.cs     # Game and editor build targets
 └── CityForm.uproject      # Unreal Engine 5.8 project descriptor
 ```

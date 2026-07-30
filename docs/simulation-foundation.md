@@ -2,13 +2,13 @@
 
 ## Status
 
-This document specifies the planned Stage 1 simulation skeleton and Stage 2
-logical road graph. It is an implementation contract, not a claim that these
-types already exist.
+The Stage 1 simulation skeleton in this document is implemented. The Stage 2
+logical road graph and time-dependent routing sections remain an implementation
+contract, not a claim that those types already exist.
 
 ## Module Boundary
 
-`CitySimulation` will be an Unreal runtime module built by UnrealBuildTool.
+`CitySimulation` is an Unreal runtime module built by UnrealBuildTool.
 
 ```text
 CityForm → CitySimulation → Core
