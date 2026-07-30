@@ -13,8 +13,8 @@ enum class ESimulationErrorCode : uint8
 	None,
 	IdExhausted,
 	InvalidRandomBound,
-	NegativeTickCount,
-	TickOverflow,
+	NegativeDuration,
+	TimeOverflow,
 	NonFiniteRoadPosition,
 	InvalidRoadNode,
 	SameRoadEndpoint,
@@ -35,7 +35,7 @@ struct FSimulationError
 	}
 };
 
-struct FAdvanceTicksResult
+struct FAdvanceTimeResult
 {
 	FSimulationError Error;
 

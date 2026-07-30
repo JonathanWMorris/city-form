@@ -22,7 +22,7 @@ struct FSimulationConfig
 struct FCitySummary
 {
 	uint64 Seed = 0;
-	int64 CurrentTick = 0;
+	int64 CurrentTimeMilliseconds = 0;
 	int32 VehicleClassCount = 0;
 	int32 RoadTypeCount = 0;
 	int32 RoadNodeCount = 0;
@@ -31,7 +31,7 @@ struct FCitySummary
 	friend bool operator==(const FCitySummary& Left, const FCitySummary& Right)
 	{
 		return Left.Seed == Right.Seed &&
-			Left.CurrentTick == Right.CurrentTick &&
+			Left.CurrentTimeMilliseconds == Right.CurrentTimeMilliseconds &&
 			Left.VehicleClassCount == Right.VehicleClassCount &&
 			Left.RoadTypeCount == Right.RoadTypeCount &&
 			Left.RoadNodeCount == Right.RoadNodeCount &&
@@ -45,13 +45,13 @@ public:
 	explicit FCitySimulation(FSimulationConfig InConfig);
 
 	const FSimulationConfig& GetConfig() const;
-	const FSimulationTime& GetTime() const;
+	const FSimulationClock& GetClock() const;
 	FDeterministicRandom& GetRandom();
 	const FVehicleClassCatalog& GetVehicleClasses() const;
 	const FRoadTypeCatalog& GetRoadTypes() const;
 	const FRoadGraph& GetRoadGraph() const;
 
-	FAdvanceTicksResult AdvanceTicks(int64 Count);
+	FAdvanceTimeResult Advance(FSimulationDuration Duration);
 	FAddRoadNodeResult AddRoadNode(FSimPoint2D PositionMeters);
 	FAddRoadSegmentResult AddRoadSegment(
 		FRoadNodeId EndpointA,
@@ -62,7 +62,7 @@ public:
 
 private:
 	FSimulationConfig Config;
-	FSimulationTime Time;
+	FSimulationClock Clock;
 	FDeterministicRandom Random;
 	FVehicleClassCatalog VehicleClasses;
 	FRoadTypeCatalog RoadTypes;
