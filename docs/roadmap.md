@@ -47,13 +47,20 @@ Exit criteria:
 
 Status: In progress
 
-Deliver:
+Completed:
 
 - Road nodes and segments with strong IDs
+- Regional defaults and a validated RoadType catalog
 - Commands to add the smallest useful road topology
 - Directional traversals and graph validation
+- Tests for valid and invalid graph construction, deterministic traversal
+  ordering, and headless repeatability
+
+Remaining:
+
 - Vehicle-aware, time-dependent A* using free-flow costs
-- Tests for valid, disconnected, and invalid graphs
+- Route tests for direct, multi-segment, disconnected, known-optimal, and
+  equal-cost cases
 
 Exit criteria:
 

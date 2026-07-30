@@ -149,6 +149,11 @@ Build the editor target:
   -WaitMutex
 ```
 
+Close the Unreal editor before using the command-line build and headless-test
+workflow. When the editor is open, UnrealBuildTool may emit a numbered
+hot-reload module while a separate commandlet loads an older base module.
+Use the MCP workflow below when tests need to run against the open editor.
+
 Compile the game target without its Xcode post-build/deploy step:
 
 ```sh
@@ -162,7 +167,7 @@ The compile-only form is temporary while
 [the macOS PostBuildSync failure](https://github.com/JonathanWMorris/city-form/issues/4)
 is investigated.
 
-Run the simulation-foundation tests without a viewport:
+Run the complete simulation test suite without a viewport:
 
 ```sh
 "$CITY_FORM_UE_ROOT/Engine/Binaries/Mac/UnrealEditor-Cmd" \

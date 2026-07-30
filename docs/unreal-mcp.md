@@ -69,8 +69,9 @@ With the editor and MCP server running:
 
 1. Inspect or enable `AutomationTestToolset`.
 2. Discover tests.
-3. Filter the test list to the relevant namespace, such as
-   `CityForm.Simulation.Foundation`.
+3. Filter the test list to `CityForm.Simulation` for the complete suite, or use
+   a narrower namespace such as `CityForm.Simulation.Foundation` or
+   `CityForm.Simulation.RoadGraph`.
 4. Run the filtered tests.
 5. Retrieve the completed results and include them in the pull request's test
    notes.

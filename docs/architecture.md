@@ -41,15 +41,20 @@ levels, or City Form presentation classes.
 
 ### CitySimulation
 
-The authoritative simulation owns:
+The authoritative simulation currently owns:
 
 - Simulation time and deterministic random state
-- Road topology and routing data
+- Regional configuration and validated RoadType and VehicleClass catalogs
+- Logical road topology and commands
+- Validation and summary metrics
+
+As later milestones land, it will also own:
+
+- Routing data
 - Parcels, zoning, buildings, and capacities
 - Households, citizens, businesses, jobs, and assignments
 - Trips, routes, road usage, and abstract traffic state
-- Commands that modify the city
-- Validation, metrics, and simulation events
+- Additional commands, metrics, and simulation events
 
 The deepest simulation code should favor plain, data-oriented C++ and explicit
 ownership. Unreal types are acceptable where they improve integration without
@@ -86,14 +91,14 @@ This boundary should support:
 - Future undo, inspection, automation, and modding facilities
 - Clear rejection reasons when a command would violate an invariant
 
-The first implementation should introduce only the commands and read models
-needed by the active milestone.
+Each milestone should introduce only the commands and read models needed by its
+working vertical slice.
 
 ## Identity and Lifetime
 
-Persistent records use strong typed IDs such as `RoadNodeId` and
-`RoadSegmentId`. References between records use IDs, not raw pointers or Actor
-references.
+Persistent records use strong typed IDs such as `FRoadNodeId` and
+`FRoadSegmentId`. References between records use IDs, not raw pointers or
+Actor references.
 
 IDs must:
 
@@ -103,8 +108,9 @@ IDs must:
 - Be validated when crossing system boundaries
 
 Deletion and reuse policies must prevent stale references from silently
-targeting unrelated records. The initial implementation may choose a simple
-monotonic allocation strategy and refine storage only after profiling.
+targeting unrelated records. Current IDs use monotonic allocation from one,
+reserve zero as invalid, and are not reused during v0.1. Storage should be
+refined only after profiling identifies a need.
 
 ## Time and Determinism
 
@@ -135,11 +141,12 @@ destroying or unloading that vehicle must not destroy the trip.
 Road utilization is derived from abstract demand and routes. v0.1 does not
 require every trip to be represented by a physically simulated vehicle.
 
-Trips use time-dependent A* with vehicle-aware traversal costs. Passenger-car
-trips progress through a permanent mesoscopic traffic layer that publishes
-historical and live travel-time observations. Future microscopic simulation may
-take responsibility for selected trips or regions while consuming the same
-Trips, Routes, DriverProfiles, and VehicleClasses.
+Planned trips will use time-dependent A* with vehicle-aware traversal costs.
+The traffic milestone will advance passenger-car trips through a permanent
+mesoscopic layer that publishes historical and live travel-time observations.
+Future microscopic simulation may take responsibility for selected trips or
+regions while consuming the same Trips, Routes, DriverProfiles, and
+VehicleClasses.
 
 The complete boundary is defined in
 [Layered Traffic Model](traffic-model.md).
@@ -195,17 +202,23 @@ deferred until their real use cases are demonstrated.
 
 ## Validation
 
-Every simulation subsystem owns invariants appropriate to its data. The initial
-test suite should cover:
+Every simulation subsystem owns invariants appropriate to its data. The current
+test suite covers:
 
 - Road endpoints reference valid nodes
 - No dangling road-segment references
 - Entity references use the correct ID category
+- Simulation time, deterministic random output, and strong-ID behavior
+- Regional defaults and RoadType and VehicleClass catalogs
+- Atomic rejection of invalid road commands
+- Repeatable graph construction and headless advancement
+
+Planned systems must extend validation to cover:
+
 - Building, home, and job capacities cannot become negative
 - Assignments do not exceed capacity
 - Trips have valid origins, destinations, and routes
 - The same controlled seed and command sequence produce repeatable results
-- Simulation advancement does not require a gameplay viewport
 
 Validation failures should provide enough context to identify the responsible
 record and rule.

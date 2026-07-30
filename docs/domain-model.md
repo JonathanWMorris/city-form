@@ -13,6 +13,8 @@ necessarily implemented in v0.1.
 
 ```text
 City
+├── Region profile
+├── Road-type catalog
 ├── Road graph
 │   ├── Road nodes
 │   └── Road segments
@@ -37,14 +39,37 @@ City
 
 ## City
 
-The City is the authoritative root of one simulation. It owns simulation time,
-deterministic random state, entity storage, ID allocation, validation, and
-summary metrics.
+The City is the authoritative root of one simulation. The current
+implementation owns simulation time, deterministic random state, an
+`FRegionProfile` snapshot, `FVehicleClass` and `FRoadType` catalogs, the
+`FRoadGraph`, ID allocation, validation, and summary metrics. Later systems add
+their authoritative entity storage to the same boundary.
 
 A City exists independently of any Unreal World, map, viewport, or visual
 representation. v0.1 keeps one City in memory and does not define persistence.
 
+## Regional Defaults
+
+An `FRegionProfile` is an immutable configuration snapshot owned by one City.
+It provides regional defaults without making simulation rules depend on a
+global locale or platform setting.
+
+The initial profile is `US-CA`. Future map setup may choose a different profile
+before constructing a City; changing an existing City's region is outside the
+current contract.
+
 ## Roads
+
+### Road Type
+
+An `FRoadType` is a validated, read-only definition in the City's RoadType
+catalog. It has a strong `FRoadTypeId`, a stable key, and a default speed
+limit. The initial `BasicTwoWayRoad` definition supports travel in both
+directions and uses the selected `FRegionProfile` default speed.
+
+RoadSegments reference a RoadType and may carry a per-segment speed-limit
+override. RoadType definitions are authoritative simulation data, not visual
+road styles.
 
 ### Road Node
 
