@@ -44,6 +44,11 @@ Budgets, save files, public transit, utilities, detailed economics, polished
 graphics, and advanced editing or traffic-management tools are outside v0.1.
 Their future requirements still influence the foundational design.
 
+Traffic will advance authoritative passenger-car trips through a permanent
+mesoscopic model. Time-dependent A* will combine learned time-of-day conditions
+with live queues while future microscopic vehicle simulation remains a
+compatible fidelity tier.
+
 See [v0.1 Product Scope](docs/product-scope.md) for the complete boundary and
 acceptance criteria.
 
@@ -70,7 +75,11 @@ determinism rules, performance strategy, and future persistence boundary.
 | --- | --- |
 | [Project Values](docs/project-values.md) | Principles used to resolve design tradeoffs |
 | [v0.1 Product Scope](docs/product-scope.md) | Included features, non-goals, and definition of done |
+| [Domain Model](docs/domain-model.md) | Shared vocabulary, ownership, and entity relationships |
 | [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
+| [Simulation Foundation](docs/simulation-foundation.md) | Planned Stage 1–2 APIs and routing contract |
+| [Traffic Model](docs/traffic-model.md) | Mesoscopic traffic, prediction, and future microscopic fidelity |
+| [Decision Records](docs/decisions/README.md) | Context and consequences of accepted architecture choices |
 | [Roadmap](docs/roadmap.md) | Ordered milestones and exit criteria |
 | [Contributing](CONTRIBUTING.md) | Setup, workflow, testing, and contribution expectations |
 

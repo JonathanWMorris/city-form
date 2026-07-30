@@ -29,6 +29,7 @@ Deliver:
 - A separate `CitySimulation` runtime module
 - A minimal city state, simulation clock, and deterministic seed
 - Strong typed ID foundations
+- A validated passenger-car VehicleClass foundation
 - Headless automation-test support
 - A validation entry point and summary metrics
 
@@ -44,13 +45,15 @@ Deliver:
 
 - Road nodes and segments with strong IDs
 - Commands to add the smallest useful road topology
-- Graph validation and basic routing
+- Directional traversals and graph validation
+- Vehicle-aware, time-dependent A* using free-flow costs
 - Tests for valid, disconnected, and invalid graphs
 
 Exit criteria:
 
 - Tests create and route through a small graph without a loaded level.
 - Dangling endpoints and invalid references are rejected or reported clearly.
+- Known optimal and equal-cost routes are resolved repeatably.
 
 ## Stage 3: Prototype Environment
 
@@ -115,15 +118,19 @@ Exit criteria:
 Deliver:
 
 - Home-to-work and work-to-home trip generation
-- Routes through the logical road graph
-- Road utilization derived from routed trips
+- Passenger-car VehicleClasses and bounded DriverProfiles
+- Historical and live traversal-time forecasting
+- Time-dependent A* routing and bounded node-based rerouting
+- Mesoscopic directional queues and individual trip progression
 - A readable utilization or congestion view
 
 Exit criteria:
 
 - Changing the road layout or job distribution changes route usage.
+- Learned and live conditions can change predicted routes by departure time.
 - Trips remain authoritative without visible vehicles.
-- Headless tests validate trip references and routes.
+- Seeded driver behavior avoids synchronized route-choice oscillation.
+- Headless tests validate trips, queues, forecasts, and routes.
 
 ## Stage 8: v0.1 Visualization and Stabilization
 
@@ -156,8 +163,9 @@ Every stage must:
 
 Potential later milestones include save/load with migrations, advanced object
 editing, construction-constraint overrides, lane and junction management,
-public transit, utilities and services, a deeper economy, modding and research
-interfaces, larger cities, improved visuals, and packaged releases.
+freight and truck demand, microscopic vehicles, public transit, utilities and
+services, a deeper economy, modding and research interfaces, larger cities,
+improved visuals, and packaged releases.
 
 Their order is intentionally not fixed until v0.1 provides evidence about the
 simulation, player experience, performance, and contributor priorities.
