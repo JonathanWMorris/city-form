@@ -26,9 +26,11 @@ explicit fixed cadence or scheduled events while sharing the same monotonic
 timeline. The initial microscopic traffic design uses a configurable
 1,000-millisecond step.
 
-The player-facing calendar is a future configurable projection of simulation
-time. Calendar balancing does not redefine physical movement units or routing
-durations.
+The player-facing calendar is a configurable projection of simulation time.
+Calendar balancing does not redefine physical movement units or routing
+durations. The initial projection, playback defaults, and extended transit
+service-day convention are defined by
+[ADR 0009](0009-accelerated-civil-and-service-time.md).
 
 Authoritative geometry remains in meters, and vehicle performance remains in
 SI units. Presentation converts meters to Unreal centimeters and interpolates
@@ -42,7 +44,8 @@ between authoritative snapshots.
 - Systems may run at different cadences while preserving deterministic order.
 - Advancing time must detect negative durations and integer overflow.
 - A millisecond timestamp does not imply a one-millisecond update loop.
-- Calendar scale and date presentation remain separate future decisions.
+- Calendar and playback APIs remain deferred until a gameplay system consumes
+  the defaults accepted in ADR 0009.
 
 ## Supersedes
 

@@ -43,6 +43,18 @@ A fine timestamp does not imply millisecond updates. Routing runs on demand,
 traffic runs at its configured step, and slower city systems use independent
 cadences or scheduled events.
 
+The default future gameplay projection advances one 24-hour civil day in
+45 wall-clock minutes at 1x. This playback ratio does not change the
+1,000-millisecond traffic step: at sustained 1x it requests approximately
+32 traffic steps per wall-clock second. At higher playback rates, the
+simulation must slow relative to wall time if it cannot process every
+authoritative step. It must not skip traffic work to preserve the requested
+visual speed.
+
+Playback and calendar defaults are documented in
+[Gameplay Time and Development Pacing](gameplay-pacing.md). They are not yet
+implemented by the traffic model.
+
 The first model uses ballistic integration during one step:
 
 ```text

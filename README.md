@@ -81,6 +81,8 @@ determinism rules, performance strategy, and future persistence boundary.
 | [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
 | [Simulation Foundation](docs/simulation-foundation.md) | Current APIs and planned routing contract |
 | [Traffic Model](docs/traffic-model.md) | Global microscopic traffic, prediction, and future incidents |
+| [Gameplay Pacing](docs/gameplay-pacing.md) | Accelerated calendar and ideal construction targets |
+| [Future Transit Foundation](docs/transit-foundation.md) | Requirements for realistic multimodal transit |
 | [Decision Records](docs/decisions/README.md) | Context and consequences of accepted architecture choices |
 | [Roadmap](docs/roadmap.md) | Ordered milestones and exit criteria |
 | [Unreal MCP Workflow](docs/unreal-mcp.md) | Optional editor automation setup and troubleshooting |
