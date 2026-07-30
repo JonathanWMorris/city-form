@@ -17,9 +17,9 @@ const FSimulationConfig& FCitySimulation::GetConfig() const
 	return Config;
 }
 
-const FSimulationTime& FCitySimulation::GetTime() const
+const FSimulationClock& FCitySimulation::GetClock() const
 {
-	return Time;
+	return Clock;
 }
 
 FDeterministicRandom& FCitySimulation::GetRandom()
@@ -42,9 +42,9 @@ const FRoadGraph& FCitySimulation::GetRoadGraph() const
 	return RoadGraph;
 }
 
-FAdvanceTicksResult FCitySimulation::AdvanceTicks(const int64 Count)
+FAdvanceTimeResult FCitySimulation::Advance(const FSimulationDuration Duration)
 {
-	return Time.AdvanceTicks(Count);
+	return Clock.Advance(Duration);
 }
 
 FAddRoadNodeResult FCitySimulation::AddRoadNode(const FSimPoint2D PositionMeters)
@@ -67,11 +67,11 @@ FAddRoadSegmentResult FCitySimulation::AddRoadSegment(
 FValidationReport FCitySimulation::Validate() const
 {
 	FValidationReport Report;
-	if (Time.GetTick() < 0)
+	if (Clock.GetCurrentInstant().GetMillisecondsSinceStart() < 0)
 	{
 		Report.Add({
 			EValidationSeverity::Error,
-			EValidationIssueCode::NegativeSimulationTick,
+			EValidationIssueCode::NegativeSimulationTime,
 			TEXT("SimulationTime"),
 			0,
 			TEXT("Simulation time cannot be negative.")});
@@ -88,7 +88,7 @@ FCitySummary FCitySimulation::GetSummary() const
 {
 	return {
 		Config.Seed,
-		Time.GetTick(),
+		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
 		VehicleClasses.GetDefinitions().Num(),
 		RoadTypes.GetDefinitions().Num(),
 		RoadGraph.GetNodes().Num(),

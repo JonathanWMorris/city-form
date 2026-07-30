@@ -5,26 +5,52 @@
 namespace CityForm::Simulation
 {
 
-int64 FSimulationTime::GetTick() const
+FSimulationInstantResult AddSimulationDuration(
+	const FSimulationInstant Instant,
+	const FSimulationDuration Duration)
 {
-	return CurrentTick;
+	if (Duration.GetMilliseconds() < 0)
+	{
+		return {
+			{},
+			{
+				ESimulationErrorCode::NegativeDuration,
+				TEXT("Simulation time cannot advance by a negative duration.")
+			}};
+	}
+
+	if (Duration.GetMilliseconds() >
+		MAX_int64 - Instant.GetMillisecondsSinceStart())
+	{
+		return {
+			{},
+			{
+				ESimulationErrorCode::TimeOverflow,
+				TEXT("Simulation time advancement would overflow its millisecond range.")
+			}};
+	}
+
+	return {
+		FSimulationInstant(
+			Instant.GetMillisecondsSinceStart() + Duration.GetMilliseconds()),
+		{}};
 }
 
-FAdvanceTicksResult FSimulationTime::AdvanceTicks(const int64 Count)
+FSimulationInstant FSimulationClock::GetCurrentInstant() const
 {
-	if (Count < 0)
+	return CurrentInstant;
+}
+
+FAdvanceTimeResult FSimulationClock::Advance(const FSimulationDuration Duration)
+{
+	const FSimulationInstantResult Result =
+		AddSimulationDuration(CurrentInstant, Duration);
+	if (!Result.IsSuccess())
 	{
-		return {
-			{ESimulationErrorCode::NegativeTickCount, TEXT("Simulation time cannot advance by a negative count.")}};
+		return {Result.Error};
 	}
 
-	if (Count > MAX_int64 - CurrentTick)
-	{
-		return {
-			{ESimulationErrorCode::TickOverflow, TEXT("Simulation time advancement would overflow its tick range.")}};
-	}
-
-	CurrentTick += Count;
+	CurrentInstant = Result.Instant;
 	return {};
 }
 

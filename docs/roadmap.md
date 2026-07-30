@@ -55,10 +55,10 @@ Completed:
 - Directional traversals and graph validation
 - Tests for valid and invalid graph construction, deterministic traversal
   ordering, and headless repeatability
+- Millisecond timestamps and durations with subsystem-specific cadences
 
 Remaining:
 
-- Millisecond timestamps and durations with subsystem-specific cadences
 - Vehicle-aware, time-dependent A* using free-flow costs
 - Route tests for direct, multi-segment, disconnected, known-optimal, and
   equal-cost cases

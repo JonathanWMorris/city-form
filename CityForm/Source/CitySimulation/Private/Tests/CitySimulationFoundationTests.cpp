@@ -42,48 +42,85 @@ bool FCitySimulationLifecycleTest::RunTest(const FString& Parameters)
 	FCitySimulation City({1234});
 
 	TestEqual(TEXT("The configured seed is retained."), City.GetConfig().Seed, uint64(1234));
-	TestEqual(TEXT("A city starts at tick zero."), City.GetTime().GetTick(), int64(0));
+	TestEqual(
+		TEXT("A city starts at zero milliseconds."),
+		City.GetClock().GetCurrentInstant().GetMillisecondsSinceStart(),
+		int64(0));
 	TestTrue(TEXT("A new city validates."), City.Validate().IsValid());
 
 	const FCitySummary InitialSummary = City.GetSummary();
 	TestEqual(TEXT("The summary contains the seed."), InitialSummary.Seed, uint64(1234));
-	TestEqual(TEXT("The summary starts at tick zero."), InitialSummary.CurrentTick, int64(0));
+	TestEqual(
+		TEXT("The summary starts at zero milliseconds."),
+		InitialSummary.CurrentTimeMilliseconds,
+		int64(0));
 	TestEqual(TEXT("The default vehicle catalog contains one class."), InitialSummary.VehicleClassCount, 1);
 
-	TestTrue(TEXT("Positive advancement succeeds."), City.AdvanceTicks(60).IsSuccess());
-	TestEqual(TEXT("The city advances by integer-minute ticks."), City.GetTime().GetTick(), int64(60));
+	TestTrue(
+		TEXT("Positive advancement succeeds."),
+		City.Advance(FSimulationDuration(60000)).IsSuccess());
+	TestEqual(
+		TEXT("The city advances by integer milliseconds."),
+		City.GetClock().GetCurrentInstant().GetMillisecondsSinceStart(),
+		int64(60000));
 
 	const FCitySummary AdvancedSummary = City.GetSummary();
-	TestEqual(TEXT("The advanced summary reports the current tick."), AdvancedSummary.CurrentTick, int64(60));
+	TestEqual(
+		TEXT("The advanced summary reports the current time."),
+		AdvancedSummary.CurrentTimeMilliseconds,
+		int64(60000));
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FSimulationTimeBoundaryTest,
+	FSimulationClockBoundaryTest,
 	"CityForm.Simulation.Foundation.SimulationTimeBoundaries",
 	FoundationTestFlags)
 
-bool FSimulationTimeBoundaryTest::RunTest(const FString& Parameters)
+bool FSimulationClockBoundaryTest::RunTest(const FString& Parameters)
 {
-	FSimulationTime Time;
+	static_assert(!std::is_convertible_v<int64, FSimulationInstant>);
+	static_assert(!std::is_convertible_v<int64, FSimulationDuration>);
+	static_assert(!std::is_convertible_v<FSimulationInstant, FSimulationDuration>);
 
-	TestTrue(TEXT("Zero advancement succeeds."), Time.AdvanceTicks(0).IsSuccess());
-	TestEqual(TEXT("Zero advancement does not mutate time."), Time.GetTick(), int64(0));
+	FSimulationClock Clock;
+	TestTrue(TEXT("Zero advancement succeeds."), Clock.Advance(FSimulationDuration()).IsSuccess());
+	TestEqual(
+		TEXT("Zero advancement does not mutate time."),
+		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
+		int64(0));
 
-	const FAdvanceTicksResult NegativeResult = Time.AdvanceTicks(-1);
+	const FAdvanceTimeResult NegativeResult = Clock.Advance(FSimulationDuration(-1));
 	TestFalse(TEXT("Negative advancement fails."), NegativeResult.IsSuccess());
 	TestTrue(
 		TEXT("Negative advancement has a stable code."),
-		NegativeResult.Error.Code == ESimulationErrorCode::NegativeTickCount);
-	TestEqual(TEXT("Negative advancement is atomic."), Time.GetTick(), int64(0));
+		NegativeResult.Error.Code == ESimulationErrorCode::NegativeDuration);
+	TestEqual(
+		TEXT("Negative advancement is atomic."),
+		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
+		int64(0));
 
-	TestTrue(TEXT("Advancement to the maximum tick succeeds."), Time.AdvanceTicks(MAX_int64).IsSuccess());
-	const FAdvanceTicksResult OverflowResult = Time.AdvanceTicks(1);
+	TestTrue(
+		TEXT("Advancement to the maximum instant succeeds."),
+		Clock.Advance(FSimulationDuration(MAX_int64)).IsSuccess());
+	const FAdvanceTimeResult OverflowResult = Clock.Advance(FSimulationDuration(1));
 	TestFalse(TEXT("Overflowing advancement fails."), OverflowResult.IsSuccess());
 	TestTrue(
 		TEXT("Overflow has a stable code."),
-		OverflowResult.Error.Code == ESimulationErrorCode::TickOverflow);
-	TestEqual(TEXT("Overflow does not mutate time."), Time.GetTick(), int64(MAX_int64));
+		OverflowResult.Error.Code == ESimulationErrorCode::TimeOverflow);
+	TestEqual(
+		TEXT("Overflow does not mutate time."),
+		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
+		int64(MAX_int64));
+
+	const FSimulationInstantResult Added = AddSimulationDuration(
+		FSimulationInstant(1000),
+		FSimulationDuration(250));
+	TestTrue(TEXT("Checked instant addition succeeds."), Added.IsSuccess());
+	TestEqual(
+		TEXT("Checked instant addition uses milliseconds."),
+		Added.Instant.GetMillisecondsSinceStart(),
+		int64(1250));
 	return true;
 }
 
@@ -238,8 +275,12 @@ bool FHeadlessRepeatabilityTest::RunTest(const FString& Parameters)
 
 	for (int32 Step = 0; Step < 10; ++Step)
 	{
-		TestTrue(TEXT("The first headless city advances."), FirstCity.AdvanceTicks(144).IsSuccess());
-		TestTrue(TEXT("The second headless city advances."), SecondCity.AdvanceTicks(144).IsSuccess());
+		TestTrue(
+			TEXT("The first headless city advances."),
+			FirstCity.Advance(FSimulationDuration(144000)).IsSuccess());
+		TestTrue(
+			TEXT("The second headless city advances."),
+			SecondCity.Advance(FSimulationDuration(144000)).IsSuccess());
 		TestEqual(
 			TEXT("Seeded random output remains repeatable."),
 			FirstCity.GetRandom().NextUInt64(),

@@ -17,7 +17,7 @@ enum class EValidationSeverity : uint8
 
 enum class EValidationIssueCode : uint8
 {
-	NegativeSimulationTick,
+	NegativeSimulationTime,
 	InvalidVehicleClassId,
 	DuplicateVehicleClassId,
 	NonFiniteVehicleValue,

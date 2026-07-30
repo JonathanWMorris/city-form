@@ -2,9 +2,9 @@
 
 ## Status
 
-The Stage 1 simulation skeleton and Stage 2 logical road graph are implemented.
-The millisecond-time migration and time-dependent routing sections are accepted
-implementation contracts for the remaining Stage 2 work.
+The Stage 1 simulation skeleton, millisecond time model, and Stage 2 logical
+road graph are implemented. Time-dependent routing remains the implementation
+contract for the rest of Stage 2.
 
 ## Module Boundary
 
