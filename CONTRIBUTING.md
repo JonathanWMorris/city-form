@@ -14,7 +14,11 @@ Before proposing implementation work, read:
 
 - [Project Values](docs/project-values.md)
 - [v0.1 Product Scope](docs/product-scope.md)
+- [Domain Model](docs/domain-model.md)
 - [Architecture](docs/architecture.md)
+- [Simulation Foundation](docs/simulation-foundation.md)
+- [Traffic Model](docs/traffic-model.md)
+- [Architecture Decision Records](docs/decisions/README.md)
 - [Roadmap](docs/roadmap.md)
 
 For substantial features or architectural changes, open a GitHub issue before
@@ -125,6 +129,7 @@ change affects:
 - Setup, build, or testing instructions
 - Platform compatibility
 - Roadmap exit criteria
+- Accepted architecture decisions
 
 Documentation should distinguish current behavior from planned behavior.
 

@@ -7,6 +7,11 @@ This document defines the intended architectural boundaries for City Form. The
 APIs may evolve as the v0.1 vertical slice is built, but changes must preserve
 the responsibilities and dependency direction below.
 
+The concrete Stage 1–2 contract is documented in
+[Simulation Foundation](simulation-foundation.md). Accepted architectural
+choices and their consequences live in
+[Architecture Decision Records](decisions/README.md).
+
 ## System Boundary
 
 City Form uses one Unreal project with two distinct responsibilities:
@@ -47,6 +52,9 @@ The authoritative simulation owns:
 The deepest simulation code should favor plain, data-oriented C++ and explicit
 ownership. Unreal types are acceptable where they improve integration without
 coupling the model to rendering or UObject lifetimes.
+
+`CitySimulation` will initially be an Unreal runtime module that depends only on
+`Core`. Its authoritative types will not use UObject reflection or ownership.
 
 ### CityForm
 
@@ -124,6 +132,15 @@ destroying or unloading that vehicle must not destroy the trip.
 
 Road utilization is derived from abstract demand and routes. v0.1 does not
 require every trip to be represented by a physically simulated vehicle.
+
+Trips use time-dependent A* with vehicle-aware traversal costs. Passenger-car
+trips progress through a permanent mesoscopic traffic layer that publishes
+historical and live travel-time observations. Future microscopic simulation may
+take responsibility for selected trips or regions while consuming the same
+Trips, Routes, DriverProfiles, and VehicleClasses.
+
+The complete boundary is defined in
+[Layered Traffic Model](traffic-model.md).
 
 ## Performance Strategy
 

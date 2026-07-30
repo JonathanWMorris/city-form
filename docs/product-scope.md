@@ -58,7 +58,10 @@ production-quality meshes are deferred.
 - Businesses and jobs associated with commercial buildings
 - Employed residents assigned to valid jobs
 - Abstract home-to-work and work-to-home trips
-- Routes computed through the logical road graph
+- Passenger-car VehicleClasses and bounded DriverProfiles
+- Time-dependent A* routes through the logical road graph
+- Historical time-of-day and live-queue travel-time forecasts
+- Mesoscopic progression of individual authoritative trips
 
 Residents and authoritative trips exist independently of visible pedestrians or
 vehicles.
@@ -66,6 +69,8 @@ vehicles.
 ### Traffic Feedback
 
 - Road usage derived from routed trips
+- Directional capacity and point queues
+- Bounded rerouting at road nodes
 - A readable congestion or utilization visualization
 - A small number of placeholder visible vehicles only after abstract trips are
   functioning
@@ -90,8 +95,10 @@ on the verified macOS toolchain and demonstrate all of the following:
 3. Observe homes and businesses appear with valid capacities.
 4. Populate the city with roughly 1,000 persistent residents.
 5. Assign eligible residents to valid jobs without exceeding capacity.
-6. Generate and route commuting trips through the logical road graph.
-7. Observe road utilization change in response to city layout and trips.
+6. Generate and time-dependently route passenger-car commuting trips through
+   the logical road graph.
+7. Observe road utilization, queues, and route choices change in response to
+   city layout, live traffic, and learned time-of-day conditions.
 8. Run the equivalent simulation scenario without a loaded gameplay viewport.
 9. Repeat a defined scenario with the same seed and obtain the same validated
    simulation result where deterministic behavior is promised.
@@ -109,7 +116,8 @@ The following are outside v0.1:
 - Persistent save files or save-version compatibility
 - Public transit, utilities, education, crime, weather, or politics
 - Detailed pedestrian simulation or animation
-- Realistic vehicle physics
+- Freight, deliveries, trucks, or vehicle ownership
+- Microscopic lanes, car-following, acceleration, or vehicle physics
 - Detailed road engineering, traffic signals, or lane management
 - Multiplayer, GIS import, or a public modding API
 - Production-quality buildings, roads, terrain, or procedural skyscrapers
@@ -129,6 +137,11 @@ address in the base experience:
 v0.1 implements only basic road creation and zoning. Its logical data,
 identities, and command boundaries must not make these later capabilities
 unreasonably difficult.
+
+The traffic model follows the same principle. Mesoscopic traffic remains a
+supported citywide fidelity tier; future microscopic simulation will reuse its
+Trips, Routes, DriverProfiles, VehicleClasses, and observations rather than
+replace them.
 
 ## Persistence and Compatibility
 
