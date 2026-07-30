@@ -2,9 +2,10 @@
 
 ## Status
 
-This document defines the intended architectural boundaries for City Form. The
-`CitySimulation` module described here has not been implemented yet. Concrete
-APIs may evolve as the v0.1 vertical slice is built, but changes must preserve
+This document defines the architectural boundaries for City Form. The Stage 1
+`CitySimulation` module now implements the dependency boundary, deterministic
+primitives, simulation clock, validation, summary, and initial vehicle-class
+catalog. Later systems may evolve the concrete APIs, but changes must preserve
 the responsibilities and dependency direction below.
 
 The concrete Stage 1–2 contract is documented in
@@ -53,8 +54,8 @@ The deepest simulation code should favor plain, data-oriented C++ and explicit
 ownership. Unreal types are acceptable where they improve integration without
 coupling the model to rendering or UObject lifetimes.
 
-`CitySimulation` will initially be an Unreal runtime module that depends only on
-`Core`. Its authoritative types will not use UObject reflection or ownership.
+`CitySimulation` is an Unreal runtime module that depends only on `Core`. Its
+authoritative types use ordinary C++ without UObject reflection or ownership.
 
 ### CityForm
 

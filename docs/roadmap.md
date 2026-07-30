@@ -10,6 +10,8 @@ refined as evidence emerges, but v0.1 scope changes belong in
 
 ## Stage 0: Project Foundation
 
+Status: Complete
+
 Deliver:
 
 - A clean Unreal Engine 5.8 C++ project
@@ -23,6 +25,8 @@ Exit criteria:
 - Generated Unreal files do not appear as source-control changes.
 
 ## Stage 1: CitySimulation Skeleton
+
+Status: Complete
 
 Deliver:
 
@@ -40,6 +44,8 @@ Exit criteria:
   summary output for the same seed.
 
 ## Stage 2: Logical Road Graph
+
+Status: Next
 
 Deliver:
 
