@@ -5,10 +5,11 @@ with Unreal Engine. It aims to make the systems that shape a city coherent,
 inspectable, scalable, and enjoyable to control.
 
 > [!IMPORTANT]
-> City Form is at the logical-road-graph stage. The headless `CitySimulation`
-> module supports validated regional road defaults, road types, nodes,
-> segments, and directional traversals, but no custom levels, routing, traffic
-> flow, interactive road tools, or custom assets exist yet.
+> City Form has completed its headless Stage 2 road graph and routing
+> foundation. `CitySimulation` supports validated regional road defaults,
+> logical topology, millisecond time, and vehicle-aware time-dependent A*, but
+> no custom levels, traffic progression, interactive road tools, or custom
+> assets exist yet.
 
 ## Vision
 

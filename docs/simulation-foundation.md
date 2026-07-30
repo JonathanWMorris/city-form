@@ -2,9 +2,8 @@
 
 ## Status
 
-The Stage 1 simulation skeleton, millisecond time model, and Stage 2 logical
-road graph are implemented. Time-dependent routing remains the implementation
-contract for the rest of Stage 2.
+The Stage 1 simulation skeleton and Stage 2 millisecond time, logical road
+graph, and time-dependent routing contract are implemented.
 
 ## Module Boundary
 
@@ -103,6 +102,7 @@ facade exposes:
 - `Advance(FSimulationDuration Duration)`
 - `AddRoadNode(...)`
 - `AddRoadSegment(...)`
+- `FindRoute(...)`
 - `Validate()`
 - `GetSummary()`
 
@@ -245,9 +245,12 @@ A traversal-cost provider evaluates expected travel duration using:
 - VehicleClass
 - Available historical and live traffic forecast
 
-The Stage 2 routing implementation will supply a free-flow provider through
-this final time-aware interface. Congestion-aware providers arrive with the
-traffic milestone.
+Stage 2 supplies a free-flow provider through this time-aware interface.
+Congestion-aware providers arrive with the traffic milestone.
+
+Free-flow speed is the lower of the resolved RoadSegment speed and the
+VehicleClass maximum speed. Duration is rounded up to a positive whole
+millisecond.
 
 Costs must be non-negative integer milliseconds and satisfy FIFO: entering the
 same traversal later cannot produce an earlier exit. Providers explicitly
@@ -301,11 +304,6 @@ Unreal Automation Tests currently cover:
   overrides
 - Deterministic directional traversal ordering
 - Repeatable graph construction and summary output
-
-### Routing Coverage Required by Stage 2
-
-The routing implementation must add coverage for:
-
 - Direct, multi-segment, and disconnected routes
 - Known optimal A* routes
 - Equal-cost deterministic tie resolution

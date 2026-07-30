@@ -4,6 +4,9 @@
 
 Accepted
 
+The millisecond time representation is refined by
+[ADR 0007](0007-multirate-millisecond-time.md).
+
 ## Context
 
 City Form routes trips through a spatial road graph. Route choice must

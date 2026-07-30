@@ -64,6 +64,17 @@ FAddRoadSegmentResult FCitySimulation::AddRoadSegment(
 		RoadTypes);
 }
 
+FRouteResult FCitySimulation::FindRoute(const FRouteQuery& Query) const
+{
+	const FFreeFlowTraversalCostProvider CostProvider;
+	return FTimeDependentRouter::FindRoute(
+		RoadGraph,
+		RoadTypes,
+		VehicleClasses,
+		Query,
+		CostProvider);
+}
+
 FValidationReport FCitySimulation::Validate() const
 {
 	FValidationReport Report;
