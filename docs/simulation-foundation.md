@@ -2,9 +2,9 @@
 
 ## Status
 
-The Stage 1 simulation skeleton and Stage 2 logical road graph in this document
-are implemented. The time-dependent routing section remains an implementation
-contract, not a claim that those types already exist.
+The Stage 1 simulation skeleton and Stage 2 logical road graph are implemented.
+The millisecond-time migration and time-dependent routing sections are accepted
+implementation contracts for the remaining Stage 2 work.
 
 ## Module Boundary
 
@@ -29,8 +29,8 @@ second build system or external testing framework.
 
 | Quantity | Authoritative unit |
 | --- | --- |
-| Simulation time | Signed 64-bit ticks |
-| One v0.1 tick | One simulated minute |
+| Simulation timestamps | Signed 64-bit milliseconds |
+| Simulation durations | Signed 64-bit milliseconds |
 | Planar position and distance | Double-precision meters |
 | Vehicle dimensions | Meters |
 | Vehicle mass | Kilograms |
@@ -78,13 +78,19 @@ The default region is `US-CA`. Region data supplies applicable defaults to
 catalog construction and can be replaced per city without changing graph code.
 Future map setup may select another profile before constructing a City.
 
-### `FSimulationTime`
+### Simulation Time Types
 
-`FSimulationTime` stores the current signed 64-bit tick. A new City starts at
-tick zero. One tick represents one simulated minute.
+`FSimulationInstant` stores signed 64-bit milliseconds since city creation.
+`FSimulationDuration` stores a signed 64-bit millisecond difference.
+`FSimulationClock` owns the current instant, and a new City starts at zero.
 
-Calendar displays derive minutes, hours, and days from ticks. The authoritative
-clock does not store floating-point elapsed time.
+Timestamp and duration types do not convert implicitly. Checked addition
+rejects negative advancement and overflow before changing state.
+
+The millisecond representation does not require systems to update every
+millisecond. Each system uses an explicit cadence or scheduled events. A future
+calendar maps authoritative time into gameplay dates without changing physical
+movement units.
 
 ### `FCitySimulation`
 
@@ -94,18 +100,18 @@ facade exposes:
 - Construction from a validated `FSimulationConfig`
 - Read access to configuration, time, deterministic random state, the
   VehicleClass and RoadType catalogs, and the RoadGraph
-- `AdvanceTicks(int64 Count)`
+- `Advance(FSimulationDuration Duration)`
 - `AddRoadNode(...)`
 - `AddRoadSegment(...)`
 - `Validate()`
 - `GetSummary()`
 
-`AdvanceTicks(0)` succeeds without changing state. Negative counts fail.
-Advancement that would exceed the signed 64-bit tick range fails before
+Advancing by zero succeeds without changing state. Negative durations fail.
+Advancement that would exceed the signed 64-bit millisecond range fails before
 changing state.
 
 Systems run in a documented deterministic order. Rendering frames and game
-speed decide how many ticks to request but never alter what one tick means.
+speed decide how much duration to request but never change physical time units.
 
 ## Deterministic Randomness
 
@@ -148,7 +154,7 @@ loaded external data.
 stable code, entity category and ID when applicable, and an explanation.
 `IsValid()` is true when the report contains no error-severity issues.
 
-`FCitySummary` currently reports seed, current tick, VehicleClass count,
+`FCitySummary` reports seed, current time in milliseconds, VehicleClass count,
 RoadType count, RoadNode count, and RoadSegment count. Later systems add their
 own counts as they become authoritative. Summary generation is read-only and
 deterministically ordered.
@@ -212,27 +218,30 @@ road meshes are deferred.
 A route query contains:
 
 - Origin and destination RoadNode IDs
-- Departure tick
+- Departure instant
 - VehicleClass ID
-- DriverProfile context when behavioral cost perception is requested
+
+DriverProfile behavior remains outside Stage 2 routing. Later traffic systems
+may adapt provider costs or route-selection policy without changing graph
+topology.
 
 A successful route contains:
 
 - Ordered directional RoadTraversals
 - Ordered node IDs sufficient to validate continuity
 - Total distance in meters
-- Predicted arrival tick
-- Total predicted travel ticks
+- Predicted arrival instant
+- Total predicted travel duration in milliseconds
 
 Invalid endpoints, unsupported VehicleClasses, prohibited traversals, and
 disconnected destinations return distinct failures.
 
 ### Cost Evaluation
 
-A traversal-cost provider evaluates expected travel ticks using:
+A traversal-cost provider evaluates expected travel duration using:
 
 - Directional traversal
-- Predicted entry tick
+- Predicted entry instant
 - VehicleClass
 - Available historical and live traffic forecast
 
@@ -240,13 +249,13 @@ The Stage 2 routing implementation will supply a free-flow provider through
 this final time-aware interface. Congestion-aware providers arrive with the
 traffic milestone.
 
-Costs must be non-negative and satisfy FIFO: entering the same traversal later
-cannot produce an earlier exit. The initial algorithm may reject a provider
-that cannot make this guarantee.
+Costs must be non-negative integer milliseconds and satisfy FIFO: entering the
+same traversal later cannot produce an earlier exit. Providers explicitly
+declare the FIFO guarantee, and the router rejects providers that do not.
 
 ### Heuristic
 
-The A* heuristic is a lower bound on remaining travel ticks:
+The A* heuristic is a lower bound on remaining travel milliseconds:
 
 ```text
 straight-line distance to destination
@@ -254,9 +263,10 @@ straight-line distance to destination
 fastest feasible speed for the vehicle
 ```
 
-The result is rounded down to whole ticks to preserve admissibility. The speed
-bound ignores congestion but respects intrinsic VehicleClass limits. Predicted
-traffic belongs in traversal costs, not in a heuristic that could overestimate.
+The result is rounded down to whole milliseconds to preserve admissibility.
+The speed bound ignores congestion but respects intrinsic VehicleClass limits.
+Predicted traffic belongs in traversal costs, not in a heuristic that could
+overestimate.
 
 If no stronger admissible bound is available, a zero heuristic is valid and
 causes the same A* implementation to behave like Dijkstra.
@@ -280,7 +290,7 @@ therefore produce the same result for the same graph, query, and cost provider.
 Unreal Automation Tests currently cover:
 
 - Empty City construction, validation, and summary
-- Zero, positive, negative, and overflowing tick advancement
+- Zero, positive, negative, and overflowing time advancement
 - Known-seed RNG golden output
 - Strong-ID invalid state, uniqueness, category safety, and exhaustion behavior
 - Region, RoadType, and VehicleClass defaults and catalog validation

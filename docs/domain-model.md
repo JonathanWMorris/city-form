@@ -33,6 +33,7 @@ City
     ├── Citizen
     ├── Driver profile
     ├── Vehicle class
+    ├── Active vehicle
     └── Route
         └── Ordered road traversals
 ```
@@ -171,7 +172,7 @@ references:
 
 - The traveling Citizen
 - An origin and destination
-- A departure tick
+- A departure instant
 - A DriverProfile
 - A VehicleClass
 - Current progress and completion state
@@ -200,9 +201,9 @@ different VehicleClass.
 
 ### Vehicle Class
 
-A VehicleClass is a validated, read-only definition shared by routing,
-mesoscopic traffic, and future microscopic traffic. It describes dimensions,
-capacity consumption, speed and performance limits, and restriction categories.
+A VehicleClass is a validated, read-only definition shared by routing and
+global microscopic traffic. It describes dimensions, capacity consumption,
+speed and performance limits, and restriction categories.
 
 v0.1 gameplay generates only passenger-car trips. The generic class boundary is
 present so later freight, service, transit, and specialized vehicles do not
@@ -210,12 +211,24 @@ require replacement of Trip or Route data.
 
 ### Vehicle
 
-A Vehicle is a future persistent or active instance of a VehicleClass. Vehicle
-ownership and fleets are outside v0.1.
+An active Vehicle is the global movement state for a motorized Trip. It
+references its VehicleClass and Route and stores its current traversal,
+continuous distance, speed, acceleration, and route progress.
 
-The v0.1 mesoscopic layer can advance a Trip using its VehicleClass without
-creating a Vehicle record. Future microscopic simulation may create an active
-Vehicle for selected Trips while preserving the same Trip identity and Route.
+Every active vehicle advances independently of rendering visibility, camera
+position, loaded level, or region. Vehicle ownership and persistent fleets are
+outside v0.1.
+
+### Traffic Incident
+
+A TrafficIncident is a future authoritative record for a stochastic accident
+or detected collision. It identifies involved vehicles, location, occurrence
+instant, severity, capacity effects, and clearance state.
+
+Stochastic incident risk is scaled by elapsed time or distance and uses a
+dedicated deterministic random stream. Traffic incidents are outside v0.1, but
+the global vehicle model must leave room for them without making rendered
+Actors authoritative.
 
 ## Identity and Lifetime Rules
 
@@ -240,6 +253,8 @@ Vehicle for selected Trips while preserving the same Trip identity and Route.
 - Household, Citizen, Business, and Job references are mutually consistent.
 - Trips reference valid Citizens, endpoints, DriverProfiles, and
   VehicleClasses.
+- Active Vehicles reference valid Trips, VehicleClasses, traversals, and
+  contiguous route progress.
 - Routes contain contiguous, permitted traversals with valid endpoints.
 - Completed traversal history is not modified by rerouting.
 - All authoritative coordinates and physical parameters are finite and use
@@ -253,7 +268,8 @@ The following are intentionally not defined as concrete v0.1 records:
 - Freight orders, cargo, deliveries, and vehicle fleets
 - Utilities, services, budgets, land value, and detailed economics
 - Save-file schemas and migration records
-- Microscopic car-following, lane-changing, and collision state
+- Lane-changing, detailed junction conflicts, and collision state
+- Traffic incidents and emergency-response records
 
 They should extend the vocabulary above rather than transfer authority to
 visual Actors or invalidate established identities.

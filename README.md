@@ -45,10 +45,10 @@ Budgets, save files, public transit, utilities, detailed economics, polished
 graphics, and advanced editing or traffic-management tools are outside v0.1.
 Their future requirements still influence the foundational design.
 
-Traffic will advance authoritative passenger-car trips through a permanent
-mesoscopic model. Time-dependent A* will combine learned time-of-day conditions
-with live queues while future microscopic vehicle simulation remains a
-compatible fidelity tier.
+Traffic will advance authoritative passenger-car vehicles through one global,
+microscopic-lite model. Time-dependent A* will combine learned time-of-day
+conditions with live traffic while rendering remains a separate interpolated
+view of the same citywide truth.
 
 See [v0.1 Product Scope](docs/product-scope.md) for the complete boundary and
 acceptance criteria.
@@ -79,7 +79,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [Domain Model](docs/domain-model.md) | Shared vocabulary, ownership, and entity relationships |
 | [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
 | [Simulation Foundation](docs/simulation-foundation.md) | Current APIs and planned routing contract |
-| [Traffic Model](docs/traffic-model.md) | Mesoscopic traffic, prediction, and future microscopic fidelity |
+| [Traffic Model](docs/traffic-model.md) | Global microscopic traffic, prediction, and future incidents |
 | [Decision Records](docs/decisions/README.md) | Context and consequences of accepted architecture choices |
 | [Roadmap](docs/roadmap.md) | Ordered milestones and exit criteria |
 | [Unreal MCP Workflow](docs/unreal-mcp.md) | Optional editor automation setup and troubleshooting |

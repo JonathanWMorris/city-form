@@ -58,6 +58,7 @@ Completed:
 
 Remaining:
 
+- Millisecond timestamps and durations with subsystem-specific cadences
 - Vehicle-aware, time-dependent A* using free-flow costs
 - Route tests for direct, multi-segment, disconnected, known-optimal, and
   equal-cost cases
@@ -134,14 +135,16 @@ Deliver:
 - Passenger-car VehicleClasses and bounded DriverProfiles
 - Historical and live traversal-time forecasting
 - Time-dependent A* routing and bounded node-based rerouting
-- Mesoscopic directional queues and individual trip progression
+- Global microscopic-lite vehicles with continuous traversal progress
+- Fixed-step ballistic movement, leader following, and simplified node
+  admission
 - A readable utilization or congestion view
 
 Exit criteria:
 
 - Changing the road layout or job distribution changes route usage.
 - Learned and live conditions can change predicted routes by departure time.
-- Trips remain authoritative without visible vehicles.
+- Every active vehicle progresses independently of visibility or loaded level.
 - Seeded driver behavior avoids synchronized route-choice oscillation.
 - Headless tests validate trips, queues, forecasts, and routes.
 
@@ -176,9 +179,10 @@ Every stage must:
 
 Potential later milestones include save/load with migrations, advanced object
 editing, construction-constraint overrides, lane and junction management,
-freight and truck demand, microscopic vehicles, public transit, utilities and
-services, a deeper economy, modding and research interfaces, larger cities,
-improved visuals, and packaged releases.
+freight and truck demand, detailed signals and vehicle control, stochastic
+traffic incidents, public transit, utilities and services, a deeper economy,
+modding and research interfaces, million-citizen benchmark scenarios, improved
+visuals, and packaged releases.
 
 Their order is intentionally not fixed until v0.1 provides evidence about the
 simulation, player experience, performance, and contributor priorities.

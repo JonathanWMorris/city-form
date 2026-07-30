@@ -70,6 +70,7 @@ The Unreal presentation layer owns:
 - Player input, camera, and editing tools
 - Terrain and ground interaction
 - Road, parcel, building, vehicle, and pedestrian visuals
+- Frame-rate interpolation of authoritative traffic snapshots
 - UI, analytical views, effects, and audio
 - Translation from player intent into simulation commands
 - Translation from simulation snapshots or events into visible state
@@ -87,7 +88,7 @@ This boundary should support:
 
 - Headless simulation without a world or viewport
 - Replayable tests using known commands and seeds
-- Multiple visual levels of detail for the same authoritative records
+- Visual culling and levels of detail for the same authoritative records
 - Future undo, inspection, automation, and modding facilities
 - Clear rejection reasons when a command would violate an invariant
 
@@ -114,9 +115,15 @@ refined only after profiling identifies a need.
 
 ## Time and Determinism
 
-Simulation time is independent of rendering frame time. Rendering may
-interpolate or visualize snapshots, but it must not decide whether authoritative
-systems advance.
+Simulation time uses integer millisecond timestamps and durations independent
+of rendering frame time. A fine-grained clock does not require a universal
+high-frequency update loop. Routing runs on demand, traffic uses an explicit
+fixed step, and slower systems use their own cadences or scheduled events.
+
+Rendering may interpolate or visualize snapshots, but it must not decide
+whether authoritative systems advance. A future gameplay calendar is a
+configurable projection of simulation time rather than the physical unit used
+by routing and movement.
 
 Deterministic behavior requires:
 
@@ -135,21 +142,21 @@ The logical road graph is authoritative. Splines, meshes, debug lines, lanes,
 and visible vehicles are representations derived from it.
 
 An authoritative trip contains valid origin and destination references and a
-logical route. A visible vehicle may represent a selected or nearby trip, but
-destroying or unloading that vehicle must not destroy the trip.
+logical route. Each active v0.1 passenger-car trip has global
+microscopic-lite vehicle state, including traversal, continuous distance,
+speed, acceleration, and route progress.
 
-Road utilization is derived from abstract demand and routes. v0.1 does not
-require every trip to be represented by a physically simulated vehicle.
+A rendered vehicle is an interpolated view. Destroying, culling, or unloading
+that representation must not destroy or pause its authoritative vehicle.
 
 Planned trips will use time-dependent A* with vehicle-aware traversal costs.
-The traffic milestone will advance passenger-car trips through a permanent
-mesoscopic layer that publishes historical and live travel-time observations.
-Future microscopic simulation may take responsibility for selected trips or
-regions while consuming the same Trips, Routes, DriverProfiles, and
-VehicleClasses.
+The traffic milestone will advance all active vehicles through one global
+fixed-step model and publish historical and live travel-time observations.
+Camera position, visibility, and loaded regions never select simulation
+fidelity.
 
 The complete boundary is defined in
-[Layered Traffic Model](traffic-model.md).
+[Global Microscopic Traffic Model](traffic-model.md).
 
 ## Performance Strategy
 
@@ -161,7 +168,7 @@ The architecture supports that goal by:
 - Keeping persistent simulation entities compact
 - Batching system work over explicit data
 - Separating authoritative and visual update rates
-- Allowing visual and simulation detail to scale independently
+- Using subsystem-specific cadences and scheduled events
 - Reserving Actors for objects that need Unreal interaction or physical
   representation
 - Adding MassEntity or other specialized systems only after profiling shows a
@@ -170,6 +177,9 @@ The architecture supports that goal by:
 Optimization work must include a representative scenario, recorded metrics,
 and a regression check where practical. v0.1 will produce the first performance
 baseline before fixed hardware budgets are adopted.
+
+One million persistent citizens is a long-term design and benchmark target,
+not a v0.1 acceptance count or a promise of one million simultaneous vehicles.
 
 ## Persistence Boundary
 
