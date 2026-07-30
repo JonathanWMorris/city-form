@@ -15,6 +15,8 @@ implementation details and easily reversible choices do not require an ADR.
 - [0004: Layered traffic fidelity](0004-layered-traffic-fidelity.md)
 - [0005: Shared vehicle-class definitions](0005-vehicle-class-model.md)
 - [0006: Configurable regional defaults with a California baseline](0006-california-regional-defaults.md)
+- [0007: Multi-rate millisecond simulation time](0007-multirate-millisecond-time.md)
+- [0008: Global, City-owned microscopic traffic](0008-global-city-owned-microscopic-traffic.md)
 
 ## Template
 

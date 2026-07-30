@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR 0008](0008-global-city-owned-microscopic-traffic.md)
 
 ## Context
 

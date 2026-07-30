@@ -1,254 +1,213 @@
-# Layered Traffic Model
+# Global Microscopic Traffic Model
 
 ## Status
 
-This document defines the intended v0.1 mesoscopic traffic model and its
-boundary with future microscopic simulation. It establishes reusable concepts
-now while leaving calibration constants to the representative Stage 7
-benchmark.
+This document defines the intended v0.1 microscopic-lite traffic model and its
+long-term citywide boundary. Stage 7 will implement and calibrate the initial
+model. Exact performance budgets remain benchmark outcomes.
 
 ## Goals
 
 City Form traffic should:
 
 - Emerge from persistent people, jobs, and trip demand
-- Respond to time of day, queues, learned conditions, and network changes
-- Produce bounded, varied driver choices rather than lockstep reactions
-- Support individual authoritative trips without requiring one visible vehicle
-  per trip
-- Scale by changing propagation fidelity without replacing trip or routing data
+- Progress every active vehicle globally, regardless of visibility
+- Respond to time of day, congestion, road changes, and vehicle capabilities
+- Preserve individual trips without requiring one Actor per vehicle
 - Remain deterministic and headlessly testable for controlled scenarios
+- Scale toward one million persistent citizens on strong consumer hardware
 
-## Coupled Traffic Loop
+One million citizens is not a v0.1 acceptance count and does not imply one
+million simultaneous vehicles.
 
-Dynamic traffic assignment couples route choice with network loading:
+## Authoritative Boundary
+
+The City owns Trips, Routes, Vehicles, traffic observations, and all movement
+state. Unreal presentation reads snapshots and creates only the visual objects
+needed to render the current view.
+
+Camera position, rendering visibility, loaded levels, and streamed regions
+never determine whether a vehicle advances or which traffic rules it follows.
+Visual culling changes draw cost, not simulation fidelity.
+
+SUMO is not a runtime authority or project dependency. It may be used later as
+an optional offline reference for comparable networks, demand, flow, queues,
+and travel times.
+
+## Time Model
+
+Traffic uses the shared signed 64-bit millisecond timeline. The initial global
+traffic step is configurable and defaults to 1,000 milliseconds.
+
+A fine timestamp does not imply millisecond updates. Routing runs on demand,
+traffic runs at its configured step, and slower city systems use independent
+cadences or scheduled events.
+
+The first model uses ballistic integration during one step:
 
 ```text
-Trip demand and departure times
-             │
-             ▼
-Time-dependent route choice ◄──────────────┐
-             │                             │
-             ▼                             │
-Mesoscopic network loading                 │
-             │                             │
-             ▼                             │
-Observed queues and travel times ──────────┘
+new distance = old distance
+             + old speed × elapsed time
+             + 0.5 × acceleration × elapsed time²
 ```
 
-The model separates these responsibilities so each can be tested and later
-replaced or refined independently.
+Integration must detect traversal boundaries and preserve unconsumed time when
+a vehicle moves to its next traversal. If behavioral accuracy is inadequate,
+benchmarks compare global steps of 1,000, 500, and 200 milliseconds before the
+default changes.
 
-## Strategic Trip Layer
+## Strategic Trips and Active Vehicles
 
-The strategic layer owns:
+A Trip owns movement demand:
 
-- Trip identity and traveler
-- Origin, destination, and departure tick
+- Traveler and purpose
+- Origin and destination
+- Departure instant
 - DriverProfile and VehicleClass
 - Planned and completed route traversals
-- Current network location
 - Completion or failure state
 
-Trip demand is authoritative regardless of propagation fidelity. Destroying a
-visible vehicle or unloading a region does not remove its Trip.
+An active passenger-car Trip owns or references one compact Vehicle state:
 
-v0.1 generates passenger-car commute trips. Freight, deliveries, service
-vehicles, public transit, and vehicle ownership are later demand systems.
-
-## Vehicle Classes
-
-`FVehicleClassDefinition` is validated and read-only after its catalog is
-accepted by the simulation.
-
-It reserves these explicitly unit-labeled properties:
-
-| Property | Purpose |
-| --- | --- |
-| Length, width, and height in meters | Visual scale and physical restrictions |
-| Effective queue length in meters | Mesoscopic space consumption |
-| Mass in kilograms | Future dynamics, grade, energy, and restrictions |
-| Maximum/free-flow speed (m/s) | Routing and free-flow time |
-| Acceleration (m/s²) | Future stop and microscopic behavior |
-| Comfortable/emergency deceleration | Future following and safety |
-| Minimum turning radius in meters | Future turn feasibility |
-| Passenger-car-equivalent factor | Mesoscopic capacity consumption |
-| Restriction categories | Road and traversal eligibility |
-| Performance category | Future powertrain and grade response |
-
-The catalog initially contains one passenger-car class. Synthetic definitions
-may be used in tests, but v0.1 gameplay does not generate trucks without a
-freight or delivery reason.
-
-Mass does not apply a universal speed penalty. Vehicle speed and acceleration
-come from explicit performance data and road conditions. Size affects queue
-space and capacity immediately; weight and power become especially relevant on
-grades and during acceleration.
-
-## Driver Profiles
-
-A DriverProfile is deterministic data derived from the City seed. It separates
-human behavior from VehicleClass capabilities.
-
-The traffic design reserves:
-
-- Whether navigation information is used
-- Perceived travel-cost variation
-- Minimum predicted improvement required to reroute
-- Rerouting cooldown
-- Responsiveness to live versus historical information
-
-Exact distributions and defaults are calibration data. They must be recorded
-with benchmark results before Stage 7 is accepted.
-
-Drivers do not all receive perfect future knowledge or reroute simultaneously.
-This avoids synchronized oscillation and represents bounded, varied route
-choice.
-
-## v0.1 Mesoscopic Propagation
-
-Each RoadSegment exposes two directional traversal states. The v0.1
-mesoscopic layer maintains, per direction:
-
-- Free-flow traversal time
-- Capacity expressed in passenger-car equivalents per tick
-- A FIFO point queue
-- Trips committed to enter
-- Trips currently traversing
-- Predicted and observed exit ticks
-
-A Trip enters a traversal when permitted by its Route and available directional
-capacity. Its VehicleClass consumes the configured capacity equivalent and
-effective queue space. The model schedules an exit using the traversal's
-free-flow time and queue delay.
-
-Point queues do not model physical spillback into upstream segments. This is an
-explicit v0.1 limitation, not an accidental claim of lane-level realism.
-
-The mesoscopic layer advances individual Trips, but it does not simulate
-continuous position, lane choice, car-following, acceleration, braking, or
-collision avoidance.
-
-## Historical and Live Forecasting
-
-Every completed traversal publishes an observation containing:
-
-- Directional traversal
+- Vehicle and Trip identity
 - VehicleClass
-- Entry and exit ticks
-- Observed travel ticks
-- Time-of-day bucket
+- Current directional traversal
+- Continuous distance along the traversal in meters
+- Speed and acceleration in SI units
+- Route index and node-transition state
+- Leader relationship where applicable
 
-Forecasts combine:
+Completing, blocking, or cancelling a Trip updates both records atomically.
+Destroying a rendered mesh never changes either record.
 
-- Smoothed historical observations for the applicable time bucket
-- Current directional queue delay
-- Trips already committed to the traversal
-- The querying VehicleClass's intrinsic speed and restrictions
+## Vehicle Classes and Driver Profiles
 
-The forecast must not inspect trips or events that have not yet been generated.
-At the start of a new simulation, free-flow time is the historical fallback.
+`FVehicleClassDefinition` remains validated and read-only. Routing and traffic
+share its dimensions, effective spacing, mass, maximum speed, acceleration,
+braking, turning, restriction, and capacity fields.
 
-Smoothing method, time-bucket width, sample thresholds, and aging are
-configuration data selected during Stage 7 calibration. The forecast interface
-and observation schema must not depend on their eventual default values.
+v0.1 gameplay generates passenger cars only. Synthetic tests may use slower,
+larger, or restricted definitions. Mass does not create a universal speed
+penalty; explicit vehicle performance and road conditions determine movement.
 
-## Routing and Rerouting
+DriverProfiles contain deterministic behavioral differences such as desired
+speed, following behavior, navigation use, perceived route cost, and rerouting
+thresholds. Defaults require calibration against a recorded scenario.
 
-Trips request a time-dependent A* route at departure. The cost provider
-evaluates every candidate traversal at the tick when the route predicts the
-Trip would enter it.
+## v0.1 Movement
 
-An active Trip may reconsider only at a RoadNode. It reroutes only when:
+Each directional traversal maintains vehicles in deterministic distance order.
+The initial car-following rule uses the leader's position and speed, the
+follower's desired speed, VehicleClass acceleration and braking limits, and a
+minimum effective spacing.
 
-- Its DriverProfile uses applicable navigation information
-- Its cooldown has expired
-- A valid alternative exists
-- Predicted improvement exceeds its configured threshold
+v0.1 has one conceptual traffic stream per directional traversal. It does not
+model explicit lanes or lane changes. Node admission serializes conflicting
+arrivals through a simple deterministic rule sufficient for the prototype
+network.
 
-The completed prefix of a Route is immutable. Only the remaining path changes.
-A failed reroute leaves the valid existing route in place unless that route has
-become prohibited or disconnected, in which case the Trip enters an explicit
-blocked state.
+The initial model does not use PID controllers, Chaos rigid bodies, collision
+shapes, or Actors for authoritative movement. Detailed signals, junction
+conflicts, parking, and physical collisions are later extensions.
+
+## Routing and Forecasting
+
+Trips request a time-dependent A* route at departure. Every candidate
+traversal is evaluated at its predicted entry instant.
+
+The initial free-flow provider uses the lower of road speed and vehicle maximum
+speed. Stage 7 adds forecasts derived from:
+
+- Historical observations for a time-of-day bucket
+- Current vehicle density and delay
+- Vehicles committed to enter the traversal
+- The querying VehicleClass
+
+An active Trip may reconsider its remaining route only at a RoadNode. Rerouting
+uses deterministic DriverProfile rules, a cooldown, and a minimum predicted
+improvement. Completed route history is immutable.
+
+## Rendering
+
+The presentation layer receives timestamped traffic snapshots. It renders
+smooth motion by interpolating distance, speed, and acceleration along derived
+road splines at the display frame rate.
+
+Interpolation is not a second simulation model. The same sampling rule can
+produce a pose for any authoritative vehicle, while normal rendering culling
+decides only which meshes are submitted.
 
 ## Deterministic Update Order
 
-Within each simulation tick, traffic updates follow a documented order:
+For each global traffic step:
 
 1. Apply accepted network changes.
 2. Generate scheduled Trip demand.
-3. Complete traversal exits.
-4. Update directional queues and live observations.
-5. Evaluate eligible departures and reroutes in stable Trip-ID order.
-6. Admit Trips to traversals in stable order.
-7. Publish summary metrics and validation results.
+3. Apply due departures and route results.
+4. Build deterministic traversal and leader ordering.
+5. Calculate vehicle decisions from the prior authoritative snapshot.
+6. Integrate all active vehicles.
+7. Resolve traversal exits and node admission in stable ID order.
+8. Publish observations, metrics, validation, and a new snapshot.
 
-Parallelization may later preserve these semantics through deterministic
-partitioning and reduction. v0.1 does not trade repeatability for concurrency.
+Parallel implementations must preserve these semantics through deterministic
+partitioning and reduction.
 
-## Future Microscopic Fidelity
+## Future Traffic Incidents
 
-Microscopic simulation is an additional propagation provider, not a replacement
-for the strategic Trip layer.
+Stochastic accidents use a hazard rate scaled by elapsed time or distance:
 
-It will eventually:
+```text
+interval probability = 1 - exp(-risk rate × elapsed time)
+```
 
-- Create active Vehicle instances for selected Trips or loaded regions
-- Use VehicleClass dimensions, mass, acceleration, braking, turning, and
-  performance data
-- Model continuous position, lanes, following, lane changes, junctions,
-  signals, queues with physical length, and parking where required
-- Accept existing Trips and remaining Routes at explicit fidelity boundaries
-- Report traversal observations through the same forecast boundary
-- Return Trips to mesoscopic propagation when they leave detailed regions
+This prevents a traffic-step change from multiplying the long-term incident
+rate. Risk may later depend on speed, following gap, road geometry, weather,
+vehicle condition, DriverProfile, or congestion.
 
-Mesoscopic propagation remains useful for distant regions, fast-forwarding,
-headless scenarios, and cities too large to simulate microscopically
-everywhere.
+Incident randomness comes from a dedicated stream derived from the City seed,
+stable identities, the incident system, and time context. An authoritative
+TrafficIncident records participants, traversal and distance, occurrence time,
+severity, capacity effects, and clearance state.
 
-MassEntity may be evaluated as a microscopic implementation tool only after
-profiling identifies a concrete need. It does not become authoritative for
-Trip, route, or city state.
+Future physical collision detection may create the same incident record.
+Neither stochastic nor detected incidents depend on whether the location is
+visible.
 
 ## Validation and Metrics
 
 Traffic validation covers:
 
-- Valid Trip, DriverProfile, VehicleClass, and traversal references
-- Contiguous and permitted remaining Routes
-- Non-negative finite travel times and capacities
-- FIFO queue ordering
-- Capacity-equivalent accounting
-- Immutable completed traversal history
-- Valid blocked and completed states
+- Valid Trip, VehicleClass, traversal, and Route references
+- Finite non-negative distance and speed
+- Acceleration within the applicable VehicleClass limits
+- Contiguous route progress
+- Deterministic traversal ordering
+- No overlap beyond documented numerical tolerance
+- Consistent active, blocked, completed, and failed states
 
-Initial metrics include:
+Initial metrics include active and completed Trips, travel time, free-flow
+delay, directional volume, density, stopped vehicles, route failures, and
+traffic-step runtime.
 
-- Trips generated, active, completed, blocked, and failed
-- Mean and percentile travel time
-- Free-flow versus observed delay
-- Directional volume, queue, and utilization
-- Reroute attempts and accepted reroutes
-- Forecast error by time bucket where samples exist
+## Performance and Calibration
 
-## Calibration and Acceptance
+The v0.1 benchmark uses approximately 1,000 persistent residents. Later
+benchmarks must report persistent population and simultaneous active vehicles
+separately.
 
-Stage 7 must define a small reproducible network with competing routes and a
-commute peak. Calibration records:
+Long-term experiments should include 50,000, 200,000, and one million active
+vehicles to expose scaling behavior without claiming that all are required for
+normal gameplay. Measurements record hardware, build configuration, traffic
+step, wall-clock simulation rate, frame time, memory, and determinism results.
 
-- All vehicle and driver-profile defaults
-- Capacity and free-flow assumptions
-- Historical smoothing and bucket configuration
-- Rerouting thresholds and cooldown distributions
-- Hardware, build configuration, runtime, and memory
-- Traffic outcomes and forecast error
-
-Defaults are accepted only when the scenario produces stable, explainable
-patterns without route-choice oscillation. They remain tunable data rather than
-hard-coded routing behavior.
+MassEntity, SIMD specialization, GPU compute, and other scaling technology are
+adopted only after profiling identifies a concrete bottleneck. They do not
+become the authoritative domain model.
 
 ## References
 
+- [Eclipse SUMO simulation time steps](https://sumo.dlr.de/docs/Simulation/Basic_Definition.html)
+- [Eclipse SUMO traffic simulation models](https://eclipse.dev/sumo/docs/Theory/Traffic_Simulations.html)
 - [FHWA Guidebook on Dynamic Traffic Assignment](https://ops.fhwa.dot.gov/publications/fhwahop13015/index.htm)
 - [FHWA Traffic Analysis Tools Primer](https://ops.fhwa.dot.gov/trafficanalysistools/tat_vol1/sect6.htm)
-- [FHWA truck size, acceleration, and capacity analysis](https://www.fhwa.dot.gov/policy/otps/truck/wusr/chap08.cfm)

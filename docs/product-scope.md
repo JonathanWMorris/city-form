@@ -60,8 +60,8 @@ production-quality meshes are deferred.
 - Abstract home-to-work and work-to-home trips
 - Passenger-car VehicleClasses and bounded DriverProfiles
 - Time-dependent A* routes through the logical road graph
-- Historical time-of-day and live-queue travel-time forecasts
-- Mesoscopic progression of individual authoritative trips
+- Historical time-of-day and live-traffic travel-time forecasts
+- Global microscopic-lite progression of individual authoritative vehicles
 
 Residents and authoritative trips exist independently of visible pedestrians or
 vehicles.
@@ -69,14 +69,13 @@ vehicles.
 ### Traffic Feedback
 
 - Road usage derived from routed trips
-- Directional capacity and point queues
+- Per-vehicle traversal, distance, speed, acceleration, and route progress
+- Simplified directional capacity, leader following, and node admission
 - Bounded rerouting at road nodes
 - A readable congestion or utilization visualization
-- A small number of placeholder visible vehicles only after abstract trips are
-  functioning
+- Interpolated placeholder vehicles derived from authoritative snapshots
 
-Visible vehicles illustrate simulation state; they are not the authoritative
-source of traffic demand.
+Rendering visibility never determines whether a vehicle advances.
 
 ### Simulation Quality
 
@@ -117,7 +116,8 @@ The following are outside v0.1:
 - Public transit, utilities, education, crime, weather, or politics
 - Detailed pedestrian simulation or animation
 - Freight, deliveries, trucks, or vehicle ownership
-- Microscopic lanes, car-following, acceleration, or vehicle physics
+- Lanes, lane changes, PID control, or rigid-body vehicle physics
+- Detailed collision detection or stochastic traffic incidents
 - Detailed road engineering, traffic signals, or lane management
 - Multiplayer, GIS import, or a public modding API
 - Production-quality buildings, roads, terrain, or procedural skyscrapers
@@ -138,10 +138,14 @@ v0.1 implements only basic road creation and zoning. Its logical data,
 identities, and command boundaries must not make these later capabilities
 unreasonably difficult.
 
-The traffic model follows the same principle. Mesoscopic traffic remains a
-supported citywide fidelity tier; future microscopic simulation will reuse its
-Trips, Routes, DriverProfiles, VehicleClasses, and observations rather than
-replace them.
+The traffic model follows the same principle. Every active vehicle progresses
+through one global authoritative model. Visual culling and interpolation may
+scale independently, but camera position and loaded regions never change
+traffic fidelity.
+
+One million persistent citizens is a long-term design and benchmark target. It
+does not change the v0.1 population criterion and does not imply one million
+simultaneous vehicles.
 
 ## Persistence and Compatibility
 
