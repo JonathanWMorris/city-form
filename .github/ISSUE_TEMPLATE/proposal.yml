@@ -1,0 +1,46 @@
+name: Feature or design proposal
+description: Propose player-facing behavior or a substantial technical direction.
+title: "[Proposal] "
+labels:
+  - "type: feature"
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: User or project need
+      description: What problem should City Form solve, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the smallest coherent outcome, not only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and non-goals
+      description: State what this proposal includes and deliberately excludes.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider and why is this preferable?
+  - type: textarea
+    id: alignment
+    attributes:
+      label: Project alignment
+      description: Explain its relationship to project values, v0.1 scope, architecture, and accepted decisions.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable conditions that would make this proposal complete.
+    validations:
+      required: true
