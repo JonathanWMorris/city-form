@@ -14,7 +14,14 @@ enum class ESimulationErrorCode : uint8
 	IdExhausted,
 	InvalidRandomBound,
 	NegativeTickCount,
-	TickOverflow
+	TickOverflow,
+	NonFiniteRoadPosition,
+	InvalidRoadNode,
+	SameRoadEndpoint,
+	ZeroLengthRoadSegment,
+	DuplicateRoadConnection,
+	InvalidRoadType,
+	InvalidSpeedLimit
 };
 
 struct FSimulationError

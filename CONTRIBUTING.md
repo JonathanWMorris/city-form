@@ -168,13 +168,12 @@ Run the simulation-foundation tests without a viewport:
 "$CITY_FORM_UE_ROOT/Engine/Binaries/Mac/UnrealEditor-Cmd" \
   "$PWD/CityForm/CityForm.uproject" \
   -NullRHI -unattended -nop4 -nosplash \
-  -ExecCmds="Automation RunTests CityForm.Simulation.Foundation; Quit" \
+  -ExecCmds="Automation RunTests CityForm.Simulation; Quit" \
   -TestExit="Automation Test Queue Empty" -log
 ```
 
-The command must report six matching tests with successful results. An exit
-code of zero alone is not enough; review the automation result lines in the
-Unreal log.
+The command must report matching tests with successful results. An exit code of
+zero alone is not enough; review the automation result lines in the Unreal log.
 
 ## Documentation
 

@@ -58,8 +58,9 @@ connection.
 ### Road Segment
 
 A RoadSegment is one logical connection between two distinct RoadNodes. It has
-a stable `FRoadSegmentId`, references valid endpoint IDs, and has positive
-length.
+a stable `FRoadSegmentId`, references valid endpoint and RoadType IDs, and has
+positive length. Its speed limit normally comes from its RoadType and may carry
+an explicit per-segment override.
 
 The single v0.1 road type supports travel in both directions. A segment is not a
 mesh, spline, lane collection, or Actor.

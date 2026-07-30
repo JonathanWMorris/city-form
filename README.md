@@ -5,9 +5,10 @@ with Unreal Engine. It aims to make the systems that shape a city coherent,
 inspectable, scalable, and enjoyable to control.
 
 > [!IMPORTANT]
-> City Form is at the simulation-foundation stage. The headless
-> `CitySimulation` module is implemented and tested, but no gameplay systems,
-> custom levels, roads, routing, traffic flow, or custom assets exist yet.
+> City Form is at the logical-road-graph stage. The headless `CitySimulation`
+> module supports validated regional road defaults, road types, nodes,
+> segments, and directional traversals, but no custom levels, routing, traffic
+> flow, interactive road tools, or custom assets exist yet.
 
 ## Vision
 

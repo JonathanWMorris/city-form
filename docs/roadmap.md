@@ -45,7 +45,7 @@ Exit criteria:
 
 ## Stage 2: Logical Road Graph
 
-Status: Next
+Status: In progress
 
 Deliver:
 

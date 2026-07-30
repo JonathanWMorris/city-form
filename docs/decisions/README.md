@@ -14,6 +14,7 @@ implementation details and easily reversible choices do not require an ADR.
 - [0003: Time-dependent A* routing](0003-time-dependent-a-star-routing.md)
 - [0004: Layered traffic fidelity](0004-layered-traffic-fidelity.md)
 - [0005: Shared vehicle-class definitions](0005-vehicle-class-model.md)
+- [0006: Configurable regional defaults with a California baseline](0006-california-regional-defaults.md)
 
 ## Template
 

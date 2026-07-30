@@ -23,7 +23,30 @@ enum class EValidationIssueCode : uint8
 	NonFiniteVehicleValue,
 	NonPositiveVehicleValue,
 	QueueLengthShorterThanVehicle,
-	ComfortableDecelerationExceedsEmergency
+	ComfortableDecelerationExceedsEmergency,
+	EmptyRegionIdentifier,
+	NonFiniteRegionalValue,
+	NonPositiveRegionalValue,
+	InvalidRoadTypeId,
+	DuplicateRoadTypeId,
+	EmptyRoadTypeKey,
+	DuplicateRoadTypeKey,
+	NonFiniteRoadTypeValue,
+	NonPositiveRoadTypeValue,
+	InvalidRoadNodeId,
+	DuplicateRoadNodeId,
+	NonFiniteRoadPosition,
+	InvalidRoadSegmentId,
+	DuplicateRoadSegmentId,
+	MissingRoadSegmentEndpoint,
+	IdenticalRoadSegmentEndpoints,
+	DuplicateRoadConnection,
+	NonFiniteRoadSegmentLength,
+	NonPositiveRoadSegmentLength,
+	RoadSegmentLengthMismatch,
+	MissingRoadType,
+	NonFiniteSpeedLimitOverride,
+	NonPositiveSpeedLimitOverride
 };
 
 struct FValidationIssue
