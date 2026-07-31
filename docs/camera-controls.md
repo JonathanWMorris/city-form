@@ -67,11 +67,31 @@ UI and tools may suppress all camera input temporarily. They may also disable
 edge scrolling independently when pointer interaction near a screen boundary
 must take priority.
 
+## Stage 3 Verification Baseline
+
+Stage 3 was verified on July 31, 2026, on an Apple Silicon Mac running the
+macOS 27 beta, Unreal Engine 5.8, and Xcode 26.1.1 with the Metal Toolchain.
+
+- The editor and game targets both built successfully in Development.
+- `/Game/Maps/Prototype` opened as the configured editor and game map.
+- PIE spawned and possessed `ACityFormCameraPawn` with
+  `ACityFormPlayerController` at the ground-level origin; no character pawn or
+  character movement component was used.
+- Camera navigation was reviewed in PIE during PR #80. The missing `R`/`F`
+  tilt alternatives found during hands-on review were corrected before merge.
+- All 23 `CityForm.*` automation tests passed: four presentation camera tests
+  and 19 simulation tests.
+- A separate `UnrealEditor-Cmd -NullRHI` process found and passed all 19
+  `CityForm.Simulation` tests with exit code zero and no gameplay viewport.
+
+This baseline completes the prototype-environment milestone. Future camera
+tuning remains presentation work and must not change simulation outcomes.
+
 ## Current Limitations
 
 - There is no in-game rebinding or sensitivity interface.
 - Gamepads, touchscreens, native pinch/rotate gestures, drag-to-pan, and
   cursor-centered zoom are not implemented.
-- Physical trackpad direction and feel must remain part of macOS playtesting;
-  operating-system natural-scroll settings can affect perceived direction.
+- Trackpad scroll feel can vary with operating-system natural-scroll settings
+  and should be rechecked when configurable input settings are introduced.
 - Road editing and right-click cancellation are Stage 4 work.

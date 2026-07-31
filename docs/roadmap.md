@@ -68,21 +68,16 @@ Exit criteria:
 
 ## Stage 3: Prototype Environment
 
-Status: In progress — implementation complete, final hands-on verification
-pending
+Status: Complete
 
-Implemented:
+Completed:
 
 - A project-owned two-kilometer flat test map with documented metric bounds
 - A smooth ground-focused city-builder camera
 - Keyboard, mouse, edge-scroll, and trackpad-scroll navigation
 - Minimal project-owned input and game-mode configuration
-
-Remaining:
-
-- Complete the final macOS navigation checklist, including physical trackpad
-  direction and feel
-- Record any tuning follow-ups without expanding this stage into road editing
+- Verified macOS editor and game builds, PIE startup, presentation tests, and
+  headless simulation independence
 
 Exit criteria:
 
