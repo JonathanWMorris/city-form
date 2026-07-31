@@ -73,8 +73,9 @@ void UCityFormToolPaletteWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	USizeBox* DockSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DockSize"));
+	DockSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DockSize"));
 	DockSize->SetWidthOverride(DockWidth);
+	DockSize->SetHeightOverride(ClosedDockHeight);
 	WidgetTree->RootWidget = DockSize;
 
 	PaletteBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PaletteBorder"));
@@ -137,7 +138,10 @@ void UCityFormToolPaletteWidget::SetSelectedTool(const ECityFormToolMode ToolMod
 
 void UCityFormToolPaletteWidget::SetRoadCategoryOpen(const bool bOpen)
 {
-	SetDesiredSizeInViewport(FVector2D(DockWidth, bOpen ? OpenDockHeight : ClosedDockHeight));
+	if (DockSize != nullptr)
+	{
+		DockSize->SetHeightOverride(bOpen ? OpenDockHeight : ClosedDockHeight);
+	}
 	if (RoadTray != nullptr)
 	{
 		RoadTray->SetVisibility(bOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
