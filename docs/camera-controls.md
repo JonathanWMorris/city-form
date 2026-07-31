@@ -21,7 +21,8 @@ level never determine which parts of the authoritative city simulation run.
 | Hold middle mouse and drag horizontally | Rotate |
 | Hold middle mouse and drag vertically | Tilt |
 | `Q`, `E` | Rotate left or right |
-| `Home`, `End` | Tilt toward the horizon or toward top-down |
+| `R`, `F` | Tilt toward the horizon or toward top-down |
+| `Home`, `End` | Alternative tilt controls |
 | `Z`, `X` | Zoom in or out without a wheel |
 
 Right-click and trackpad secondary click are deliberately unassigned. Future

@@ -148,6 +148,9 @@ void ACityFormCameraPawn::ConfigureRuntimeMappings()
 	AddNegateModifier(RuntimeMappingContext, Q);
 	RuntimeMappingContext->MapKey(RotateAction, EKeys::E);
 
+	RuntimeMappingContext->MapKey(TiltAction, EKeys::R);
+	FEnhancedActionKeyMapping& F = RuntimeMappingContext->MapKey(TiltAction, EKeys::F);
+	AddNegateModifier(RuntimeMappingContext, F);
 	RuntimeMappingContext->MapKey(TiltAction, EKeys::Home);
 	FEnhancedActionKeyMapping& End = RuntimeMappingContext->MapKey(TiltAction, EKeys::End);
 	AddNegateModifier(RuntimeMappingContext, End);
