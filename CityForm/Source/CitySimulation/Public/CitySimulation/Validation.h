@@ -58,7 +58,7 @@ struct FValidationIssue
 	FString Message;
 };
 
-class FValidationReport
+class CITYSIMULATION_API FValidationReport
 {
 public:
 	void Add(FValidationIssue Issue);

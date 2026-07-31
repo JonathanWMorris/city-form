@@ -20,7 +20,7 @@ struct FBoundedRandomResult
 	}
 };
 
-class FDeterministicRandom
+class CITYSIMULATION_API FDeterministicRandom
 {
 public:
 	explicit FDeterministicRandom(uint64 Seed);

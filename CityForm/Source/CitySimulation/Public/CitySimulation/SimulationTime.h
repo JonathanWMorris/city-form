@@ -7,7 +7,7 @@
 namespace CityForm::Simulation
 {
 
-class FSimulationDuration
+class CITYSIMULATION_API FSimulationDuration
 {
 public:
 	constexpr FSimulationDuration() = default;
@@ -40,7 +40,7 @@ private:
 	int64 Milliseconds = 0;
 };
 
-class FSimulationInstant
+class CITYSIMULATION_API FSimulationInstant
 {
 public:
 	constexpr FSimulationInstant() = default;
@@ -84,11 +84,11 @@ struct FSimulationInstantResult
 	}
 };
 
-FSimulationInstantResult AddSimulationDuration(
+CITYSIMULATION_API FSimulationInstantResult AddSimulationDuration(
 	FSimulationInstant Instant,
 	FSimulationDuration Duration);
 
-class FSimulationClock
+class CITYSIMULATION_API FSimulationClock
 {
 public:
 	FSimulationInstant GetCurrentInstant() const;

@@ -30,7 +30,7 @@ struct FRoadSpeedLimitResult
 	}
 };
 
-class FRoadTypeCatalog
+class CITYSIMULATION_API FRoadTypeCatalog
 {
 public:
 	static FRoadTypeId GetBasicTwoWayRoadTypeId();

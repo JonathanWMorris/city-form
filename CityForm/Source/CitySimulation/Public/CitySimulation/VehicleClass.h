@@ -32,7 +32,7 @@ struct FVehicleClassDefinition
 	EVehiclePerformanceCategory PerformanceCategory = EVehiclePerformanceCategory::Standard;
 };
 
-class FVehicleClassCatalog
+class CITYSIMULATION_API FVehicleClassCatalog
 {
 public:
 	static FVehicleClassDefinition MakeProvisionalPassengerCar();

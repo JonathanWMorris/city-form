@@ -76,6 +76,12 @@ The Unreal presentation layer owns:
 Blueprints are appropriate for visual assembly and configuration. Reusable
 simulation rules and authoritative state belong in C++.
 
+The active city is owned by `UCityFormSimulationSubsystem`, whose game-instance
+lifetime is independent of any loaded map or presentation Actor. Native Unreal
+tools submit typed commands through this subsystem and receive detached
+presentation snapshots. The subsystem does not expose the mutable simulation or
+road graph to Actors or Blueprints.
+
 ## Data Flow
 
 Player-facing tools submit explicit commands rather than mutating simulation
@@ -92,6 +98,12 @@ This boundary should support:
 
 Each milestone should introduce only the commands and read models needed by its
 working vertical slice.
+
+At the Unreal boundary, X and Y coordinates convert explicitly between
+authoritative meters and Unreal centimeters using exactly 100 centimeters per
+meter. Authoritative planar positions return to presentation at ground Z. Road
+graph snapshots contain stable simulation IDs but copy positions and lengths
+into Unreal units; changing or discarding a snapshot cannot alter the city.
 
 ## Identity and Lifetime
 

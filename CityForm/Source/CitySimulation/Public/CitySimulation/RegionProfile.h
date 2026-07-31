@@ -8,7 +8,7 @@
 namespace CityForm::Simulation
 {
 
-struct FRegionProfile
+struct CITYSIMULATION_API FRegionProfile
 {
 	FString Identifier = TEXT("US-CA");
 	double BasicTwoWayRoadDefaultSpeedLimitMetersPerSecond = 11.176;
