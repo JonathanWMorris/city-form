@@ -143,6 +143,11 @@ through one global authoritative model. Visual culling and interpolation may
 scale independently, but camera position and loaded regions never change
 traffic fidelity.
 
+The prototype's finite ground also preserves the contract for future
+procedurally extensible and community-authored maps. Seeded terrain generation,
+tile acquisition, and regional outside connections are not v0.1 features; their
+accepted direction is documented in [Map Foundation](map-foundation.md).
+
 One million persistent citizens is a long-term design and benchmark target. It
 does not change the v0.1 population criterion and does not imply one million
 simultaneous vehicles.

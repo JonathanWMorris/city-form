@@ -8,8 +8,9 @@ inspectable, scalable, and enjoyable to control.
 > City Form has completed its headless Stage 2 road graph and routing
 > foundation. `CitySimulation` supports validated regional road defaults,
 > logical topology, millisecond time, and vehicle-aware time-dependent A*, but
-> no custom levels, traffic progression, interactive road tools, or custom
-> assets exist yet.
+> traffic progression, interactive road tools, and custom gameplay assets do
+> not exist yet. Stage 3 now has a project-owned flat prototype map and awaits
+> its city-builder camera.
 
 ## Vision
 
@@ -79,6 +80,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [v0.1 Product Scope](docs/product-scope.md) | Included features, non-goals, and definition of done |
 | [Domain Model](docs/domain-model.md) | Shared vocabulary, ownership, and entity relationships |
 | [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
+| [Map Foundation](docs/map-foundation.md) | Prototype coordinates and future extensible-world contract |
 | [Simulation Foundation](docs/simulation-foundation.md) | Current APIs and planned routing contract |
 | [Traffic Model](docs/traffic-model.md) | Global microscopic traffic, prediction, and future incidents |
 | [Gameplay Pacing](docs/gameplay-pacing.md) | Accelerated calendar and ideal construction targets |
@@ -97,6 +99,7 @@ proposals before accepted decisions are reflected here.
 CityForm/
 ├── Build/Mac/Resources/   # Unreal-generated macOS project resources
 ├── Config/                # Initial Unreal project configuration
+├── Content/Maps/          # Project-owned Unreal levels
 ├── Source/CityForm/       # Unreal presentation and gameplay module
 ├── Source/CitySimulation/ # Headless authoritative simulation module
 ├── Source/*.Target.cs     # Game and editor build targets
