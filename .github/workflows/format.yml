@@ -1,0 +1,38 @@
+name: C++ formatting
+
+on:
+  pull_request:
+    paths:
+      - ".clang-format"
+      - ".github/workflows/format.yml"
+      - "CityForm/Source/**/*.cpp"
+      - "CityForm/Source/**/*.h"
+  push:
+    branches:
+      - main
+    paths:
+      - ".clang-format"
+      - ".github/workflows/format.yml"
+      - "CityForm/Source/**/*.cpp"
+      - "CityForm/Source/**/*.h"
+
+permissions:
+  contents: read
+
+jobs:
+  clang-format:
+    name: clang-format 17
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Verify formatter version
+        run: clang-format-17 --version
+
+      - name: Check C++ formatting
+        run: >-
+          git ls-files -z -- 'CityForm/Source/**/*.h' 'CityForm/Source/**/*.cpp'
+          | xargs -0 -r clang-format-17 --dry-run --Werror

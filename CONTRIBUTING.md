@@ -112,8 +112,24 @@ the current milestone while preserving the documented boundaries.
 - Include enough context in validation failures and logs to identify the
   affected record and invariant.
 
-Automated formatting is not yet configured. Match the surrounding code and
-avoid reformatting unrelated files.
+The repository uses clang-format 17. Format all tracked C++ files from the
+repository root on macOS with:
+
+```sh
+git ls-files -z -- 'CityForm/Source/**/*.h' 'CityForm/Source/**/*.cpp' | \
+  xargs -0 xcrun clang-format -i
+```
+
+Check formatting without modifying files with:
+
+```sh
+git ls-files -z -- 'CityForm/Source/**/*.h' 'CityForm/Source/**/*.cpp' | \
+  xargs -0 xcrun clang-format --dry-run --Werror
+```
+
+Linux contributors and CI should use `clang-format-17` in place of
+`xcrun clang-format`. Pull requests run the same non-mutating check. Keep
+format-only changes separate from behavioral changes when practical.
 
 ## Testing
 
