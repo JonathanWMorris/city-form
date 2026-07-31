@@ -116,6 +116,10 @@ public:
 		FRoadNodeId EndpointB,
 		FRoadSegmentDefinition Definition,
 		const FRoadTypeCatalog& RoadTypes);
+	/**
+	 * Validates both endpoints and the segment before allocating any records.
+	 * A failed result leaves nodes, segments, indexes, adjacency, and ID allocators unchanged.
+	 */
 	FCreateRoadSegmentResult CreateRoadSegment(FRoadEndpointInput EndpointA,
 		FRoadEndpointInput EndpointB,
 		FRoadSegmentDefinition Definition,

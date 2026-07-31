@@ -65,6 +65,12 @@ struct CITYSIMULATION_API FTraversalCostResult
 	static FTraversalCostResult Failure(ERouteErrorCode Code, FString Message);
 };
 
+/**
+ * Supplies traversal durations at the instant a vehicle enters an edge.
+ * Successful costs must be non-negative and errors must include a typed reason;
+ * Prohibited means that the edge is unavailable without invalidating the query.
+ * Time-dependent A* accepts only providers whose arrival function is FIFO.
+ */
 class CITYSIMULATION_API ITraversalCostProvider
 {
 public:
@@ -131,6 +137,11 @@ struct FRouteResult
 class CITYSIMULATION_API FTimeDependentRouter
 {
 public:
+	/**
+	 * Finds the earliest-arrival route for Query.DepartureInstant.
+	 * Traversal costs are evaluated at each predicted edge-entry instant, and
+	 * equal-cost choices resolve deterministically from stable graph IDs.
+	 */
 	static FRouteResult FindRoute(const FRoadGraph& Graph,
 		const FRoadTypeCatalog& RoadTypes,
 		const FVehicleClassCatalog& VehicleClasses,

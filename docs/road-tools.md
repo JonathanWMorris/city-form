@@ -26,6 +26,11 @@ upper layer contains concrete tools for the open category. Unimplemented
 categories are not shown. The road symbol is composed from source-defined UMG
 shapes rather than editor-only icons or binary artwork.
 
+The 720-pixel-wide dock stays bottom-center, 24 pixels above the viewport edge.
+Its root container changes from 118 pixels high when closed to 190 pixels high
+when the Roads tray is open; opening the tray does not resize or reposition the
+viewport slot. This keeps both layers visible across editor viewport sizes.
+
 ## Simulation Boundary
 
 The first click changes only transient presentation state. The second click

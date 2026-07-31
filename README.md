@@ -15,6 +15,15 @@ inspectable, scalable, and enjoyable to control.
 > snapping, live preview, and persistent placeholder roads rebuilt from
 > detached logical-graph snapshots.
 
+## Current Focus
+
+Development is moving into
+[Stage 5: Parcels, Zoning, and Development](https://github.com/JonathanWMorris/city-form/issues/30).
+The next implementation packet is
+[deterministic roadside parcel generation](https://github.com/JonathanWMorris/city-form/issues/31).
+GitHub issues are the task-level todo list; this repository documentation
+records accepted behavior, architecture, and milestone outcomes.
+
 ## Vision
 
 The first meaningful gameplay loop is intentionally focused:
