@@ -9,9 +9,9 @@ inspectable, scalable, and enjoyable to control.
 > foundation. `CitySimulation` supports validated regional road defaults,
 > logical topology, millisecond time, and vehicle-aware time-dependent A*, but
 > traffic progression, interactive road tools, and city content do not exist
-> yet. Stage 3 now has a project-owned flat prototype map and a C++ city-builder
-> camera; final hands-on navigation verification remains before the
-> prototype-environment stage is complete.
+> yet. Stage 3 is complete with a project-owned flat prototype map and verified
+> C++ city-builder camera. Stage 4 begins with the Unreal-to-simulation bridge
+> required by interactive road creation.
 
 ## Vision
 
