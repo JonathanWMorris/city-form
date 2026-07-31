@@ -13,7 +13,7 @@
 namespace CityForm::Simulation
 {
 
-struct FSimPoint2D
+struct CITYSIMULATION_API FSimPoint2D
 {
 	double X = 0.0;
 	double Y = 0.0;
@@ -78,7 +78,7 @@ struct FAddRoadSegmentResult
 	}
 };
 
-class FRoadGraph
+class CITYSIMULATION_API FRoadGraph
 {
 public:
 	static constexpr double LengthValidationToleranceMeters = 1.0e-9;

@@ -10,8 +10,9 @@ inspectable, scalable, and enjoyable to control.
 > logical topology, millisecond time, and vehicle-aware time-dependent A*, but
 > traffic progression, interactive road tools, and city content do not exist
 > yet. Stage 3 is complete with a project-owned flat prototype map and verified
-> C++ city-builder camera. Stage 4 begins with the Unreal-to-simulation bridge
-> required by interactive road creation.
+> C++ city-builder camera. Stage 4 is underway with a game-instance-owned
+> Unreal-to-simulation bridge, explicit unit conversion, and detached road graph
+> snapshots ready for interactive road creation.
 
 ## Vision
 

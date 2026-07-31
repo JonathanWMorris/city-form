@@ -40,7 +40,7 @@ struct FCitySummary
 	}
 };
 
-class FCitySimulation
+class CITYSIMULATION_API FCitySimulation
 {
 public:
 	explicit FCitySimulation(FSimulationConfig InConfig);

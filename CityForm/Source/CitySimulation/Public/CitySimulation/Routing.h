@@ -45,7 +45,7 @@ enum class ETraversalCostStatus : uint8
 	Error
 };
 
-struct FTraversalCostResult
+struct CITYSIMULATION_API FTraversalCostResult
 {
 	FSimulationDuration Duration;
 	ETraversalCostStatus Status = ETraversalCostStatus::Success;
@@ -67,7 +67,7 @@ struct FTraversalCostResult
 		FString Message);
 };
 
-class ITraversalCostProvider
+class CITYSIMULATION_API ITraversalCostProvider
 {
 public:
 	virtual ~ITraversalCostProvider() = default;
@@ -81,7 +81,7 @@ public:
 		const FVehicleClassDefinition& VehicleClass) const = 0;
 };
 
-class FFreeFlowTraversalCostProvider final : public ITraversalCostProvider
+class CITYSIMULATION_API FFreeFlowTraversalCostProvider final : public ITraversalCostProvider
 {
 public:
 	virtual bool GuaranteesFifo() const override;
@@ -133,7 +133,7 @@ struct FRouteResult
 	}
 };
 
-class FTimeDependentRouter
+class CITYSIMULATION_API FTimeDependentRouter
 {
 public:
 	static FRouteResult FindRoute(

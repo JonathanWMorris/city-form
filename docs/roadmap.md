@@ -92,8 +92,12 @@ regional gateways, and production-scale streaming remain future work.
 
 ## Stage 4: Interactive Roads
 
+Status: In progress
+
 Deliver:
 
+- A game-instance-owned bridge between Unreal and the authoritative simulation
+- Explicit meter-to-centimeter conversion and detached road graph snapshots
 - Ground raycasting from the player cursor
 - Two-click road-segment creation and a live preview
 - Translation from player input into simulation road commands
