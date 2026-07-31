@@ -3,6 +3,7 @@
 Thumbs.db
 
 # IDE and generated project files
+.codex/
 .vs/
 .idea/
 .vscode/
