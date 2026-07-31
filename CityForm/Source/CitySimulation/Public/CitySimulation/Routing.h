@@ -62,19 +62,22 @@ struct CITYSIMULATION_API FTraversalCostResult
 	}
 
 	static FTraversalCostResult Prohibited();
-	static FTraversalCostResult Failure(
-		ERouteErrorCode Code,
-		FString Message);
+	static FTraversalCostResult Failure(ERouteErrorCode Code, FString Message);
 };
 
+/**
+ * Supplies traversal durations at the instant a vehicle enters an edge.
+ * Successful costs must be non-negative and errors must include a typed reason;
+ * Prohibited means that the edge is unavailable without invalidating the query.
+ * Time-dependent A* accepts only providers whose arrival function is FIFO.
+ */
 class CITYSIMULATION_API ITraversalCostProvider
 {
 public:
 	virtual ~ITraversalCostProvider() = default;
 
 	virtual bool GuaranteesFifo() const = 0;
-	virtual FTraversalCostResult Evaluate(
-		const FRoadGraph& Graph,
+	virtual FTraversalCostResult Evaluate(const FRoadGraph& Graph,
 		const FRoadTypeCatalog& RoadTypes,
 		const FRoadTraversal& Traversal,
 		FSimulationInstant EntryInstant,
@@ -85,8 +88,7 @@ class CITYSIMULATION_API FFreeFlowTraversalCostProvider final : public ITraversa
 {
 public:
 	virtual bool GuaranteesFifo() const override;
-	virtual FTraversalCostResult Evaluate(
-		const FRoadGraph& Graph,
+	virtual FTraversalCostResult Evaluate(const FRoadGraph& Graph,
 		const FRoadTypeCatalog& RoadTypes,
 		const FRoadTraversal& Traversal,
 		FSimulationInstant EntryInstant,
@@ -101,8 +103,7 @@ enum class ERouteHeuristicMode : uint8
 
 struct FRouteOptions
 {
-	ERouteHeuristicMode HeuristicMode =
-		ERouteHeuristicMode::VehicleSpeedLowerBound;
+	ERouteHeuristicMode HeuristicMode = ERouteHeuristicMode::VehicleSpeedLowerBound;
 };
 
 struct FRouteQuery
@@ -136,8 +137,12 @@ struct FRouteResult
 class CITYSIMULATION_API FTimeDependentRouter
 {
 public:
-	static FRouteResult FindRoute(
-		const FRoadGraph& Graph,
+	/**
+	 * Finds the earliest-arrival route for Query.DepartureInstant.
+	 * Traversal costs are evaluated at each predicted edge-entry instant, and
+	 * equal-cost choices resolve deterministically from stable graph IDs.
+	 */
+	static FRouteResult FindRoute(const FRoadGraph& Graph,
 		const FRoadTypeCatalog& RoadTypes,
 		const FVehicleClassCatalog& VehicleClasses,
 		const FRouteQuery& Query,

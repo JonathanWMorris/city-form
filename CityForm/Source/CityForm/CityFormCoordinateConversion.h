@@ -10,9 +10,7 @@ struct CITYFORM_API FCityFormCoordinateConversion
 {
 	static constexpr double UnrealCentimetersPerSimulationMeter = 100.0;
 
-	static CityForm::Simulation::FSimPoint2D ToSimulationMeters(
-		const FVector& UnrealPositionCentimeters);
-	static FVector ToUnrealCentimeters(
-		CityForm::Simulation::FSimPoint2D SimulationPositionMeters);
+	static CityForm::Simulation::FSimPoint2D ToSimulationMeters(const FVector& UnrealPositionCentimeters);
+	static FVector ToUnrealCentimeters(CityForm::Simulation::FSimPoint2D SimulationPositionMeters);
 	static double ToUnrealCentimeters(double SimulationDistanceMeters);
 };

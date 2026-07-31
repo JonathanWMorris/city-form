@@ -12,8 +12,7 @@ class CITYSIMULATION_API FSimulationDuration
 public:
 	constexpr FSimulationDuration() = default;
 
-	explicit constexpr FSimulationDuration(const int64 InMilliseconds)
-		: Milliseconds(InMilliseconds)
+	explicit constexpr FSimulationDuration(const int64 InMilliseconds) : Milliseconds(InMilliseconds)
 	{
 	}
 
@@ -22,16 +21,12 @@ public:
 		return Milliseconds;
 	}
 
-	friend constexpr bool operator==(
-		const FSimulationDuration Left,
-		const FSimulationDuration Right)
+	friend constexpr bool operator==(const FSimulationDuration Left, const FSimulationDuration Right)
 	{
 		return Left.Milliseconds == Right.Milliseconds;
 	}
 
-	friend constexpr bool operator<(
-		const FSimulationDuration Left,
-		const FSimulationDuration Right)
+	friend constexpr bool operator<(const FSimulationDuration Left, const FSimulationDuration Right)
 	{
 		return Left.Milliseconds < Right.Milliseconds;
 	}
@@ -55,16 +50,12 @@ public:
 		return MillisecondsSinceStart;
 	}
 
-	friend constexpr bool operator==(
-		const FSimulationInstant Left,
-		const FSimulationInstant Right)
+	friend constexpr bool operator==(const FSimulationInstant Left, const FSimulationInstant Right)
 	{
 		return Left.MillisecondsSinceStart == Right.MillisecondsSinceStart;
 	}
 
-	friend constexpr bool operator<(
-		const FSimulationInstant Left,
-		const FSimulationInstant Right)
+	friend constexpr bool operator<(const FSimulationInstant Left, const FSimulationInstant Right)
 	{
 		return Left.MillisecondsSinceStart < Right.MillisecondsSinceStart;
 	}
@@ -85,8 +76,7 @@ struct FSimulationInstantResult
 };
 
 CITYSIMULATION_API FSimulationInstantResult AddSimulationDuration(
-	FSimulationInstant Instant,
-	FSimulationDuration Duration);
+	FSimulationInstant Instant, FSimulationDuration Duration);
 
 class CITYSIMULATION_API FSimulationClock
 {

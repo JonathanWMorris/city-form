@@ -6,9 +6,7 @@ namespace CityForm::Simulation
 {
 
 FCitySimulation::FCitySimulation(const FSimulationConfig InConfig)
-	: Config(InConfig)
-	, Random(InConfig.Seed)
-	, RoadTypes(InConfig.RegionProfile)
+	: Config(InConfig), Random(InConfig.Seed), RoadTypes(InConfig.RegionProfile)
 {
 }
 
@@ -53,38 +51,21 @@ FAddRoadNodeResult FCitySimulation::AddRoadNode(const FSimPoint2D PositionMeters
 }
 
 FAddRoadSegmentResult FCitySimulation::AddRoadSegment(
-	const FRoadNodeId EndpointA,
-	const FRoadNodeId EndpointB,
-	FRoadSegmentDefinition Definition)
+	const FRoadNodeId EndpointA, const FRoadNodeId EndpointB, FRoadSegmentDefinition Definition)
 {
-	return RoadGraph.AddRoadSegment(
-		EndpointA,
-		EndpointB,
-		MoveTemp(Definition),
-		RoadTypes);
+	return RoadGraph.AddRoadSegment(EndpointA, EndpointB, MoveTemp(Definition), RoadTypes);
 }
 
 FCreateRoadSegmentResult FCitySimulation::CreateRoadSegment(
-	FRoadEndpointInput EndpointA,
-	FRoadEndpointInput EndpointB,
-	FRoadSegmentDefinition Definition)
+	FRoadEndpointInput EndpointA, FRoadEndpointInput EndpointB, FRoadSegmentDefinition Definition)
 {
-	return RoadGraph.CreateRoadSegment(
-		MoveTemp(EndpointA),
-		MoveTemp(EndpointB),
-		MoveTemp(Definition),
-		RoadTypes);
+	return RoadGraph.CreateRoadSegment(MoveTemp(EndpointA), MoveTemp(EndpointB), MoveTemp(Definition), RoadTypes);
 }
 
 FRouteResult FCitySimulation::FindRoute(const FRouteQuery& Query) const
 {
 	const FFreeFlowTraversalCostProvider CostProvider;
-	return FTimeDependentRouter::FindRoute(
-		RoadGraph,
-		RoadTypes,
-		VehicleClasses,
-		Query,
-		CostProvider);
+	return FTimeDependentRouter::FindRoute(RoadGraph, RoadTypes, VehicleClasses, Query, CostProvider);
 }
 
 FValidationReport FCitySimulation::Validate() const
@@ -92,8 +73,7 @@ FValidationReport FCitySimulation::Validate() const
 	FValidationReport Report;
 	if (Clock.GetCurrentInstant().GetMillisecondsSinceStart() < 0)
 	{
-		Report.Add({
-			EValidationSeverity::Error,
+		Report.Add({EValidationSeverity::Error,
 			EValidationIssueCode::NegativeSimulationTime,
 			TEXT("SimulationTime"),
 			0,
@@ -109,8 +89,7 @@ FValidationReport FCitySimulation::Validate() const
 
 FCitySummary FCitySimulation::GetSummary() const
 {
-	return {
-		Config.Seed,
+	return {Config.Seed,
 		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
 		VehicleClasses.GetDefinitions().Num(),
 		RoadTypes.GetDefinitions().Num(),

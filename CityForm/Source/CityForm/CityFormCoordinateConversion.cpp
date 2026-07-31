@@ -4,25 +4,20 @@
 
 using CityForm::Simulation::FSimPoint2D;
 
-FSimPoint2D FCityFormCoordinateConversion::ToSimulationMeters(
-	const FVector& UnrealPositionCentimeters)
+FSimPoint2D FCityFormCoordinateConversion::ToSimulationMeters(const FVector& UnrealPositionCentimeters)
 {
-	return {
-		UnrealPositionCentimeters.X / UnrealCentimetersPerSimulationMeter,
+	return {UnrealPositionCentimeters.X / UnrealCentimetersPerSimulationMeter,
 		UnrealPositionCentimeters.Y / UnrealCentimetersPerSimulationMeter};
 }
 
-FVector FCityFormCoordinateConversion::ToUnrealCentimeters(
-	const FSimPoint2D SimulationPositionMeters)
+FVector FCityFormCoordinateConversion::ToUnrealCentimeters(const FSimPoint2D SimulationPositionMeters)
 {
-	return {
-		SimulationPositionMeters.X * UnrealCentimetersPerSimulationMeter,
+	return {SimulationPositionMeters.X * UnrealCentimetersPerSimulationMeter,
 		SimulationPositionMeters.Y * UnrealCentimetersPerSimulationMeter,
 		0.0};
 }
 
-double FCityFormCoordinateConversion::ToUnrealCentimeters(
-	const double SimulationDistanceMeters)
+double FCityFormCoordinateConversion::ToUnrealCentimeters(const double SimulationDistanceMeters)
 {
 	return SimulationDistanceMeters * UnrealCentimetersPerSimulationMeter;
 }

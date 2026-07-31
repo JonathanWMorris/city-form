@@ -14,14 +14,12 @@ FRoadTypeId FRoadTypeCatalog::GetBasicTwoWayRoadTypeId()
 
 FRoadTypeDefinition FRoadTypeCatalog::MakeBasicTwoWayRoad(const FRegionProfile& RegionProfile)
 {
-	return {
-		GetBasicTwoWayRoadTypeId(),
+	return {GetBasicTwoWayRoadTypeId(),
 		TEXT("BasicTwoWayRoad"),
 		RegionProfile.BasicTwoWayRoadDefaultSpeedLimitMetersPerSecond};
 }
 
-FRoadTypeCatalog::FRoadTypeCatalog()
-	: FRoadTypeCatalog(FRegionProfile::MakeCalifornia())
+FRoadTypeCatalog::FRoadTypeCatalog() : FRoadTypeCatalog(FRegionProfile::MakeCalifornia())
 {
 }
 
@@ -30,8 +28,7 @@ FRoadTypeCatalog::FRoadTypeCatalog(const FRegionProfile& RegionProfile)
 	Definitions.Add(MakeBasicTwoWayRoad(RegionProfile));
 }
 
-FRoadTypeCatalog::FRoadTypeCatalog(TArray<FRoadTypeDefinition> InDefinitions)
-	: Definitions(MoveTemp(InDefinitions))
+FRoadTypeCatalog::FRoadTypeCatalog(TArray<FRoadTypeDefinition> InDefinitions) : Definitions(MoveTemp(InDefinitions))
 {
 }
 
@@ -54,26 +51,22 @@ const TArray<FRoadTypeDefinition>& FRoadTypeCatalog::GetDefinitions() const
 }
 
 FRoadSpeedLimitResult FRoadTypeCatalog::ResolveSpeedLimit(
-	const FRoadTypeId RoadTypeId,
-	const TOptional<double>& OverrideMetersPerSecond) const
+	const FRoadTypeId RoadTypeId, const TOptional<double>& OverrideMetersPerSecond) const
 {
 	const FRoadTypeDefinition* Definition = Find(RoadTypeId);
 	if (Definition == nullptr)
 	{
-		return {
-			0.0,
-			{ESimulationErrorCode::InvalidRoadType, TEXT("The road type does not exist in this city.")}};
+		return {0.0, {ESimulationErrorCode::InvalidRoadType, TEXT("The road type does not exist in this city.")}};
 	}
 
-	const double SpeedLimit = OverrideMetersPerSecond.IsSet()
-		? OverrideMetersPerSecond.GetValue()
-		: Definition->DefaultSpeedLimitMetersPerSecond;
+	const double SpeedLimit = OverrideMetersPerSecond.IsSet() ? OverrideMetersPerSecond.GetValue()
+															  : Definition->DefaultSpeedLimitMetersPerSecond;
 
 	if (!std::isfinite(SpeedLimit) || SpeedLimit <= 0.0)
 	{
-		return {
-			0.0,
-			{ESimulationErrorCode::InvalidSpeedLimit, TEXT("A road speed limit must be finite and greater than zero.")}};
+		return {0.0,
+			{ESimulationErrorCode::InvalidSpeedLimit,
+				TEXT("A road speed limit must be finite and greater than zero.")}};
 	}
 
 	return {SpeedLimit, {}};
@@ -89,8 +82,7 @@ FValidationReport FRoadTypeCatalog::Validate() const
 
 		if (!Definition.Id.IsValid())
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::InvalidRoadTypeId,
 				TEXT("RoadType"),
 				0,
@@ -99,8 +91,7 @@ FValidationReport FRoadTypeCatalog::Validate() const
 
 		if (Definition.Key.IsEmpty())
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::EmptyRoadTypeKey,
 				TEXT("RoadType"),
 				Definition.Id.GetValue(),
@@ -109,8 +100,7 @@ FValidationReport FRoadTypeCatalog::Validate() const
 
 		if (!std::isfinite(Definition.DefaultSpeedLimitMetersPerSecond))
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::NonFiniteRoadTypeValue,
 				TEXT("RoadType"),
 				Definition.Id.GetValue(),
@@ -118,8 +108,7 @@ FValidationReport FRoadTypeCatalog::Validate() const
 		}
 		else if (Definition.DefaultSpeedLimitMetersPerSecond <= 0.0)
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::NonPositiveRoadTypeValue,
 				TEXT("RoadType"),
 				Definition.Id.GetValue(),
@@ -131,8 +120,7 @@ FValidationReport FRoadTypeCatalog::Validate() const
 			const FRoadTypeDefinition& EarlierDefinition = Definitions[EarlierIndex];
 			if (EarlierDefinition.Id == Definition.Id)
 			{
-				Report.Add({
-					EValidationSeverity::Error,
+				Report.Add({EValidationSeverity::Error,
 					EValidationIssueCode::DuplicateRoadTypeId,
 					TEXT("RoadType"),
 					Definition.Id.GetValue(),
@@ -145,8 +133,7 @@ FValidationReport FRoadTypeCatalog::Validate() const
 		{
 			if (Definitions[EarlierIndex].Key == Definition.Key)
 			{
-				Report.Add({
-					EValidationSeverity::Error,
+				Report.Add({EValidationSeverity::Error,
 					EValidationIssueCode::DuplicateRoadTypeKey,
 					TEXT("RoadType"),
 					Definition.Id.GetValue(),

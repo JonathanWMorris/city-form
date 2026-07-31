@@ -14,11 +14,7 @@ double DistanceBetween(const FSimPoint2D& Left, const FSimPoint2D& Right)
 	return std::hypot(Right.X - Left.X, Right.Y - Left.Y);
 }
 
-void OrderEndpoints(
-	const FRoadNodeId First,
-	const FRoadNodeId Second,
-	FRoadNodeId& Lower,
-	FRoadNodeId& Higher)
+void OrderEndpoints(const FRoadNodeId First, const FRoadNodeId Second, FRoadNodeId& Lower, FRoadNodeId& Higher)
 {
 	if (Second < First)
 	{
@@ -32,8 +28,7 @@ void OrderEndpoints(
 	}
 }
 
-bool HasConnection(
-	const TMap<FRoadNodeId, TMap<FRoadNodeId, FRoadSegmentId>>& Connections,
+bool HasConnection(const TMap<FRoadNodeId, TMap<FRoadNodeId, FRoadSegmentId>>& Connections,
 	const FRoadNodeId First,
 	const FRoadNodeId Second)
 {
@@ -45,8 +40,7 @@ bool HasConnection(
 	return ConnectionsFromLower != nullptr && ConnectionsFromLower->Contains(Higher);
 }
 
-void AddConnection(
-	TMap<FRoadNodeId, TMap<FRoadNodeId, FRoadSegmentId>>& Connections,
+void AddConnection(TMap<FRoadNodeId, TMap<FRoadNodeId, FRoadSegmentId>>& Connections,
 	const FRoadNodeId First,
 	const FRoadNodeId Second,
 	const FRoadSegmentId SegmentId)
@@ -68,8 +62,7 @@ FAddRoadNodeResult FRoadGraph::AddRoadNode(const FSimPoint2D PositionMeters)
 {
 	if (!PositionMeters.IsFinite())
 	{
-		return {
-			FRoadNodeId(),
+		return {FRoadNodeId(),
 			{ESimulationErrorCode::NonFiniteRoadPosition, TEXT("Road-node coordinates must be finite.")}};
 	}
 
@@ -86,8 +79,7 @@ FAddRoadNodeResult FRoadGraph::AddRoadNode(const FSimPoint2D PositionMeters)
 	return {Allocation.Id, {}};
 }
 
-FAddRoadSegmentResult FRoadGraph::AddRoadSegment(
-	const FRoadNodeId EndpointA,
+FAddRoadSegmentResult FRoadGraph::AddRoadSegment(const FRoadNodeId EndpointA,
 	const FRoadNodeId EndpointB,
 	FRoadSegmentDefinition Definition,
 	const FRoadTypeCatalog& RoadTypes)
@@ -96,21 +88,19 @@ FAddRoadSegmentResult FRoadGraph::AddRoadSegment(
 	const FRoadNode* NodeB = FindNode(EndpointB);
 	if (NodeA == nullptr || NodeB == nullptr)
 	{
-		return {
-			FRoadSegmentId(),
-			{ESimulationErrorCode::InvalidRoadNode, TEXT("Both road-segment endpoints must reference existing nodes.")}};
+		return {FRoadSegmentId(),
+			{ESimulationErrorCode::InvalidRoadNode,
+				TEXT("Both road-segment endpoints must reference existing nodes.")}};
 	}
 
 	if (EndpointA == EndpointB)
 	{
-		return {
-			FRoadSegmentId(),
+		return {FRoadSegmentId(),
 			{ESimulationErrorCode::SameRoadEndpoint, TEXT("A road segment must connect two distinct nodes.")}};
 	}
 
-	const FRoadSpeedLimitResult SpeedLimit = RoadTypes.ResolveSpeedLimit(
-		Definition.RoadTypeId,
-		Definition.SpeedLimitOverrideMetersPerSecond);
+	const FRoadSpeedLimitResult SpeedLimit =
+		RoadTypes.ResolveSpeedLimit(Definition.RoadTypeId, Definition.SpeedLimitOverrideMetersPerSecond);
 	if (!SpeedLimit.IsSuccess())
 	{
 		return {FRoadSegmentId(), SpeedLimit.Error};
@@ -119,16 +109,15 @@ FAddRoadSegmentResult FRoadGraph::AddRoadSegment(
 	const double LengthMeters = DistanceBetween(NodeA->PositionMeters, NodeB->PositionMeters);
 	if (!std::isfinite(LengthMeters) || LengthMeters <= 0.0)
 	{
-		return {
-			FRoadSegmentId(),
+		return {FRoadSegmentId(),
 			{ESimulationErrorCode::ZeroLengthRoadSegment, TEXT("A road segment must have positive finite length.")}};
 	}
 
 	if (HasConnection(Connections, EndpointA, EndpointB))
 	{
-		return {
-			FRoadSegmentId(),
-			{ESimulationErrorCode::DuplicateRoadConnection, TEXT("A connection already exists between these road nodes.")}};
+		return {FRoadSegmentId(),
+			{ESimulationErrorCode::DuplicateRoadConnection,
+				TEXT("A connection already exists between these road nodes.")}};
 	}
 
 	const TStrongIdAllocationResult<FRoadSegmentId> Allocation = SegmentIdAllocator.Allocate();
@@ -138,12 +127,7 @@ FAddRoadSegmentResult FRoadGraph::AddRoadSegment(
 	}
 
 	const int32 NewIndex = Segments.Num();
-	Segments.Add({
-		Allocation.Id,
-		EndpointA,
-		EndpointB,
-		MoveTemp(Definition),
-		LengthMeters});
+	Segments.Add({Allocation.Id, EndpointA, EndpointB, MoveTemp(Definition), LengthMeters});
 	SegmentIndexes.Add(Allocation.Id, NewIndex);
 	Adjacency.FindChecked(EndpointA).Add(Allocation.Id);
 	Adjacency.FindChecked(EndpointB).Add(Allocation.Id);
@@ -151,39 +135,44 @@ FAddRoadSegmentResult FRoadGraph::AddRoadSegment(
 	return {Allocation.Id, {}};
 }
 
-FCreateRoadSegmentResult FRoadGraph::CreateRoadSegment(
-	FRoadEndpointInput EndpointA,
+FCreateRoadSegmentResult FRoadGraph::CreateRoadSegment(FRoadEndpointInput EndpointA,
 	FRoadEndpointInput EndpointB,
 	FRoadSegmentDefinition Definition,
 	const FRoadTypeCatalog& RoadTypes)
 {
-	const FRoadNode* ExistingA = EndpointA.ExistingNodeId.IsSet()
-		? FindNode(EndpointA.ExistingNodeId.GetValue())
-		: nullptr;
-	const FRoadNode* ExistingB = EndpointB.ExistingNodeId.IsSet()
-		? FindNode(EndpointB.ExistingNodeId.GetValue())
-		: nullptr;
+	const FRoadNode* ExistingA =
+		EndpointA.ExistingNodeId.IsSet() ? FindNode(EndpointA.ExistingNodeId.GetValue()) : nullptr;
+	const FRoadNode* ExistingB =
+		EndpointB.ExistingNodeId.IsSet() ? FindNode(EndpointB.ExistingNodeId.GetValue()) : nullptr;
 	if ((EndpointA.ExistingNodeId.IsSet() && ExistingA == nullptr) ||
 		(EndpointB.ExistingNodeId.IsSet() && ExistingB == nullptr))
 	{
-		return {{}, {}, {}, {ESimulationErrorCode::InvalidRoadNode, TEXT("Existing road endpoints must reference valid nodes.")}};
+		return {{},
+			{},
+			{},
+			{ESimulationErrorCode::InvalidRoadNode, TEXT("Existing road endpoints must reference valid nodes.")}};
 	}
 
 	const FSimPoint2D PositionA = ExistingA != nullptr ? ExistingA->PositionMeters : EndpointA.PositionMeters;
 	const FSimPoint2D PositionB = ExistingB != nullptr ? ExistingB->PositionMeters : EndpointB.PositionMeters;
 	if (!PositionA.IsFinite() || !PositionB.IsFinite())
 	{
-		return {{}, {}, {}, {ESimulationErrorCode::NonFiniteRoadPosition, TEXT("Road endpoint coordinates must be finite.")}};
+		return {{},
+			{},
+			{},
+			{ESimulationErrorCode::NonFiniteRoadPosition, TEXT("Road endpoint coordinates must be finite.")}};
 	}
 
 	if (ExistingA != nullptr && ExistingB != nullptr && ExistingA->Id == ExistingB->Id)
 	{
-		return {{}, {}, {}, {ESimulationErrorCode::SameRoadEndpoint, TEXT("A road segment must connect two distinct nodes.")}};
+		return {{},
+			{},
+			{},
+			{ESimulationErrorCode::SameRoadEndpoint, TEXT("A road segment must connect two distinct nodes.")}};
 	}
 
-	const FRoadSpeedLimitResult SpeedLimit = RoadTypes.ResolveSpeedLimit(
-		Definition.RoadTypeId,
-		Definition.SpeedLimitOverrideMetersPerSecond);
+	const FRoadSpeedLimitResult SpeedLimit =
+		RoadTypes.ResolveSpeedLimit(Definition.RoadTypeId, Definition.SpeedLimitOverrideMetersPerSecond);
 	if (!SpeedLimit.IsSuccess())
 	{
 		return {{}, {}, {}, SpeedLimit.Error};
@@ -192,12 +181,19 @@ FCreateRoadSegmentResult FRoadGraph::CreateRoadSegment(
 	const double LengthMeters = DistanceBetween(PositionA, PositionB);
 	if (!std::isfinite(LengthMeters) || LengthMeters <= 0.0)
 	{
-		return {{}, {}, {}, {ESimulationErrorCode::ZeroLengthRoadSegment, TEXT("A road segment must have positive finite length.")}};
+		return {{},
+			{},
+			{},
+			{ESimulationErrorCode::ZeroLengthRoadSegment, TEXT("A road segment must have positive finite length.")}};
 	}
 
 	if (ExistingA != nullptr && ExistingB != nullptr && HasConnection(Connections, ExistingA->Id, ExistingB->Id))
 	{
-		return {{}, {}, {}, {ESimulationErrorCode::DuplicateRoadConnection, TEXT("A connection already exists between these road nodes.")}};
+		return {{},
+			{},
+			{},
+			{ESimulationErrorCode::DuplicateRoadConnection,
+				TEXT("A connection already exists between these road nodes.")}};
 	}
 
 	const uint64 NewNodeCount = (ExistingA == nullptr ? 1 : 0) + (ExistingB == nullptr ? 1 : 0);
@@ -275,30 +271,27 @@ TArray<FRoadTraversal> FRoadGraph::GetOutgoingTraversals(const FRoadNodeId NodeI
 			continue;
 		}
 
-		const FRoadNodeId ToNodeId = Segment->EndpointA == NodeId
-			? Segment->EndpointB
-			: Segment->EndpointA;
+		const FRoadNodeId ToNodeId = Segment->EndpointA == NodeId ? Segment->EndpointB : Segment->EndpointA;
 		Traversals.Add({SegmentId, NodeId, ToNodeId});
 	}
 
-	Traversals.Sort([](const FRoadTraversal& Left, const FRoadTraversal& Right)
-	{
-		if (Left.SegmentId != Right.SegmentId)
+	Traversals.Sort(
+		[](const FRoadTraversal& Left, const FRoadTraversal& Right)
 		{
-			return Left.SegmentId < Right.SegmentId;
-		}
-		return Left.ToNodeId < Right.ToNodeId;
-	});
+			if (Left.SegmentId != Right.SegmentId)
+			{
+				return Left.SegmentId < Right.SegmentId;
+			}
+			return Left.ToNodeId < Right.ToNodeId;
+		});
 	return Traversals;
 }
 
 FRoadSpeedLimitResult FRoadGraph::ResolveSpeedLimit(
-	const FRoadSegment& Segment,
-	const FRoadTypeCatalog& RoadTypes) const
+	const FRoadSegment& Segment, const FRoadTypeCatalog& RoadTypes) const
 {
 	return RoadTypes.ResolveSpeedLimit(
-		Segment.Definition.RoadTypeId,
-		Segment.Definition.SpeedLimitOverrideMetersPerSecond);
+		Segment.Definition.RoadTypeId, Segment.Definition.SpeedLimitOverrideMetersPerSecond);
 }
 
 FValidationReport FRoadGraph::Validate(const FRoadTypeCatalog& RoadTypes) const
@@ -306,8 +299,7 @@ FValidationReport FRoadGraph::Validate(const FRoadTypeCatalog& RoadTypes) const
 	return ValidateRecords(Nodes, Segments, RoadTypes);
 }
 
-FValidationReport FRoadGraph::ValidateRecords(
-	const TArray<FRoadNode>& NodesToValidate,
+FValidationReport FRoadGraph::ValidateRecords(const TArray<FRoadNode>& NodesToValidate,
 	const TArray<FRoadSegment>& SegmentsToValidate,
 	const FRoadTypeCatalog& RoadTypes)
 {
@@ -318,8 +310,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 	{
 		if (!Node.Id.IsValid())
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::InvalidRoadNodeId,
 				TEXT("RoadNode"),
 				0,
@@ -327,8 +318,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 		}
 		else if (NodesById.Contains(Node.Id))
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::DuplicateRoadNodeId,
 				TEXT("RoadNode"),
 				Node.Id.GetValue(),
@@ -341,8 +331,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 
 		if (!Node.PositionMeters.IsFinite())
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::NonFiniteRoadPosition,
 				TEXT("RoadNode"),
 				Node.Id.GetValue(),
@@ -356,8 +345,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 	{
 		if (!Segment.Id.IsValid())
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::InvalidRoadSegmentId,
 				TEXT("RoadSegment"),
 				0,
@@ -365,8 +353,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 		}
 		else if (SegmentIds.Contains(Segment.Id))
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::DuplicateRoadSegmentId,
 				TEXT("RoadSegment"),
 				Segment.Id.GetValue(),
@@ -384,8 +371,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 
 		if (NodeA == nullptr || NodeB == nullptr)
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::MissingRoadSegmentEndpoint,
 				TEXT("RoadSegment"),
 				Segment.Id.GetValue(),
@@ -394,8 +380,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 
 		if (Segment.EndpointA == Segment.EndpointB)
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::IdenticalRoadSegmentEndpoints,
 				TEXT("RoadSegment"),
 				Segment.Id.GetValue(),
@@ -405,8 +390,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 		{
 			if (HasConnection(RecordConnections, Segment.EndpointA, Segment.EndpointB))
 			{
-				Report.Add({
-					EValidationSeverity::Error,
+				Report.Add({EValidationSeverity::Error,
 					EValidationIssueCode::DuplicateRoadConnection,
 					TEXT("RoadSegment"),
 					Segment.Id.GetValue(),
@@ -420,8 +404,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 
 		if (RoadTypes.Find(Segment.Definition.RoadTypeId) == nullptr)
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::MissingRoadType,
 				TEXT("RoadSegment"),
 				Segment.Id.GetValue(),
@@ -433,8 +416,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 			const double Override = Segment.Definition.SpeedLimitOverrideMetersPerSecond.GetValue();
 			if (!std::isfinite(Override))
 			{
-				Report.Add({
-					EValidationSeverity::Error,
+				Report.Add({EValidationSeverity::Error,
 					EValidationIssueCode::NonFiniteSpeedLimitOverride,
 					TEXT("RoadSegment"),
 					Segment.Id.GetValue(),
@@ -442,8 +424,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 			}
 			else if (Override <= 0.0)
 			{
-				Report.Add({
-					EValidationSeverity::Error,
+				Report.Add({EValidationSeverity::Error,
 					EValidationIssueCode::NonPositiveSpeedLimitOverride,
 					TEXT("RoadSegment"),
 					Segment.Id.GetValue(),
@@ -453,8 +434,7 @@ FValidationReport FRoadGraph::ValidateRecords(
 
 		if (!std::isfinite(Segment.LengthMeters))
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::NonFiniteRoadSegmentLength,
 				TEXT("RoadSegment"),
 				Segment.Id.GetValue(),
@@ -462,23 +442,21 @@ FValidationReport FRoadGraph::ValidateRecords(
 		}
 		else if (Segment.LengthMeters <= 0.0)
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::NonPositiveRoadSegmentLength,
 				TEXT("RoadSegment"),
 				Segment.Id.GetValue(),
 				TEXT("A road-segment length must be greater than zero.")});
 		}
 
-		if (NodeA != nullptr && NodeB != nullptr &&
-			NodeA->PositionMeters.IsFinite() && NodeB->PositionMeters.IsFinite())
+		if (NodeA != nullptr && NodeB != nullptr && NodeA->PositionMeters.IsFinite() &&
+			NodeB->PositionMeters.IsFinite())
 		{
 			const double ExpectedLength = DistanceBetween(NodeA->PositionMeters, NodeB->PositionMeters);
 			if (ExpectedLength <= 0.0 ||
 				std::fabs(Segment.LengthMeters - ExpectedLength) > LengthValidationToleranceMeters)
 			{
-				Report.Add({
-					EValidationSeverity::Error,
+				Report.Add({EValidationSeverity::Error,
 					EValidationIssueCode::RoadSegmentLengthMismatch,
 					TEXT("RoadSegment"),
 					Segment.Id.GetValue(),

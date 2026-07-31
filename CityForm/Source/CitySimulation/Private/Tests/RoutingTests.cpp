@@ -12,34 +12,23 @@ namespace
 {
 
 constexpr EAutomationTestFlags RoutingTestFlags =
-	EAutomationTestFlags_ApplicationContextMask |
-	EAutomationTestFlags::EngineFilter;
+	EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::EngineFilter;
 
-FRoadNodeId AddNode(
-	FAutomationTestBase& Test,
-	FCitySimulation& City,
-	const double X,
-	const double Y)
+FRoadNodeId AddNode(FAutomationTestBase& Test, FCitySimulation& City, const double X, const double Y)
 {
 	const FAddRoadNodeResult Result = City.AddRoadNode({X, Y});
 	Test.TestTrue(TEXT("Test setup adds a road node."), Result.IsSuccess());
 	return Result.NodeId;
 }
 
-FRoadSegmentId AddSegment(
-	FAutomationTestBase& Test,
+FRoadSegmentId AddSegment(FAutomationTestBase& Test,
 	FCitySimulation& City,
 	const FRoadNodeId From,
 	const FRoadNodeId To,
 	const TOptional<double>& SpeedOverride = {})
 {
-	const FAddRoadSegmentResult Result = City.AddRoadSegment(
-		From,
-		To,
-		{
-			FRoadTypeCatalog::GetBasicTwoWayRoadTypeId(),
-			SpeedOverride
-		});
+	const FAddRoadSegmentResult Result =
+		City.AddRoadSegment(From, To, {FRoadTypeCatalog::GetBasicTwoWayRoadTypeId(), SpeedOverride});
 	Test.TestTrue(TEXT("Test setup adds a road segment."), Result.IsSuccess());
 	return Result.SegmentId;
 }
@@ -47,15 +36,12 @@ FRoadSegmentId AddSegment(
 class FTimeSwitchingCostProvider final : public ITraversalCostProvider
 {
 public:
-	FTimeSwitchingCostProvider(
-		const FRoadSegmentId InEarlyPathFirst,
+	FTimeSwitchingCostProvider(const FRoadSegmentId InEarlyPathFirst,
 		const FRoadSegmentId InEarlyPathSecond,
 		const FRoadSegmentId InStablePathFirst,
 		const FRoadSegmentId InStablePathSecond)
-		: EarlyPathFirst(InEarlyPathFirst)
-		, EarlyPathSecond(InEarlyPathSecond)
-		, StablePathFirst(InStablePathFirst)
-		, StablePathSecond(InStablePathSecond)
+		: EarlyPathFirst(InEarlyPathFirst), EarlyPathSecond(InEarlyPathSecond), StablePathFirst(InStablePathFirst),
+		  StablePathSecond(InStablePathSecond)
 	{
 	}
 
@@ -64,8 +50,7 @@ public:
 		return true;
 	}
 
-	virtual FTraversalCostResult Evaluate(
-		const FRoadGraph&,
+	virtual FTraversalCostResult Evaluate(const FRoadGraph&,
 		const FRoadTypeCatalog&,
 		const FRoadTraversal& Traversal,
 		const FSimulationInstant EntryInstant,
@@ -74,18 +59,13 @@ public:
 		int64 DurationMilliseconds = 0;
 		if (Traversal.SegmentId == EarlyPathFirst)
 		{
-			DurationMilliseconds =
-				EntryInstant.GetMillisecondsSinceStart() < 50000
-					? 10000
-					: 100000;
+			DurationMilliseconds = EntryInstant.GetMillisecondsSinceStart() < 50000 ? 10000 : 100000;
 		}
 		else if (Traversal.SegmentId == EarlyPathSecond)
 		{
 			DurationMilliseconds = 10000;
 		}
-		else if (
-			Traversal.SegmentId == StablePathFirst ||
-			Traversal.SegmentId == StablePathSecond)
+		else if (Traversal.SegmentId == StablePathFirst || Traversal.SegmentId == StablePathSecond)
 		{
 			DurationMilliseconds = 30000;
 		}
@@ -94,10 +74,7 @@ public:
 			return FTraversalCostResult::Prohibited();
 		}
 
-		return {
-			FSimulationDuration(DurationMilliseconds),
-			ETraversalCostStatus::Success,
-			{}};
+		return {FSimulationDuration(DurationMilliseconds), ETraversalCostStatus::Success, {}};
 	}
 
 private:
@@ -119,8 +96,7 @@ enum class EContractProviderBehavior : uint8
 class FContractCostProvider final : public ITraversalCostProvider
 {
 public:
-	explicit FContractCostProvider(const EContractProviderBehavior InBehavior)
-		: Behavior(InBehavior)
+	explicit FContractCostProvider(const EContractProviderBehavior InBehavior) : Behavior(InBehavior)
 	{
 	}
 
@@ -129,8 +105,7 @@ public:
 		return Behavior != EContractProviderBehavior::NonFifo;
 	}
 
-	virtual FTraversalCostResult Evaluate(
-		const FRoadGraph&,
+	virtual FTraversalCostResult Evaluate(const FRoadGraph&,
 		const FRoadTypeCatalog&,
 		const FRoadTraversal&,
 		const FSimulationInstant,
@@ -139,28 +114,16 @@ public:
 		switch (Behavior)
 		{
 		case EContractProviderBehavior::Negative:
-			return {
-				FSimulationDuration(-1),
-				ETraversalCostStatus::Success,
-				{}};
+			return {FSimulationDuration(-1), ETraversalCostStatus::Success, {}};
 		case EContractProviderBehavior::Zero:
-			return {
-				FSimulationDuration(),
-				ETraversalCostStatus::Success,
-				{}};
+			return {FSimulationDuration(), ETraversalCostStatus::Success, {}};
 		case EContractProviderBehavior::Prohibited:
 			return FTraversalCostResult::Prohibited();
 		case EContractProviderBehavior::Overflow:
-			return {
-				FSimulationDuration(10),
-				ETraversalCostStatus::Success,
-				{}};
+			return {FSimulationDuration(10), ETraversalCostStatus::Success, {}};
 		case EContractProviderBehavior::NonFifo:
 		default:
-			return {
-				FSimulationDuration(1),
-				ETraversalCostStatus::Success,
-				{}};
+			return {FSimulationDuration(1), ETraversalCostStatus::Success, {}};
 		}
 	}
 
@@ -181,63 +144,44 @@ bool FRouteQueryTest::RunTest(const FString& Parameters)
 	const FRoadNodeId A = AddNode(*this, City, 0.0, 0.0);
 	const FRoadNodeId B = AddNode(*this, City, 100.0, 0.0);
 	const FRoadNodeId Disconnected = AddNode(*this, City, 200.0, 0.0);
-	const FRoadSegmentId Segment =
-		AddSegment(*this, City, A, B, TOptional<double>(10.0));
+	const FRoadSegmentId Segment = AddSegment(*this, City, A, B, TOptional<double>(10.0));
 
-	const FRouteResult Direct = City.FindRoute(
-		{A, B, FSimulationInstant(1000), FVehicleClassId(1)});
+	const FRouteResult Direct = City.FindRoute({A, B, FSimulationInstant(1000), FVehicleClassId(1)});
 	TestTrue(TEXT("A direct route succeeds."), Direct.IsSuccess());
 	TestEqual(TEXT("A direct route has one traversal."), Direct.Route.Traversals.Num(), 1);
 	TestEqual(TEXT("The direct route uses the segment."), Direct.Route.Traversals[0].SegmentId, Segment);
 	TestEqual(TEXT("A direct route has both endpoint nodes."), Direct.Route.NodeIds.Num(), 2);
 	TestEqual(TEXT("The route distance is measured in meters."), Direct.Route.TotalDistanceMeters, 100.0);
 	TestEqual(
-		TEXT("The route duration uses milliseconds."),
-		Direct.Route.TravelDuration.GetMilliseconds(),
-		int64(10000));
-	TestEqual(
-		TEXT("Arrival includes the departure instant."),
+		TEXT("The route duration uses milliseconds."), Direct.Route.TravelDuration.GetMilliseconds(), int64(10000));
+	TestEqual(TEXT("Arrival includes the departure instant."),
 		Direct.Route.ArrivalInstant.GetMillisecondsSinceStart(),
 		int64(11000));
 
-	const FRouteResult SameNode = City.FindRoute(
-		{A, A, FSimulationInstant(2000), FVehicleClassId(1)});
+	const FRouteResult SameNode = City.FindRoute({A, A, FSimulationInstant(2000), FVehicleClassId(1)});
 	TestTrue(TEXT("A same-node query succeeds."), SameNode.IsSuccess());
 	TestEqual(TEXT("A same-node route has no traversals."), SameNode.Route.Traversals.Num(), 0);
 	TestEqual(TEXT("A same-node route retains its node."), SameNode.Route.NodeIds.Num(), 1);
-	TestEqual(
-		TEXT("A same-node route has zero duration."),
-		SameNode.Route.TravelDuration.GetMilliseconds(),
-		int64(0));
+	TestEqual(TEXT("A same-node route has zero duration."), SameNode.Route.TravelDuration.GetMilliseconds(), int64(0));
 
-	const FRouteResult DisconnectedResult = City.FindRoute(
-		{A, Disconnected, FSimulationInstant(), FVehicleClassId(1)});
-	TestTrue(
-		TEXT("A disconnected query has a stable code."),
+	const FRouteResult DisconnectedResult = City.FindRoute({A, Disconnected, FSimulationInstant(), FVehicleClassId(1)});
+	TestTrue(TEXT("A disconnected query has a stable code."),
 		DisconnectedResult.Error.Code == ERouteErrorCode::Disconnected);
 
-	const FRouteResult InvalidOrigin = City.FindRoute(
-		{FRoadNodeId(999), B, FSimulationInstant(), FVehicleClassId(1)});
-	TestTrue(
-		TEXT("An invalid origin has a stable code."),
-		InvalidOrigin.Error.Code == ERouteErrorCode::InvalidOrigin);
+	const FRouteResult InvalidOrigin = City.FindRoute({FRoadNodeId(999), B, FSimulationInstant(), FVehicleClassId(1)});
+	TestTrue(TEXT("An invalid origin has a stable code."), InvalidOrigin.Error.Code == ERouteErrorCode::InvalidOrigin);
 
-	const FRouteResult InvalidDestination = City.FindRoute(
-		{A, FRoadNodeId(999), FSimulationInstant(), FVehicleClassId(1)});
-	TestTrue(
-		TEXT("An invalid destination has a stable code."),
+	const FRouteResult InvalidDestination =
+		City.FindRoute({A, FRoadNodeId(999), FSimulationInstant(), FVehicleClassId(1)});
+	TestTrue(TEXT("An invalid destination has a stable code."),
 		InvalidDestination.Error.Code == ERouteErrorCode::InvalidDestination);
 
-	const FRouteResult InvalidVehicle = City.FindRoute(
-		{A, B, FSimulationInstant(), FVehicleClassId(999)});
-	TestTrue(
-		TEXT("An invalid VehicleClass has a stable code."),
+	const FRouteResult InvalidVehicle = City.FindRoute({A, B, FSimulationInstant(), FVehicleClassId(999)});
+	TestTrue(TEXT("An invalid VehicleClass has a stable code."),
 		InvalidVehicle.Error.Code == ERouteErrorCode::InvalidVehicleClass);
 
-	const FRouteResult InvalidDeparture = City.FindRoute(
-		{A, B, FSimulationInstant(-1), FVehicleClassId(1)});
-	TestTrue(
-		TEXT("A negative departure has a stable code."),
+	const FRouteResult InvalidDeparture = City.FindRoute({A, B, FSimulationInstant(-1), FVehicleClassId(1)});
+	TestTrue(TEXT("A negative departure has a stable code."),
 		InvalidDeparture.Error.Code == ERouteErrorCode::InvalidDepartureTime);
 	return true;
 }
@@ -262,13 +206,8 @@ bool FRouteOptimalityTest::RunTest(const FString& Parameters)
 	const FFreeFlowTraversalCostProvider Provider;
 	const FRouteQuery Query{A, D, FSimulationInstant(), FVehicleClassId(1)};
 	const FRouteResult AStar = FTimeDependentRouter::FindRoute(
-		City.GetRoadGraph(),
-		City.GetRoadTypes(),
-		City.GetVehicleClasses(),
-		Query,
-		Provider);
-	const FRouteResult Dijkstra = FTimeDependentRouter::FindRoute(
-		City.GetRoadGraph(),
+		City.GetRoadGraph(), City.GetRoadTypes(), City.GetVehicleClasses(), Query, Provider);
+	const FRouteResult Dijkstra = FTimeDependentRouter::FindRoute(City.GetRoadGraph(),
 		City.GetRoadTypes(),
 		City.GetVehicleClasses(),
 		Query,
@@ -280,13 +219,10 @@ bool FRouteOptimalityTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("The optimal route has two segments."), AStar.Route.Traversals.Num(), 2);
 	TestEqual(TEXT("The optimal route begins on AB."), AStar.Route.Traversals[0].SegmentId, AB);
 	TestEqual(TEXT("The optimal route finishes on BD."), AStar.Route.Traversals[1].SegmentId, BD);
-	TestEqual(
-		TEXT("A* and zero-heuristic duration agree."),
+	TestEqual(TEXT("A* and zero-heuristic duration agree."),
 		AStar.Route.TravelDuration.GetMilliseconds(),
 		Dijkstra.Route.TravelDuration.GetMilliseconds());
-	TestTrue(
-		TEXT("A* and zero-heuristic traversals agree."),
-		AStar.Route.Traversals == Dijkstra.Route.Traversals);
+	TestTrue(TEXT("A* and zero-heuristic traversals agree."), AStar.Route.Traversals == Dijkstra.Route.Traversals);
 	return true;
 }
 
@@ -309,8 +245,7 @@ bool FRouteTieBreakingTest::RunTest(const FString& Parameters)
 
 	for (int32 Attempt = 0; Attempt < 3; ++Attempt)
 	{
-		const FRouteResult Route = City.FindRoute(
-			{A, D, FSimulationInstant(), FVehicleClassId(1)});
+		const FRouteResult Route = City.FindRoute({A, D, FSimulationInstant(), FVehicleClassId(1)});
 		TestTrue(TEXT("An equal-cost route succeeds."), Route.IsSuccess());
 		TestEqual(TEXT("The stable route begins on the lowest segment."), Route.Route.Traversals[0].SegmentId, AB);
 		TestEqual(TEXT("The stable destination predecessor wins."), Route.Route.Traversals[1].SegmentId, BD);
@@ -329,10 +264,9 @@ bool FVehicleAwareFreeFlowTest::RunTest(const FString& Parameters)
 	const FRoadNodeId DefaultA = AddNode(*this, DefaultRoadCity, 0.0, 0.0);
 	const FRoadNodeId DefaultB = AddNode(*this, DefaultRoadCity, 100.0, 0.0);
 	AddSegment(*this, DefaultRoadCity, DefaultA, DefaultB);
-	const FRouteResult RegionalDefault = DefaultRoadCity.FindRoute(
-		{DefaultA, DefaultB, FSimulationInstant(), FVehicleClassId(1)});
-	TestEqual(
-		TEXT("The California road default resolves to 8,948 milliseconds."),
+	const FRouteResult RegionalDefault =
+		DefaultRoadCity.FindRoute({DefaultA, DefaultB, FSimulationInstant(), FVehicleClassId(1)});
+	TestEqual(TEXT("The California road default resolves to 8,948 milliseconds."),
 		RegionalDefault.Route.TravelDuration.GetMilliseconds(),
 		int64(8948));
 
@@ -341,29 +275,25 @@ bool FVehicleAwareFreeFlowTest::RunTest(const FString& Parameters)
 	const FRoadNodeId OverrideB = AddNode(*this, OverrideCity, 100.0, 0.0);
 	AddSegment(*this, OverrideCity, OverrideA, OverrideB, TOptional<double>(20.0));
 
-	const FRouteResult PassengerCar = OverrideCity.FindRoute(
-		{OverrideA, OverrideB, FSimulationInstant(), FVehicleClassId(1)});
-	TestEqual(
-		TEXT("The segment speed override affects free-flow cost."),
+	const FRouteResult PassengerCar =
+		OverrideCity.FindRoute({OverrideA, OverrideB, FSimulationInstant(), FVehicleClassId(1)});
+	TestEqual(TEXT("The segment speed override affects free-flow cost."),
 		PassengerCar.Route.TravelDuration.GetMilliseconds(),
 		int64(5000));
 
-	FVehicleClassDefinition SlowDefinition =
-		FVehicleClassCatalog::MakeProvisionalPassengerCar();
+	FVehicleClassDefinition SlowDefinition = FVehicleClassCatalog::MakeProvisionalPassengerCar();
 	SlowDefinition.Id = FVehicleClassId(2);
 	SlowDefinition.MaximumSpeedMetersPerSecond = 5.0;
 	TArray<FVehicleClassDefinition> SlowDefinitions;
 	SlowDefinitions.Add(SlowDefinition);
 	const FVehicleClassCatalog SlowCatalog(MoveTemp(SlowDefinitions));
 	const FFreeFlowTraversalCostProvider Provider;
-	const FRouteResult SlowVehicle = FTimeDependentRouter::FindRoute(
-		OverrideCity.GetRoadGraph(),
+	const FRouteResult SlowVehicle = FTimeDependentRouter::FindRoute(OverrideCity.GetRoadGraph(),
 		OverrideCity.GetRoadTypes(),
 		SlowCatalog,
 		{OverrideA, OverrideB, FSimulationInstant(), FVehicleClassId(2)},
 		Provider);
-	TestEqual(
-		TEXT("Vehicle maximum speed constrains free-flow cost."),
+	TestEqual(TEXT("Vehicle maximum speed constrains free-flow cost."),
 		SlowVehicle.Route.TravelDuration.GetMilliseconds(),
 		int64(20000));
 	return true;
@@ -388,15 +318,13 @@ bool FTimeDependentRouteTest::RunTest(const FString& Parameters)
 
 	const FTimeSwitchingCostProvider Provider(AB, BD, AC, CD);
 	const FRouteOptions ZeroHeuristic{ERouteHeuristicMode::Zero};
-	const FRouteResult Early = FTimeDependentRouter::FindRoute(
-		City.GetRoadGraph(),
+	const FRouteResult Early = FTimeDependentRouter::FindRoute(City.GetRoadGraph(),
 		City.GetRoadTypes(),
 		City.GetVehicleClasses(),
 		{A, D, FSimulationInstant(0), FVehicleClassId(1)},
 		Provider,
 		ZeroHeuristic);
-	const FRouteResult Late = FTimeDependentRouter::FindRoute(
-		City.GetRoadGraph(),
+	const FRouteResult Late = FTimeDependentRouter::FindRoute(City.GetRoadGraph(),
 		City.GetRoadTypes(),
 		City.GetVehicleClasses(),
 		{A, D, FSimulationInstant(60000), FVehicleClassId(1)},
@@ -406,13 +334,8 @@ bool FTimeDependentRouteTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("The early route uses its fast path."), Early.Route.Traversals[0].SegmentId, AB);
 	TestEqual(TEXT("The late route changes to the stable path."), Late.Route.Traversals[0].SegmentId, AC);
 	TestEqual(
-		TEXT("The early route takes twenty seconds."),
-		Early.Route.TravelDuration.GetMilliseconds(),
-		int64(20000));
-	TestEqual(
-		TEXT("The late route takes sixty seconds."),
-		Late.Route.TravelDuration.GetMilliseconds(),
-		int64(60000));
+		TEXT("The early route takes twenty seconds."), Early.Route.TravelDuration.GetMilliseconds(), int64(20000));
+	TestEqual(TEXT("The late route takes sixty seconds."), Late.Route.TravelDuration.GetMilliseconds(), int64(60000));
 	return true;
 }
 
@@ -432,8 +355,7 @@ bool FRouteProviderContractTest::RunTest(const FString& Parameters)
 	const auto RunWith = [&](const EContractProviderBehavior Behavior, const int64 Departure = 0)
 	{
 		const FContractCostProvider Provider(Behavior);
-		return FTimeDependentRouter::FindRoute(
-			City.GetRoadGraph(),
+		return FTimeDependentRouter::FindRoute(City.GetRoadGraph(),
 			City.GetRoadTypes(),
 			City.GetVehicleClasses(),
 			{A, B, FSimulationInstant(Departure), FVehicleClassId(1)},
@@ -441,29 +363,17 @@ bool FRouteProviderContractTest::RunTest(const FString& Parameters)
 			ZeroHeuristic);
 	};
 
-	TestTrue(
-		TEXT("A non-FIFO provider is rejected."),
-		RunWith(EContractProviderBehavior::NonFifo).Error.Code ==
-			ERouteErrorCode::ProviderDoesNotGuaranteeFifo);
-	TestTrue(
-		TEXT("A negative traversal cost is rejected."),
-		RunWith(EContractProviderBehavior::Negative).Error.Code ==
-			ERouteErrorCode::InvalidTraversalCost);
-	const FRouteResult ZeroCost =
-		RunWith(EContractProviderBehavior::Zero);
+	TestTrue(TEXT("A non-FIFO provider is rejected."),
+		RunWith(EContractProviderBehavior::NonFifo).Error.Code == ERouteErrorCode::ProviderDoesNotGuaranteeFifo);
+	TestTrue(TEXT("A negative traversal cost is rejected."),
+		RunWith(EContractProviderBehavior::Negative).Error.Code == ERouteErrorCode::InvalidTraversalCost);
+	const FRouteResult ZeroCost = RunWith(EContractProviderBehavior::Zero);
 	TestTrue(TEXT("A zero traversal cost succeeds."), ZeroCost.IsSuccess());
-	TestEqual(
-		TEXT("A zero traversal cost is accepted."),
-		ZeroCost.Route.TravelDuration.GetMilliseconds(),
-		int64(0));
-	TestTrue(
-		TEXT("A fully prohibited path is distinct from disconnection."),
-		RunWith(EContractProviderBehavior::Prohibited).Error.Code ==
-			ERouteErrorCode::NoPermittedRoute);
-	TestTrue(
-		TEXT("Arrival overflow has a stable route code."),
-		RunWith(EContractProviderBehavior::Overflow, MAX_int64 - 5).Error.Code ==
-			ERouteErrorCode::TimeOverflow);
+	TestEqual(TEXT("A zero traversal cost is accepted."), ZeroCost.Route.TravelDuration.GetMilliseconds(), int64(0));
+	TestTrue(TEXT("A fully prohibited path is distinct from disconnection."),
+		RunWith(EContractProviderBehavior::Prohibited).Error.Code == ERouteErrorCode::NoPermittedRoute);
+	TestTrue(TEXT("Arrival overflow has a stable route code."),
+		RunWith(EContractProviderBehavior::Overflow, MAX_int64 - 5).Error.Code == ERouteErrorCode::TimeOverflow);
 	return true;
 }
 

@@ -11,8 +11,10 @@ implementation details and easily reversible choices do not require an ADR.
 
 - [0001: Core-only CitySimulation module](0001-core-only-simulation-module.md)
 - [0002: Integer time and metric coordinates](0002-time-and-coordinate-model.md)
+  — superseded by ADR 0007
 - [0003: Time-dependent A* routing](0003-time-dependent-a-star-routing.md)
 - [0004: Layered traffic fidelity](0004-layered-traffic-fidelity.md)
+  — superseded by ADR 0008
 - [0005: Shared vehicle-class definitions](0005-vehicle-class-model.md)
 - [0006: Configurable regional defaults with a California baseline](0006-california-regional-defaults.md)
 - [0007: Multi-rate millisecond simulation time](0007-multirate-millisecond-time.md)

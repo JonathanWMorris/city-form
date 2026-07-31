@@ -18,8 +18,7 @@ FValidationReport FRegionProfile::Validate() const
 
 	if (Identifier.IsEmpty())
 	{
-		Report.Add({
-			EValidationSeverity::Error,
+		Report.Add({EValidationSeverity::Error,
 			EValidationIssueCode::EmptyRegionIdentifier,
 			TEXT("RegionProfile"),
 			0,
@@ -28,8 +27,7 @@ FValidationReport FRegionProfile::Validate() const
 
 	if (!std::isfinite(BasicTwoWayRoadDefaultSpeedLimitMetersPerSecond))
 	{
-		Report.Add({
-			EValidationSeverity::Error,
+		Report.Add({EValidationSeverity::Error,
 			EValidationIssueCode::NonFiniteRegionalValue,
 			TEXT("RegionProfile"),
 			0,
@@ -37,8 +35,7 @@ FValidationReport FRegionProfile::Validate() const
 	}
 	else if (BasicTwoWayRoadDefaultSpeedLimitMetersPerSecond <= 0.0)
 	{
-		Report.Add({
-			EValidationSeverity::Error,
+		Report.Add({EValidationSeverity::Error,
 			EValidationIssueCode::NonPositiveRegionalValue,
 			TEXT("RegionProfile"),
 			0,

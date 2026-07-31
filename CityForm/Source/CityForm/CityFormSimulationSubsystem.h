@@ -62,13 +62,18 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	CityForm::Simulation::FCreateRoadSegmentResult CreateRoadSegment(
-		FCityFormRoadEndpointInput EndpointA,
+	CityForm::Simulation::FCreateRoadSegmentResult CreateRoadSegment(FCityFormRoadEndpointInput EndpointA,
 		FCityFormRoadEndpointInput EndpointB,
 		CityForm::Simulation::FRoadSegmentDefinition Definition);
 
+	/** Returns a detached copy whose lifetime and mutations cannot affect authoritative state. */
 	FCityFormRoadGraphSnapshot CreateRoadGraphSnapshot() const;
-	FOnCityFormRoadGraphChanged& OnRoadGraphChanged() { return RoadGraphChanged; }
+
+	/** Broadcasts synchronously after a road command succeeds, never after a rejected command. */
+	FOnCityFormRoadGraphChanged& OnRoadGraphChanged()
+	{
+		return RoadGraphChanged;
+	}
 	CityForm::Simulation::FCitySummary GetCitySummary() const;
 	CityForm::Simulation::FValidationReport ValidateCity() const;
 

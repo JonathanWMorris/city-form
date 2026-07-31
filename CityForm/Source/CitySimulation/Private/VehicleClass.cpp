@@ -10,15 +10,11 @@ namespace
 {
 
 void ValidatePositiveFinite(
-	const FVehicleClassDefinition& Definition,
-	const double Value,
-	const TCHAR* FieldName,
-	FValidationReport& Report)
+	const FVehicleClassDefinition& Definition, const double Value, const TCHAR* FieldName, FValidationReport& Report)
 {
 	if (!std::isfinite(Value))
 	{
-		Report.Add({
-			EValidationSeverity::Error,
+		Report.Add({EValidationSeverity::Error,
 			EValidationIssueCode::NonFiniteVehicleValue,
 			TEXT("VehicleClass"),
 			Definition.Id.GetValue(),
@@ -26,8 +22,7 @@ void ValidatePositiveFinite(
 	}
 	else if (Value <= 0.0)
 	{
-		Report.Add({
-			EValidationSeverity::Error,
+		Report.Add({EValidationSeverity::Error,
 			EValidationIssueCode::NonPositiveVehicleValue,
 			TEXT("VehicleClass"),
 			Definition.Id.GetValue(),
@@ -39,8 +34,7 @@ void ValidatePositiveFinite(
 
 FVehicleClassDefinition FVehicleClassCatalog::MakeProvisionalPassengerCar()
 {
-	return {
-		FVehicleClassId(1),
+	return {FVehicleClassId(1),
 		4.5,
 		1.8,
 		1.5,
@@ -94,8 +88,7 @@ FValidationReport FVehicleClassCatalog::Validate() const
 
 		if (!Definition.Id.IsValid())
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::InvalidVehicleClassId,
 				TEXT("VehicleClass"),
 				0,
@@ -106,8 +99,7 @@ FValidationReport FVehicleClassCatalog::Validate() const
 		{
 			if (Definitions[EarlierIndex].Id == Definition.Id)
 			{
-				Report.Add({
-					EValidationSeverity::Error,
+				Report.Add({EValidationSeverity::Error,
 					EValidationIssueCode::DuplicateVehicleClassId,
 					TEXT("VehicleClass"),
 					Definition.Id.GetValue(),
@@ -120,48 +112,30 @@ FValidationReport FVehicleClassCatalog::Validate() const
 		ValidatePositiveFinite(Definition, Definition.WidthMeters, TEXT("WidthMeters"), Report);
 		ValidatePositiveFinite(Definition, Definition.HeightMeters, TEXT("HeightMeters"), Report);
 		ValidatePositiveFinite(
-			Definition,
-			Definition.EffectiveQueueLengthMeters,
-			TEXT("EffectiveQueueLengthMeters"),
-			Report);
+			Definition, Definition.EffectiveQueueLengthMeters, TEXT("EffectiveQueueLengthMeters"), Report);
 		ValidatePositiveFinite(Definition, Definition.MassKilograms, TEXT("MassKilograms"), Report);
 		ValidatePositiveFinite(
-			Definition,
-			Definition.MaximumSpeedMetersPerSecond,
-			TEXT("MaximumSpeedMetersPerSecond"),
-			Report);
-		ValidatePositiveFinite(
-			Definition,
+			Definition, Definition.MaximumSpeedMetersPerSecond, TEXT("MaximumSpeedMetersPerSecond"), Report);
+		ValidatePositiveFinite(Definition,
 			Definition.MaximumAccelerationMetersPerSecondSquared,
 			TEXT("MaximumAccelerationMetersPerSecondSquared"),
 			Report);
-		ValidatePositiveFinite(
-			Definition,
+		ValidatePositiveFinite(Definition,
 			Definition.ComfortableDecelerationMetersPerSecondSquared,
 			TEXT("ComfortableDecelerationMetersPerSecondSquared"),
 			Report);
-		ValidatePositiveFinite(
-			Definition,
+		ValidatePositiveFinite(Definition,
 			Definition.EmergencyDecelerationMetersPerSecondSquared,
 			TEXT("EmergencyDecelerationMetersPerSecondSquared"),
 			Report);
 		ValidatePositiveFinite(
-			Definition,
-			Definition.MinimumTurningRadiusMeters,
-			TEXT("MinimumTurningRadiusMeters"),
-			Report);
-		ValidatePositiveFinite(
-			Definition,
-			Definition.PassengerCarEquivalent,
-			TEXT("PassengerCarEquivalent"),
-			Report);
+			Definition, Definition.MinimumTurningRadiusMeters, TEXT("MinimumTurningRadiusMeters"), Report);
+		ValidatePositiveFinite(Definition, Definition.PassengerCarEquivalent, TEXT("PassengerCarEquivalent"), Report);
 
-		if (std::isfinite(Definition.EffectiveQueueLengthMeters) &&
-			std::isfinite(Definition.LengthMeters) &&
+		if (std::isfinite(Definition.EffectiveQueueLengthMeters) && std::isfinite(Definition.LengthMeters) &&
 			Definition.EffectiveQueueLengthMeters < Definition.LengthMeters)
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::QueueLengthShorterThanVehicle,
 				TEXT("VehicleClass"),
 				Definition.Id.GetValue(),
@@ -173,8 +147,7 @@ FValidationReport FVehicleClassCatalog::Validate() const
 			Definition.ComfortableDecelerationMetersPerSecondSquared >
 				Definition.EmergencyDecelerationMetersPerSecondSquared)
 		{
-			Report.Add({
-				EValidationSeverity::Error,
+			Report.Add({EValidationSeverity::Error,
 				EValidationIssueCode::ComfortableDecelerationExceedsEmergency,
 				TEXT("VehicleClass"),
 				Definition.Id.GetValue(),

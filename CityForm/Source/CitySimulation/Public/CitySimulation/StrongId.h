@@ -8,14 +8,12 @@
 namespace CityForm::Simulation
 {
 
-template <typename Tag>
-class TStrongId
+template <typename Tag> class TStrongId
 {
 public:
 	constexpr TStrongId() = default;
 
-	explicit constexpr TStrongId(const uint64 InValue)
-		: Value(InValue)
+	explicit constexpr TStrongId(const uint64 InValue) : Value(InValue)
 	{
 	}
 
@@ -53,8 +51,7 @@ private:
 	uint64 Value = 0;
 };
 
-template <typename IdType>
-struct TStrongIdAllocationResult
+template <typename IdType> struct TStrongIdAllocationResult
 {
 	IdType Id;
 	FSimulationError Error;
@@ -65,12 +62,10 @@ struct TStrongIdAllocationResult
 	}
 };
 
-template <typename IdType>
-class TStrongIdAllocator
+template <typename IdType> class TStrongIdAllocator
 {
 public:
-	explicit constexpr TStrongIdAllocator(const uint64 InNextValue = 1)
-		: NextValue(InNextValue)
+	explicit constexpr TStrongIdAllocator(const uint64 InNextValue = 1) : NextValue(InNextValue)
 	{
 	}
 
@@ -78,9 +73,7 @@ public:
 	{
 		if (NextValue == 0)
 		{
-			return {
-				IdType(),
-				{ESimulationErrorCode::IdExhausted, TEXT("The strong-ID allocator is exhausted.")}};
+			return {IdType(), {ESimulationErrorCode::IdExhausted, TEXT("The strong-ID allocator is exhausted.")}};
 		}
 
 		const IdType AllocatedId(NextValue);
@@ -90,8 +83,7 @@ public:
 
 	constexpr bool CanAllocate(const uint64 Count) const
 	{
-		return Count == 0 ||
-			(NextValue != 0 && Count - 1 <= MAX_uint64 - NextValue);
+		return Count == 0 || (NextValue != 0 && Count - 1 <= MAX_uint64 - NextValue);
 	}
 
 	uint64 GetNextValueForDiagnostics() const

@@ -13,12 +13,10 @@ struct CITYFORM_API FCityFormCameraTuning
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Bounds", meta = (Units = "cm"))
-	FVector2D BuildableMinimum = FVector2D(
-		FCityFormPrototypeMapContract::BuildableMinimumCentimeters);
+	FVector2D BuildableMinimum = FVector2D(FCityFormPrototypeMapContract::BuildableMinimumCentimeters);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Bounds", meta = (Units = "cm"))
-	FVector2D BuildableMaximum = FVector2D(
-		FCityFormPrototypeMapContract::BuildableMaximumCentimeters);
+	FVector2D BuildableMaximum = FVector2D(FCityFormPrototypeMapContract::BuildableMaximumCentimeters);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Movement", meta = (ClampMin = "0.0", Units = "cm/s"))
 	double MinimumPanSpeed = 3000.0;
@@ -41,13 +39,22 @@ struct CITYFORM_API FCityFormCameraTuning
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom", meta = (ClampMin = "0.0", Units = "cm/s"))
 	double KeyboardZoomSpeed = 60000.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Orbit", meta = (ClampMin = "-89.0", ClampMax = "-1.0", Units = "deg"))
+	UPROPERTY(EditAnywhere,
+		BlueprintReadWrite,
+		Category = "Camera|Orbit",
+		meta = (ClampMin = "-89.0", ClampMax = "-1.0", Units = "deg"))
 	double MinimumPitch = -80.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Orbit", meta = (ClampMin = "-89.0", ClampMax = "-1.0", Units = "deg"))
+	UPROPERTY(EditAnywhere,
+		BlueprintReadWrite,
+		Category = "Camera|Orbit",
+		meta = (ClampMin = "-89.0", ClampMax = "-1.0", Units = "deg"))
 	double MaximumPitch = -25.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Orbit", meta = (ClampMin = "-89.0", ClampMax = "-1.0", Units = "deg"))
+	UPROPERTY(EditAnywhere,
+		BlueprintReadWrite,
+		Category = "Camera|Orbit",
+		meta = (ClampMin = "-89.0", ClampMax = "-1.0", Units = "deg"))
 	double InitialPitch = -55.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Orbit", meta = (Units = "deg"))

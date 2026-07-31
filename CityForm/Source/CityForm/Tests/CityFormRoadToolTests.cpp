@@ -93,33 +93,25 @@ bool FCityFormRoadVisualInstancesTest::RunTest(const FString& Parameters)
 	FCityFormRoadGraphSnapshot Snapshot;
 	Snapshot.Nodes.Add({FRoadNodeId(1), FVector(0.0, 0.0, 0.0)});
 	Snapshot.Nodes.Add({FRoadNodeId(2), FVector(1000.0, 0.0, 0.0)});
-	Snapshot.Segments.Add({
-		FRoadSegmentId(7),
-		FRoadNodeId(1),
-		FRoadNodeId(2),
-		FRoadTypeId(1),
-		1000.0});
+	Snapshot.Segments.Add({FRoadSegmentId(7), FRoadNodeId(1), FRoadNodeId(2), FRoadTypeId(1), 1000.0});
 
-	const TArray<FCityFormRoadVisualInstance> Visuals =
-		ACityFormRoadVisualizationActor::BuildVisualInstances(Snapshot);
+	const TArray<FCityFormRoadVisualInstance> Visuals = ACityFormRoadVisualizationActor::BuildVisualInstances(Snapshot);
 	TestEqual(TEXT("Each valid logical segment creates one visual instance."), Visuals.Num(), 1);
 	if (Visuals.Num() == 1)
 	{
 		TestEqual(TEXT("The visual preserves the stable segment ID."), Visuals[0].SegmentId, FRoadSegmentId(7));
 		TestEqual(TEXT("The road is centered between logical endpoints."),
-			Visuals[0].Transform.GetLocation(), FVector(500.0, 0.0, 10.0));
+			Visuals[0].Transform.GetLocation(),
+			FVector(500.0, 0.0, 10.0));
 		TestEqual(TEXT("A ten-meter segment scales the engine cube to its logical length."),
-			Visuals[0].Transform.GetScale3D(), FVector(10.0, 8.0, 0.2));
+			Visuals[0].Transform.GetScale3D(),
+			FVector(10.0, 8.0, 0.2));
 	}
 
-	Snapshot.Segments.Add({
-		FRoadSegmentId(8),
-		FRoadNodeId(1),
-		FRoadNodeId(99),
-		FRoadTypeId(1),
-		1000.0});
+	Snapshot.Segments.Add({FRoadSegmentId(8), FRoadNodeId(1), FRoadNodeId(99), FRoadTypeId(1), 1000.0});
 	TestEqual(TEXT("Dangling snapshot records do not create misleading visuals."),
-		ACityFormRoadVisualizationActor::BuildVisualInstances(Snapshot).Num(), 1);
+		ACityFormRoadVisualizationActor::BuildVisualInstances(Snapshot).Num(),
+		1);
 	TestEqual(TEXT("Building detached visuals does not modify the snapshot."), Snapshot.Segments.Num(), 2);
 	return true;
 }

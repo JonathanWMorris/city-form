@@ -5,8 +5,7 @@
 namespace CityForm::Simulation
 {
 
-FDeterministicRandom::FDeterministicRandom(const uint64 Seed)
-	: Engine(Seed)
+FDeterministicRandom::FDeterministicRandom(const uint64 Seed) : Engine(Seed)
 {
 }
 
@@ -19,9 +18,7 @@ FBoundedRandomResult FDeterministicRandom::NextBoundedUInt64(const uint64 Exclus
 {
 	if (ExclusiveUpperBound == 0)
 	{
-		return {
-			0,
-			{ESimulationErrorCode::InvalidRandomBound, TEXT("A random bound must be greater than zero.")}};
+		return {0, {ESimulationErrorCode::InvalidRandomBound, TEXT("A random bound must be greater than zero.")}};
 	}
 
 	const uint64 RejectionThreshold = (0 - ExclusiveUpperBound) % ExclusiveUpperBound;

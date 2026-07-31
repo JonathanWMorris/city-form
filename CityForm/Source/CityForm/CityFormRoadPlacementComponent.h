@@ -45,20 +45,23 @@ public:
 	UCityFormRoadPlacementComponent();
 
 	virtual void TickComponent(
-		float DeltaTime,
-		ELevelTick TickType,
-		FActorComponentTickFunction* ThisTickFunction) override;
+		float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void SetToolMode(ECityFormToolMode InToolMode);
 	void HandlePrimaryAction();
 	bool CancelPendingPlacement();
 
-	ECityFormToolMode GetToolMode() const { return ToolMode; }
-	ERoadPlacementState GetPlacementState() const { return Placement.State; }
+	ECityFormToolMode GetToolMode() const
+	{
+		return ToolMode;
+	}
+	ERoadPlacementState GetPlacementState() const
+	{
+		return Placement.State;
+	}
 
 	static bool IsLongEnough(const FVector& Start, const FVector& End);
-	static TOptional<FCityFormRoadNodeSnapshot> FindSnapCandidate(
-		const TArray<FCityFormRoadNodeSnapshot>& Nodes,
+	static TOptional<FCityFormRoadNodeSnapshot> FindSnapCandidate(const TArray<FCityFormRoadNodeSnapshot>& Nodes,
 		const FVector2D& CursorPosition,
 		TFunctionRef<bool(const FVector&, FVector2D&)> ProjectToScreen);
 

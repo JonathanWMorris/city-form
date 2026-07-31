@@ -50,8 +50,7 @@ struct FRoadTraversal
 
 	friend bool operator==(const FRoadTraversal& Left, const FRoadTraversal& Right)
 	{
-		return Left.SegmentId == Right.SegmentId &&
-			Left.FromNodeId == Right.FromNodeId &&
+		return Left.SegmentId == Right.SegmentId && Left.FromNodeId == Right.FromNodeId &&
 			Left.ToNodeId == Right.ToNodeId;
 	}
 };
@@ -113,13 +112,15 @@ public:
 	static constexpr double LengthValidationToleranceMeters = 1.0e-9;
 
 	FAddRoadNodeResult AddRoadNode(FSimPoint2D PositionMeters);
-	FAddRoadSegmentResult AddRoadSegment(
-		FRoadNodeId EndpointA,
+	FAddRoadSegmentResult AddRoadSegment(FRoadNodeId EndpointA,
 		FRoadNodeId EndpointB,
 		FRoadSegmentDefinition Definition,
 		const FRoadTypeCatalog& RoadTypes);
-	FCreateRoadSegmentResult CreateRoadSegment(
-		FRoadEndpointInput EndpointA,
+	/**
+	 * Validates both endpoints and the segment before allocating any records.
+	 * A failed result leaves nodes, segments, indexes, adjacency, and ID allocators unchanged.
+	 */
+	FCreateRoadSegmentResult CreateRoadSegment(FRoadEndpointInput EndpointA,
 		FRoadEndpointInput EndpointB,
 		FRoadSegmentDefinition Definition,
 		const FRoadTypeCatalog& RoadTypes);
@@ -130,14 +131,10 @@ public:
 	const TArray<FRoadSegment>& GetSegments() const;
 	TArray<FRoadTraversal> GetOutgoingTraversals(FRoadNodeId NodeId) const;
 
-	FRoadSpeedLimitResult ResolveSpeedLimit(
-		const FRoadSegment& Segment,
-		const FRoadTypeCatalog& RoadTypes) const;
+	FRoadSpeedLimitResult ResolveSpeedLimit(const FRoadSegment& Segment, const FRoadTypeCatalog& RoadTypes) const;
 	FValidationReport Validate(const FRoadTypeCatalog& RoadTypes) const;
 	static FValidationReport ValidateRecords(
-		const TArray<FRoadNode>& Nodes,
-		const TArray<FRoadSegment>& Segments,
-		const FRoadTypeCatalog& RoadTypes);
+		const TArray<FRoadNode>& Nodes, const TArray<FRoadSegment>& Segments, const FRoadTypeCatalog& RoadTypes);
 
 private:
 	TStrongIdAllocator<FRoadNodeId> NodeIdAllocator;

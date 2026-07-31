@@ -117,6 +117,14 @@ Exit criteria:
 
 ## Stage 5: Parcels, Zoning, and Development
 
+Status: Next
+
+Tracker:
+[#30 — Stage 5: Parcels, zoning, and development](https://github.com/JonathanWMorris/city-form/issues/30)
+
+Next task:
+[#31 — Generate deterministic roadside parcels](https://github.com/JonathanWMorris/city-form/issues/31)
+
 Deliver:
 
 - Simple parcels beside eligible roads
@@ -131,6 +139,11 @@ Exit criteria:
 
 ## Stage 6: Population and Employment
 
+Status: Planned
+
+Tracker:
+[#35 — Stage 6: Population and employment](https://github.com/JonathanWMorris/city-form/issues/35)
+
 Deliver:
 
 - Lightweight households and residents
@@ -144,6 +157,11 @@ Exit criteria:
 - Assignments are valid, repeatable where promised, and do not exceed capacity.
 
 ## Stage 7: Trips and Congestion
+
+Status: Planned
+
+Tracker:
+[#39 — Stage 7: Trips and congestion](https://github.com/JonathanWMorris/city-form/issues/39)
 
 Deliver:
 
@@ -165,6 +183,11 @@ Exit criteria:
 - Headless tests validate trips, queues, forecasts, and routes.
 
 ## Stage 8: v0.1 Visualization and Stabilization
+
+Status: Planned
+
+Tracker:
+[#46 — Stage 8: v0.1 visualization and stabilization](https://github.com/JonathanWMorris/city-form/issues/46)
 
 Deliver:
 
