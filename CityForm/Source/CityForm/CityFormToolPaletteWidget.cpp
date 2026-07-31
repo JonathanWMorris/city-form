@@ -45,11 +45,7 @@ UWidget* MakeRoadSymbol(UWidgetTree* WidgetTree)
 	return IconSize;
 }
 
-UButton* AddRoadButton(
-	UWidgetTree* WidgetTree,
-	UHorizontalBox* Row,
-	const TCHAR* ButtonName,
-	const TCHAR* Label)
+UButton* AddRoadButton(UWidgetTree* WidgetTree, UHorizontalBox* Row, const TCHAR* ButtonName, const TCHAR* Label)
 {
 	UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), ButtonName);
 	Button->SetBackgroundColor(InactiveColor);
@@ -67,7 +63,7 @@ UButton* AddRoadButton(
 	Row->AddChildToHorizontalBox(Button);
 	return Button;
 }
-}
+} // namespace
 
 void UCityFormToolPaletteWidget::NativeOnInitialized()
 {
@@ -99,22 +95,14 @@ void UCityFormToolPaletteWidget::NativeOnInitialized()
 	RoadTray->SetPadding(FMargin(8.0f));
 	UHorizontalBox* RoadToolRow = WidgetTree->ConstructWidget<UHorizontalBox>();
 	RoadTray->AddChild(RoadToolRow);
-	BasicRoadButton = AddRoadButton(
-		WidgetTree,
-		RoadToolRow,
-		TEXT("BasicRoadButton"),
-		TEXT("Basic Two-Way Road"));
+	BasicRoadButton = AddRoadButton(WidgetTree, RoadToolRow, TEXT("BasicRoadButton"), TEXT("Basic Two-Way Road"));
 	BasicRoadButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleBasicRoadClicked);
 	UVerticalBoxSlot* TraySlot = DockColumn->AddChildToVerticalBox(RoadTray);
 	TraySlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
 
 	UHorizontalBox* CategoryRow = WidgetTree->ConstructWidget<UHorizontalBox>();
 	DockColumn->AddChildToVerticalBox(CategoryRow);
-	RoadCategoryButton = AddRoadButton(
-		WidgetTree,
-		CategoryRow,
-		TEXT("RoadCategoryButton"),
-		TEXT("Roads"));
+	RoadCategoryButton = AddRoadButton(WidgetTree, CategoryRow, TEXT("RoadCategoryButton"), TEXT("Roads"));
 	RoadCategoryButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleRoadCategoryClicked);
 
 	SetRoadCategoryOpen(false);
@@ -131,8 +119,7 @@ void UCityFormToolPaletteWidget::SetSelectedTool(const ECityFormToolMode ToolMod
 {
 	if (BasicRoadButton != nullptr)
 	{
-		BasicRoadButton->SetBackgroundColor(
-			ToolMode == ECityFormToolMode::Road ? ActiveColor : InactiveColor);
+		BasicRoadButton->SetBackgroundColor(ToolMode == ECityFormToolMode::Road ? ActiveColor : InactiveColor);
 	}
 }
 
@@ -158,9 +145,7 @@ void UCityFormToolPaletteWidget::SetStatus(const FString& Message, const bool bI
 	{
 		StatusText->SetText(FText::FromString(Message));
 		StatusText->SetColorAndOpacity(
-			bIsError
-				? FSlateColor(FLinearColor(1.0f, 0.3f, 0.25f))
-				: FSlateColor(FLinearColor::White));
+			bIsError ? FSlateColor(FLinearColor(1.0f, 0.3f, 0.25f)) : FSlateColor(FLinearColor::White));
 	}
 }
 

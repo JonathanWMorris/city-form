@@ -31,12 +31,9 @@ struct FCitySummary
 
 	friend bool operator==(const FCitySummary& Left, const FCitySummary& Right)
 	{
-		return Left.Seed == Right.Seed &&
-			Left.CurrentTimeMilliseconds == Right.CurrentTimeMilliseconds &&
-			Left.VehicleClassCount == Right.VehicleClassCount &&
-			Left.RoadTypeCount == Right.RoadTypeCount &&
-			Left.RoadNodeCount == Right.RoadNodeCount &&
-			Left.RoadSegmentCount == Right.RoadSegmentCount;
+		return Left.Seed == Right.Seed && Left.CurrentTimeMilliseconds == Right.CurrentTimeMilliseconds &&
+			Left.VehicleClassCount == Right.VehicleClassCount && Left.RoadTypeCount == Right.RoadTypeCount &&
+			Left.RoadNodeCount == Right.RoadNodeCount && Left.RoadSegmentCount == Right.RoadSegmentCount;
 	}
 };
 
@@ -55,13 +52,9 @@ public:
 	FAdvanceTimeResult Advance(FSimulationDuration Duration);
 	FAddRoadNodeResult AddRoadNode(FSimPoint2D PositionMeters);
 	FAddRoadSegmentResult AddRoadSegment(
-		FRoadNodeId EndpointA,
-		FRoadNodeId EndpointB,
-		FRoadSegmentDefinition Definition);
+		FRoadNodeId EndpointA, FRoadNodeId EndpointB, FRoadSegmentDefinition Definition);
 	FCreateRoadSegmentResult CreateRoadSegment(
-		FRoadEndpointInput EndpointA,
-		FRoadEndpointInput EndpointB,
-		FRoadSegmentDefinition Definition);
+		FRoadEndpointInput EndpointA, FRoadEndpointInput EndpointB, FRoadSegmentDefinition Definition);
 	FRouteResult FindRoute(const FRouteQuery& Query) const;
 	FValidationReport Validate() const;
 	FCitySummary GetSummary() const;

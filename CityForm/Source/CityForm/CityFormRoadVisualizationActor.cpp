@@ -54,11 +54,9 @@ TArray<FCityFormRoadVisualInstance> ACityFormRoadVisualizationActor::BuildVisual
 		}
 
 		FVector Center = (*Start + *End) * 0.5;
-		Center.Z = FCityFormPrototypeMapContract::GroundElevationCentimeters +
-			RoadThicknessCentimeters * 0.5;
+		Center.Z = FCityFormPrototypeMapContract::GroundElevationCentimeters + RoadThicknessCentimeters * 0.5;
 		const FRotator Rotation(0.0, FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X)), 0.0);
-		const FVector Scale(
-			Length / EngineCubeSizeCentimeters,
+		const FVector Scale(Length / EngineCubeSizeCentimeters,
 			RoadWidthCentimeters / EngineCubeSizeCentimeters,
 			RoadThicknessCentimeters / EngineCubeSizeCentimeters);
 		Instances.Add({Segment.Id, FTransform(Rotation, Center, Scale)});
@@ -70,14 +68,12 @@ void ACityFormRoadVisualizationActor::BeginPlay()
 {
 	Super::BeginPlay();
 	UGameInstance* GameInstance = GetGameInstance();
-	SimulationSubsystem = GameInstance != nullptr
-		? GameInstance->GetSubsystem<UCityFormSimulationSubsystem>()
-		: nullptr;
+	SimulationSubsystem =
+		GameInstance != nullptr ? GameInstance->GetSubsystem<UCityFormSimulationSubsystem>() : nullptr;
 	if (SimulationSubsystem != nullptr)
 	{
 		RoadGraphChangedHandle = SimulationSubsystem->OnRoadGraphChanged().AddUObject(
-			this,
-			&ACityFormRoadVisualizationActor::RebuildFromSimulation);
+			this, &ACityFormRoadVisualizationActor::RebuildFromSimulation);
 		RebuildFromSimulation();
 	}
 }
@@ -102,8 +98,8 @@ void ACityFormRoadVisualizationActor::RebuildFromSimulation()
 		return;
 	}
 
-	const TArray<FCityFormRoadVisualInstance> Visuals = BuildVisualInstances(
-		SimulationSubsystem->CreateRoadGraphSnapshot());
+	const TArray<FCityFormRoadVisualInstance> Visuals =
+		BuildVisualInstances(SimulationSubsystem->CreateRoadGraphSnapshot());
 	SegmentIdsByInstance.Reserve(Visuals.Num());
 	for (const FCityFormRoadVisualInstance& Visual : Visuals)
 	{

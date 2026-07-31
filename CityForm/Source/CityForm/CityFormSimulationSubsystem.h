@@ -62,13 +62,15 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	CityForm::Simulation::FCreateRoadSegmentResult CreateRoadSegment(
-		FCityFormRoadEndpointInput EndpointA,
+	CityForm::Simulation::FCreateRoadSegmentResult CreateRoadSegment(FCityFormRoadEndpointInput EndpointA,
 		FCityFormRoadEndpointInput EndpointB,
 		CityForm::Simulation::FRoadSegmentDefinition Definition);
 
 	FCityFormRoadGraphSnapshot CreateRoadGraphSnapshot() const;
-	FOnCityFormRoadGraphChanged& OnRoadGraphChanged() { return RoadGraphChanged; }
+	FOnCityFormRoadGraphChanged& OnRoadGraphChanged()
+	{
+		return RoadGraphChanged;
+	}
 	CityForm::Simulation::FCitySummary GetCitySummary() const;
 	CityForm::Simulation::FValidationReport ValidateCity() const;
 

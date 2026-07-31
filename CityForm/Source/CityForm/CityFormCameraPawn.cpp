@@ -19,8 +19,7 @@
 
 namespace
 {
-template <typename T>
-T* LoadInputAsset(const TCHAR* Path)
+template <typename T> T* LoadInputAsset(const TCHAR* Path)
 {
 	ConstructorHelpers::FObjectFinder<T> Finder(Path);
 	return Finder.Succeeded() ? Finder.Object : nullptr;
@@ -37,7 +36,7 @@ void AddYAxisSwizzle(UInputMappingContext* Context, FEnhancedActionKeyMapping& M
 	Swizzle->Order = EInputAxisSwizzle::YXZ;
 	Mapping.Modifiers.Add(Swizzle);
 }
-}
+} // namespace
 
 ACityFormCameraPawn::ACityFormCameraPawn()
 {
@@ -57,7 +56,8 @@ ACityFormCameraPawn::ACityFormCameraPawn()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = false;
 
-	MappingContextAsset = LoadInputAsset<UInputMappingContext>(TEXT("/Game/Input/IMC_CityBuilderCamera.IMC_CityBuilderCamera"));
+	MappingContextAsset =
+		LoadInputAsset<UInputMappingContext>(TEXT("/Game/Input/IMC_CityBuilderCamera.IMC_CityBuilderCamera"));
 	PanAction = LoadInputAsset<UInputAction>(TEXT("/Game/Input/IA_CameraPan.IA_CameraPan"));
 	ScrollZoomAction = LoadInputAsset<UInputAction>(TEXT("/Game/Input/IA_CameraZoom.IA_CameraZoom"));
 	KeyboardZoomAction = LoadInputAsset<UInputAction>(TEXT("/Game/Input/IA_CameraZoomKeyboard.IA_CameraZoomKeyboard"));
@@ -94,9 +94,8 @@ void ACityFormCameraPawn::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	ULocalPlayer* LocalPlayer = PlayerController != nullptr ? PlayerController->GetLocalPlayer() : nullptr;
-	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = LocalPlayer != nullptr
-		? LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()
-		: nullptr;
+	UEnhancedInputLocalPlayerSubsystem* InputSubsystem =
+		LocalPlayer != nullptr ? LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>() : nullptr;
 	if (EnhancedInput == nullptr || InputSubsystem == nullptr || MappingContextAsset == nullptr ||
 		PanAction == nullptr || ScrollZoomAction == nullptr || KeyboardZoomAction == nullptr ||
 		RotateAction == nullptr || TiltAction == nullptr || OrbitHeldAction == nullptr || OrbitAction == nullptr)
@@ -112,18 +111,24 @@ void ACityFormCameraPawn::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	EnhancedInput->BindAction(PanAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandlePanCompleted);
 	EnhancedInput->BindAction(PanAction, ETriggerEvent::Canceled, this, &ACityFormCameraPawn::HandlePanCompleted);
 	EnhancedInput->BindAction(ScrollZoomAction, ETriggerEvent::Triggered, this, &ACityFormCameraPawn::HandleScrollZoom);
-	EnhancedInput->BindAction(KeyboardZoomAction, ETriggerEvent::Triggered, this, &ACityFormCameraPawn::HandleKeyboardZoom);
-	EnhancedInput->BindAction(KeyboardZoomAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandleKeyboardZoomCompleted);
-	EnhancedInput->BindAction(KeyboardZoomAction, ETriggerEvent::Canceled, this, &ACityFormCameraPawn::HandleKeyboardZoomCompleted);
+	EnhancedInput->BindAction(
+		KeyboardZoomAction, ETriggerEvent::Triggered, this, &ACityFormCameraPawn::HandleKeyboardZoom);
+	EnhancedInput->BindAction(
+		KeyboardZoomAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandleKeyboardZoomCompleted);
+	EnhancedInput->BindAction(
+		KeyboardZoomAction, ETriggerEvent::Canceled, this, &ACityFormCameraPawn::HandleKeyboardZoomCompleted);
 	EnhancedInput->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ACityFormCameraPawn::HandleRotate);
-	EnhancedInput->BindAction(RotateAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandleRotateCompleted);
+	EnhancedInput->BindAction(
+		RotateAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandleRotateCompleted);
 	EnhancedInput->BindAction(RotateAction, ETriggerEvent::Canceled, this, &ACityFormCameraPawn::HandleRotateCompleted);
 	EnhancedInput->BindAction(TiltAction, ETriggerEvent::Triggered, this, &ACityFormCameraPawn::HandleTilt);
 	EnhancedInput->BindAction(TiltAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandleTiltCompleted);
 	EnhancedInput->BindAction(TiltAction, ETriggerEvent::Canceled, this, &ACityFormCameraPawn::HandleTiltCompleted);
 	EnhancedInput->BindAction(OrbitHeldAction, ETriggerEvent::Started, this, &ACityFormCameraPawn::HandleOrbitHeld);
-	EnhancedInput->BindAction(OrbitHeldAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandleOrbitReleased);
-	EnhancedInput->BindAction(OrbitHeldAction, ETriggerEvent::Canceled, this, &ACityFormCameraPawn::HandleOrbitReleased);
+	EnhancedInput->BindAction(
+		OrbitHeldAction, ETriggerEvent::Completed, this, &ACityFormCameraPawn::HandleOrbitReleased);
+	EnhancedInput->BindAction(
+		OrbitHeldAction, ETriggerEvent::Canceled, this, &ACityFormCameraPawn::HandleOrbitReleased);
 	EnhancedInput->BindAction(OrbitAction, ETriggerEvent::Triggered, this, &ACityFormCameraPawn::HandleOrbit);
 }
 
@@ -170,9 +175,8 @@ void ACityFormCameraPawn::Tick(float DeltaSeconds)
 		return;
 	}
 
-	const FVector2D CombinedPan = bInputSuppressed
-		? FVector2D::ZeroVector
-		: CombinePanInput(PanInput, GetEdgePanInput());
+	const FVector2D CombinedPan =
+		bInputSuppressed ? FVector2D::ZeroVector : CombinePanInput(PanInput, GetEdgePanInput());
 	if (!CombinedPan.IsNearlyZero())
 	{
 		const double YawRadians = FMath::DegreesToRadians(TargetYaw);
@@ -185,13 +189,11 @@ void ACityFormCameraPawn::Tick(float DeltaSeconds)
 
 	if (!bInputSuppressed)
 	{
-		TargetZoom = FMath::Clamp(
-			TargetZoom - KeyboardZoomInput * Tuning.KeyboardZoomSpeed * DeltaSeconds,
+		TargetZoom = FMath::Clamp(TargetZoom - KeyboardZoomInput * Tuning.KeyboardZoomSpeed * DeltaSeconds,
 			Tuning.MinimumZoom,
 			Tuning.MaximumZoom);
 		TargetYaw = FMath::UnwindDegrees(TargetYaw + RotateInput * Tuning.KeyboardYawSpeed * DeltaSeconds);
-		TargetPitch = FMath::Clamp(
-			TargetPitch + TiltInput * Tuning.KeyboardPitchSpeed * DeltaSeconds,
+		TargetPitch = FMath::Clamp(TargetPitch + TiltInput * Tuning.KeyboardPitchSpeed * DeltaSeconds,
 			Tuning.MinimumPitch,
 			Tuning.MaximumPitch);
 	}
@@ -201,7 +203,8 @@ void ACityFormCameraPawn::Tick(float DeltaSeconds)
 	SpringArm->TargetArmLength = FMath::Lerp(static_cast<double>(SpringArm->TargetArmLength), TargetZoom, Alpha);
 
 	const FRotator CurrentRotation = SpringArm->GetRelativeRotation();
-	const double SmoothedYaw = CurrentRotation.Yaw + FMath::FindDeltaAngleDegrees(CurrentRotation.Yaw, TargetYaw) * Alpha;
+	const double SmoothedYaw =
+		CurrentRotation.Yaw + FMath::FindDeltaAngleDegrees(CurrentRotation.Yaw, TargetYaw) * Alpha;
 	const double SmoothedPitch = FMath::Lerp(static_cast<double>(CurrentRotation.Pitch), TargetPitch, Alpha);
 	SpringArm->SetRelativeRotation(FRotator(SmoothedPitch, SmoothedYaw, 0.0));
 }
@@ -232,8 +235,8 @@ FVector2D ACityFormCameraPawn::GetEdgePanInput() const
 	int32 ViewportX = 0;
 	int32 ViewportY = 0;
 	PlayerController->GetViewportSize(ViewportX, ViewportY);
-	if (!PlayerController->GetMousePosition(MouseX, MouseY) || ViewportX <= 0 || ViewportY <= 0 ||
-		MouseX < 0.0f || MouseY < 0.0f || MouseX > ViewportX || MouseY > ViewportY)
+	if (!PlayerController->GetMousePosition(MouseX, MouseY) || ViewportX <= 0 || ViewportY <= 0 || MouseX < 0.0f ||
+		MouseY < 0.0f || MouseX > ViewportX || MouseY > ViewportY)
 	{
 		return FVector2D::ZeroVector;
 	}
@@ -276,9 +279,7 @@ void ACityFormCameraPawn::HandleScrollZoom(const FInputActionValue& Value)
 	if (!bInputSuppressed)
 	{
 		TargetZoom = FMath::Clamp(
-			TargetZoom - Value.Get<float>() * Tuning.ScrollZoomStep,
-			Tuning.MinimumZoom,
-			Tuning.MaximumZoom);
+			TargetZoom - Value.Get<float>() * Tuning.ScrollZoomStep, Tuning.MinimumZoom, Tuning.MaximumZoom);
 	}
 }
 
@@ -338,9 +339,7 @@ void ACityFormCameraPawn::HandleOrbit(const FInputActionValue& Value)
 		const FVector2D Delta = Value.Get<FVector2D>();
 		TargetYaw = FMath::UnwindDegrees(TargetYaw + Delta.X * Tuning.PointerOrbitSensitivity);
 		TargetPitch = FMath::Clamp(
-			TargetPitch - Delta.Y * Tuning.PointerOrbitSensitivity,
-			Tuning.MinimumPitch,
-			Tuning.MaximumPitch);
+			TargetPitch - Delta.Y * Tuning.PointerOrbitSensitivity, Tuning.MinimumPitch, Tuning.MaximumPitch);
 	}
 }
 
@@ -394,9 +393,8 @@ double ACityFormCameraPawn::ComputeSmoothingAlpha(double Response, double DeltaS
 double ACityFormCameraPawn::ComputePanSpeed(const FCityFormCameraTuning& InTuning, double ZoomDistance)
 {
 	const double Range = InTuning.MaximumZoom - InTuning.MinimumZoom;
-	const double ZoomFraction = Range > UE_DOUBLE_SMALL_NUMBER
-		? FMath::Clamp((ZoomDistance - InTuning.MinimumZoom) / Range, 0.0, 1.0)
-		: 0.0;
+	const double ZoomFraction =
+		Range > UE_DOUBLE_SMALL_NUMBER ? FMath::Clamp((ZoomDistance - InTuning.MinimumZoom) / Range, 0.0, 1.0) : 0.0;
 	return FMath::Lerp(InTuning.MinimumPanSpeed, InTuning.MaximumPanSpeed, ZoomFraction);
 }
 
@@ -407,8 +405,7 @@ FVector2D ACityFormCameraPawn::CombinePanInput(const FVector2D& KeyboardInput, c
 
 FVector ACityFormCameraPawn::ClampFocusToBounds(const FCityFormCameraTuning& InTuning, const FVector& Focus)
 {
-	return FVector(
-		FMath::Clamp(Focus.X, InTuning.BuildableMinimum.X, InTuning.BuildableMaximum.X),
+	return FVector(FMath::Clamp(Focus.X, InTuning.BuildableMinimum.X, InTuning.BuildableMaximum.X),
 		FMath::Clamp(Focus.Y, InTuning.BuildableMinimum.Y, InTuning.BuildableMaximum.Y),
 		0.0);
 }

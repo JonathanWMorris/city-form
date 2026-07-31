@@ -42,33 +42,24 @@ bool FCitySimulationLifecycleTest::RunTest(const FString& Parameters)
 	FCitySimulation City({1234});
 
 	TestEqual(TEXT("The configured seed is retained."), City.GetConfig().Seed, uint64(1234));
-	TestEqual(
-		TEXT("A city starts at zero milliseconds."),
+	TestEqual(TEXT("A city starts at zero milliseconds."),
 		City.GetClock().GetCurrentInstant().GetMillisecondsSinceStart(),
 		int64(0));
 	TestTrue(TEXT("A new city validates."), City.Validate().IsValid());
 
 	const FCitySummary InitialSummary = City.GetSummary();
 	TestEqual(TEXT("The summary contains the seed."), InitialSummary.Seed, uint64(1234));
-	TestEqual(
-		TEXT("The summary starts at zero milliseconds."),
-		InitialSummary.CurrentTimeMilliseconds,
-		int64(0));
+	TestEqual(TEXT("The summary starts at zero milliseconds."), InitialSummary.CurrentTimeMilliseconds, int64(0));
 	TestEqual(TEXT("The default vehicle catalog contains one class."), InitialSummary.VehicleClassCount, 1);
 
-	TestTrue(
-		TEXT("Positive advancement succeeds."),
-		City.Advance(FSimulationDuration(60000)).IsSuccess());
-	TestEqual(
-		TEXT("The city advances by integer milliseconds."),
+	TestTrue(TEXT("Positive advancement succeeds."), City.Advance(FSimulationDuration(60000)).IsSuccess());
+	TestEqual(TEXT("The city advances by integer milliseconds."),
 		City.GetClock().GetCurrentInstant().GetMillisecondsSinceStart(),
 		int64(60000));
 
 	const FCitySummary AdvancedSummary = City.GetSummary();
 	TestEqual(
-		TEXT("The advanced summary reports the current time."),
-		AdvancedSummary.CurrentTimeMilliseconds,
-		int64(60000));
+		TEXT("The advanced summary reports the current time."), AdvancedSummary.CurrentTimeMilliseconds, int64(60000));
 	return true;
 }
 
@@ -85,42 +76,29 @@ bool FSimulationClockBoundaryTest::RunTest(const FString& Parameters)
 
 	FSimulationClock Clock;
 	TestTrue(TEXT("Zero advancement succeeds."), Clock.Advance(FSimulationDuration()).IsSuccess());
-	TestEqual(
-		TEXT("Zero advancement does not mutate time."),
+	TestEqual(TEXT("Zero advancement does not mutate time."),
 		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
 		int64(0));
 
 	const FAdvanceTimeResult NegativeResult = Clock.Advance(FSimulationDuration(-1));
 	TestFalse(TEXT("Negative advancement fails."), NegativeResult.IsSuccess());
-	TestTrue(
-		TEXT("Negative advancement has a stable code."),
+	TestTrue(TEXT("Negative advancement has a stable code."),
 		NegativeResult.Error.Code == ESimulationErrorCode::NegativeDuration);
-	TestEqual(
-		TEXT("Negative advancement is atomic."),
-		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
-		int64(0));
+	TestEqual(TEXT("Negative advancement is atomic."), Clock.GetCurrentInstant().GetMillisecondsSinceStart(), int64(0));
 
-	TestTrue(
-		TEXT("Advancement to the maximum instant succeeds."),
+	TestTrue(TEXT("Advancement to the maximum instant succeeds."),
 		Clock.Advance(FSimulationDuration(MAX_int64)).IsSuccess());
 	const FAdvanceTimeResult OverflowResult = Clock.Advance(FSimulationDuration(1));
 	TestFalse(TEXT("Overflowing advancement fails."), OverflowResult.IsSuccess());
-	TestTrue(
-		TEXT("Overflow has a stable code."),
-		OverflowResult.Error.Code == ESimulationErrorCode::TimeOverflow);
-	TestEqual(
-		TEXT("Overflow does not mutate time."),
+	TestTrue(TEXT("Overflow has a stable code."), OverflowResult.Error.Code == ESimulationErrorCode::TimeOverflow);
+	TestEqual(TEXT("Overflow does not mutate time."),
 		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
 		int64(MAX_int64));
 
-	const FSimulationInstantResult Added = AddSimulationDuration(
-		FSimulationInstant(1000),
-		FSimulationDuration(250));
+	const FSimulationInstantResult Added = AddSimulationDuration(FSimulationInstant(1000), FSimulationDuration(250));
 	TestTrue(TEXT("Checked instant addition succeeds."), Added.IsSuccess());
 	TestEqual(
-		TEXT("Checked instant addition uses milliseconds."),
-		Added.Instant.GetMillisecondsSinceStart(),
-		int64(1250));
+		TEXT("Checked instant addition uses milliseconds."), Added.Instant.GetMillisecondsSinceStart(), int64(1250));
 	return true;
 }
 
@@ -132,16 +110,13 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 bool FDeterministicRandomTest::RunTest(const FString& Parameters)
 {
 	FDeterministicRandom GoldenRandom(42);
-	TestEqual(
-		TEXT("The first raw value matches the locked mt19937_64 sequence."),
+	TestEqual(TEXT("The first raw value matches the locked mt19937_64 sequence."),
 		GoldenRandom.NextUInt64(),
 		uint64(13930160852258120406ULL));
-	TestEqual(
-		TEXT("The second raw value matches the locked mt19937_64 sequence."),
+	TestEqual(TEXT("The second raw value matches the locked mt19937_64 sequence."),
 		GoldenRandom.NextUInt64(),
 		uint64(11788048577503494824ULL));
-	TestEqual(
-		TEXT("The third raw value matches the locked mt19937_64 sequence."),
+	TestEqual(TEXT("The third raw value matches the locked mt19937_64 sequence."),
 		GoldenRandom.NextUInt64(),
 		uint64(13874630024467741450ULL));
 
@@ -153,11 +128,9 @@ bool FDeterministicRandomTest::RunTest(const FString& Parameters)
 	FDeterministicRandom InvalidBoundRandom(42);
 	const FBoundedRandomResult InvalidBoundResult = InvalidBoundRandom.NextBoundedUInt64(0);
 	TestFalse(TEXT("A zero bound fails."), InvalidBoundResult.IsSuccess());
-	TestTrue(
-		TEXT("A zero bound has a stable code."),
+	TestTrue(TEXT("A zero bound has a stable code."),
 		InvalidBoundResult.Error.Code == ESimulationErrorCode::InvalidRandomBound);
-	TestEqual(
-		TEXT("An invalid bound does not consume random state."),
+	TestEqual(TEXT("An invalid bound does not consume random state."),
 		InvalidBoundRandom.NextUInt64(),
 		uint64(13930160852258120406ULL));
 
@@ -166,9 +139,7 @@ bool FDeterministicRandomTest::RunTest(const FString& Parameters)
 	const double UnitValue = UnitRandomA.NextUnitDouble();
 	TestTrue(TEXT("Unit output is at least zero."), UnitValue >= 0.0);
 	TestTrue(TEXT("Unit output is below one."), UnitValue < 1.0);
-	TestTrue(
-		TEXT("The explicitly mapped unit output is repeatable."),
-		UnitValue == UnitRandomB.NextUnitDouble());
+	TestTrue(TEXT("The explicitly mapped unit output is repeatable."), UnitValue == UnitRandomB.NextUnitDouble());
 	return true;
 }
 
@@ -200,13 +171,9 @@ bool FStrongIdTest::RunTest(const FString& Parameters)
 
 	const TStrongIdAllocationResult<FRoadNodeId> Exhausted = BoundaryAllocator.Allocate();
 	TestFalse(TEXT("Allocation after the maximum fails."), Exhausted.IsSuccess());
-	TestTrue(
-		TEXT("Exhaustion has a stable code."),
-		Exhausted.Error.Code == ESimulationErrorCode::IdExhausted);
+	TestTrue(TEXT("Exhaustion has a stable code."), Exhausted.Error.Code == ESimulationErrorCode::IdExhausted);
 	TestEqual(
-		TEXT("An exhausted allocator remains exhausted."),
-		BoundaryAllocator.GetNextValueForDiagnostics(),
-		uint64(0));
+		TEXT("An exhausted allocator remains exhausted."), BoundaryAllocator.GetNextValueForDiagnostics(), uint64(0));
 	return true;
 }
 
@@ -228,9 +195,15 @@ bool FVehicleClassCatalogTest::RunTest(const FString& Parameters)
 		TestEqual(TEXT("Passenger-car queue length includes spacing."), PassengerCar->EffectiveQueueLengthMeters, 7.5);
 		TestEqual(TEXT("Passenger-car mass is in kilograms."), PassengerCar->MassKilograms, 1500.0);
 		TestEqual(TEXT("Passenger-car maximum speed is in m/s."), PassengerCar->MaximumSpeedMetersPerSecond, 33.333);
-		TestEqual(TEXT("Passenger-car maximum acceleration is in m/s^2."), PassengerCar->MaximumAccelerationMetersPerSecondSquared, 2.5);
-		TestEqual(TEXT("Passenger-car comfortable deceleration is in m/s^2."), PassengerCar->ComfortableDecelerationMetersPerSecondSquared, 3.0);
-		TestEqual(TEXT("Passenger-car emergency deceleration is in m/s^2."), PassengerCar->EmergencyDecelerationMetersPerSecondSquared, 8.0);
+		TestEqual(TEXT("Passenger-car maximum acceleration is in m/s^2."),
+			PassengerCar->MaximumAccelerationMetersPerSecondSquared,
+			2.5);
+		TestEqual(TEXT("Passenger-car comfortable deceleration is in m/s^2."),
+			PassengerCar->ComfortableDecelerationMetersPerSecondSquared,
+			3.0);
+		TestEqual(TEXT("Passenger-car emergency deceleration is in m/s^2."),
+			PassengerCar->EmergencyDecelerationMetersPerSecondSquared,
+			8.0);
 		TestEqual(TEXT("Passenger-car turning radius is in meters."), PassengerCar->MinimumTurningRadiusMeters, 5.5);
 		TestEqual(TEXT("Passenger-car PCE is one."), PassengerCar->PassengerCarEquivalent, 1.0);
 		TestEqual(TEXT("Passenger-car restrictions are empty."), PassengerCar->RestrictionMask, uint32(0));
@@ -246,10 +219,12 @@ bool FVehicleClassCatalogTest::RunTest(const FString& Parameters)
 	InvalidDefinitions.Add(InvalidDefinition);
 	const FValidationReport InvalidReport = FVehicleClassCatalog(MoveTemp(InvalidDefinitions)).Validate();
 	TestFalse(TEXT("An invalid definition fails validation."), InvalidReport.IsValid());
-	TestEqual(TEXT("An invalid ID is reported."), CountIssues(InvalidReport, EValidationIssueCode::InvalidVehicleClassId), 1);
-	TestEqual(TEXT("A non-finite value is reported."), CountIssues(InvalidReport, EValidationIssueCode::NonFiniteVehicleValue), 1);
 	TestEqual(
-		TEXT("Invalid deceleration ordering is reported."),
+		TEXT("An invalid ID is reported."), CountIssues(InvalidReport, EValidationIssueCode::InvalidVehicleClassId), 1);
+	TestEqual(TEXT("A non-finite value is reported."),
+		CountIssues(InvalidReport, EValidationIssueCode::NonFiniteVehicleValue),
+		1);
+	TestEqual(TEXT("Invalid deceleration ordering is reported."),
 		CountIssues(InvalidReport, EValidationIssueCode::ComfortableDecelerationExceedsEmergency),
 		1);
 
@@ -259,7 +234,9 @@ bool FVehicleClassCatalogTest::RunTest(const FString& Parameters)
 	const FVehicleClassCatalog DuplicateCatalog(MoveTemp(DuplicateDefinitions));
 	const FValidationReport DuplicateReport = DuplicateCatalog.Validate();
 	TestFalse(TEXT("Duplicate IDs fail validation."), DuplicateReport.IsValid());
-	TestEqual(TEXT("A duplicate ID is reported once."), CountIssues(DuplicateReport, EValidationIssueCode::DuplicateVehicleClassId), 1);
+	TestEqual(TEXT("A duplicate ID is reported once."),
+		CountIssues(DuplicateReport, EValidationIssueCode::DuplicateVehicleClassId),
+		1);
 	return true;
 }
 
@@ -275,21 +252,18 @@ bool FHeadlessRepeatabilityTest::RunTest(const FString& Parameters)
 
 	for (int32 Step = 0; Step < 10; ++Step)
 	{
+		TestTrue(TEXT("The first headless city advances."), FirstCity.Advance(FSimulationDuration(144000)).IsSuccess());
 		TestTrue(
-			TEXT("The first headless city advances."),
-			FirstCity.Advance(FSimulationDuration(144000)).IsSuccess());
-		TestTrue(
-			TEXT("The second headless city advances."),
-			SecondCity.Advance(FSimulationDuration(144000)).IsSuccess());
-		TestEqual(
-			TEXT("Seeded random output remains repeatable."),
+			TEXT("The second headless city advances."), SecondCity.Advance(FSimulationDuration(144000)).IsSuccess());
+		TestEqual(TEXT("Seeded random output remains repeatable."),
 			FirstCity.GetRandom().NextUInt64(),
 			SecondCity.GetRandom().NextUInt64());
 	}
 
 	TestTrue(TEXT("The first headless city validates."), FirstCity.Validate().IsValid());
 	TestTrue(TEXT("The second headless city validates."), SecondCity.Validate().IsValid());
-	TestTrue(TEXT("Equivalent command sequences produce equal summaries."), FirstCity.GetSummary() == SecondCity.GetSummary());
+	TestTrue(TEXT("Equivalent command sequences produce equal summaries."),
+		FirstCity.GetSummary() == SecondCity.GetSummary());
 	return true;
 }
 

@@ -5,35 +5,22 @@
 namespace CityForm::Simulation
 {
 
-FSimulationInstantResult AddSimulationDuration(
-	const FSimulationInstant Instant,
-	const FSimulationDuration Duration)
+FSimulationInstantResult AddSimulationDuration(const FSimulationInstant Instant, const FSimulationDuration Duration)
 {
 	if (Duration.GetMilliseconds() < 0)
 	{
-		return {
-			{},
-			{
-				ESimulationErrorCode::NegativeDuration,
-				TEXT("Simulation time cannot advance by a negative duration.")
-			}};
+		return {{},
+			{ESimulationErrorCode::NegativeDuration, TEXT("Simulation time cannot advance by a negative duration.")}};
 	}
 
-	if (Duration.GetMilliseconds() >
-		MAX_int64 - Instant.GetMillisecondsSinceStart())
+	if (Duration.GetMilliseconds() > MAX_int64 - Instant.GetMillisecondsSinceStart())
 	{
-		return {
-			{},
-			{
-				ESimulationErrorCode::TimeOverflow,
-				TEXT("Simulation time advancement would overflow its millisecond range.")
-			}};
+		return {{},
+			{ESimulationErrorCode::TimeOverflow,
+				TEXT("Simulation time advancement would overflow its millisecond range.")}};
 	}
 
-	return {
-		FSimulationInstant(
-			Instant.GetMillisecondsSinceStart() + Duration.GetMilliseconds()),
-		{}};
+	return {FSimulationInstant(Instant.GetMillisecondsSinceStart() + Duration.GetMilliseconds()), {}};
 }
 
 FSimulationInstant FSimulationClock::GetCurrentInstant() const
@@ -43,8 +30,7 @@ FSimulationInstant FSimulationClock::GetCurrentInstant() const
 
 FAdvanceTimeResult FSimulationClock::Advance(const FSimulationDuration Duration)
 {
-	const FSimulationInstantResult Result =
-		AddSimulationDuration(CurrentInstant, Duration);
+	const FSimulationInstantResult Result = AddSimulationDuration(CurrentInstant, Duration);
 	if (!Result.IsSuccess())
 	{
 		return {Result.Error};

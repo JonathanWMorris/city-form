@@ -43,8 +43,7 @@ public:
 	const FRoadTypeDefinition* Find(FRoadTypeId Id) const;
 	const TArray<FRoadTypeDefinition>& GetDefinitions() const;
 	FRoadSpeedLimitResult ResolveSpeedLimit(
-		FRoadTypeId RoadTypeId,
-		const TOptional<double>& OverrideMetersPerSecond) const;
+		FRoadTypeId RoadTypeId, const TOptional<double>& OverrideMetersPerSecond) const;
 	FValidationReport Validate() const;
 
 private:

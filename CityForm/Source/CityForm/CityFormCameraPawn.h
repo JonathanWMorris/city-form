@@ -30,16 +30,25 @@ public:
 	void SetCameraInputSuppressed(bool bSuppressed);
 
 	UFUNCTION(BlueprintPure, Category = "City Form|Camera")
-	bool IsCameraInputSuppressed() const { return bInputSuppressed; }
+	bool IsCameraInputSuppressed() const
+	{
+		return bInputSuppressed;
+	}
 
 	UFUNCTION(BlueprintCallable, Category = "City Form|Camera")
 	void SetEdgeScrollingEnabled(bool bEnabled);
 
 	UFUNCTION(BlueprintPure, Category = "City Form|Camera")
-	bool IsEdgeScrollingEnabled() const { return bEdgeScrollingEnabled; }
+	bool IsEdgeScrollingEnabled() const
+	{
+		return bEdgeScrollingEnabled;
+	}
 
 	UFUNCTION(BlueprintPure, Category = "City Form|Camera")
-	FVector GetFocusLocation() const { return GetActorLocation(); }
+	FVector GetFocusLocation() const
+	{
+		return GetActorLocation();
+	}
 
 	UFUNCTION(BlueprintPure, Category = "City Form|Camera")
 	double GetZoomDistance() const;

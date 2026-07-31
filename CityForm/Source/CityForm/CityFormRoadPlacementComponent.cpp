@@ -16,9 +16,7 @@ UCityFormRoadPlacementComponent::UCityFormRoadPlacementComponent()
 }
 
 void UCityFormRoadPlacementComponent::TickComponent(
-	const float DeltaTime,
-	const ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+	const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (ToolMode == ECityFormToolMode::Road && Placement.State == ERoadPlacementState::StartSelected)
@@ -76,9 +74,8 @@ void UCityFormRoadPlacementComponent::HandlePrimaryAction()
 
 	ACityFormPlayerController* Controller = Cast<ACityFormPlayerController>(GetOwner());
 	UGameInstance* GameInstance = Controller != nullptr ? Controller->GetGameInstance() : nullptr;
-	UCityFormSimulationSubsystem* Simulation = GameInstance != nullptr
-		? GameInstance->GetSubsystem<UCityFormSimulationSubsystem>()
-		: nullptr;
+	UCityFormSimulationSubsystem* Simulation =
+		GameInstance != nullptr ? GameInstance->GetSubsystem<UCityFormSimulationSubsystem>() : nullptr;
 	if (Simulation == nullptr)
 	{
 		SetStatus(TEXT("The city simulation is unavailable."), true);
@@ -88,10 +85,8 @@ void UCityFormRoadPlacementComponent::HandlePrimaryAction()
 
 	FRoadSegmentDefinition Definition;
 	Definition.RoadTypeId = FRoadTypeCatalog::GetBasicTwoWayRoadTypeId();
-	const FCreateRoadSegmentResult Result = Simulation->CreateRoadSegment(
-		Placement.StartEndpoint,
-		Endpoint,
-		Definition);
+	const FCreateRoadSegmentResult Result =
+		Simulation->CreateRoadSegment(Placement.StartEndpoint, Endpoint, Definition);
 	ClearPendingPlacement();
 	if (!Result.IsSuccess())
 	{
@@ -99,9 +94,7 @@ void UCityFormRoadPlacementComponent::HandlePrimaryAction()
 		return;
 	}
 
-	SetStatus(FString::Printf(
-		TEXT("Created road segment %llu. Click to start another."),
-		Result.SegmentId.GetValue()));
+	SetStatus(FString::Printf(TEXT("Created road segment %llu. Click to start another."), Result.SegmentId.GetValue()));
 }
 
 bool UCityFormRoadPlacementComponent::CancelPendingPlacement()
@@ -147,8 +140,7 @@ TOptional<FCityFormRoadNodeSnapshot> UCityFormRoadPlacementComponent::FindSnapCa
 }
 
 bool UCityFormRoadPlacementComponent::TryGetCursorEndpoint(
-	FCityFormRoadEndpointInput& OutEndpoint,
-	FVector& OutPosition) const
+	FCityFormRoadEndpointInput& OutEndpoint, FVector& OutPosition) const
 {
 	const ACityFormPlayerController* Controller = Cast<ACityFormPlayerController>(GetOwner());
 	if (Controller == nullptr || Controller->IsPointerOverToolPalette())
@@ -174,17 +166,15 @@ bool UCityFormRoadPlacementComponent::TryGetCursorEndpoint(
 	}
 
 	const UGameInstance* GameInstance = Controller->GetGameInstance();
-	const UCityFormSimulationSubsystem* Simulation = GameInstance != nullptr
-		? GameInstance->GetSubsystem<UCityFormSimulationSubsystem>()
-		: nullptr;
+	const UCityFormSimulationSubsystem* Simulation =
+		GameInstance != nullptr ? GameInstance->GetSubsystem<UCityFormSimulationSubsystem>() : nullptr;
 	if (Simulation == nullptr)
 	{
 		return false;
 	}
 
 	const FCityFormRoadGraphSnapshot Snapshot = Simulation->CreateRoadGraphSnapshot();
-	const TOptional<FCityFormRoadNodeSnapshot> Snap = FindSnapCandidate(
-		Snapshot.Nodes,
+	const TOptional<FCityFormRoadNodeSnapshot> Snap = FindSnapCandidate(Snapshot.Nodes,
 		FVector2D(CursorX, CursorY),
 		[Controller](const FVector& WorldPosition, FVector2D& ScreenPosition)
 		{

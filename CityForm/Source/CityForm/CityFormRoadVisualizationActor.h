@@ -22,8 +22,7 @@ class CITYFORM_API ACityFormRoadVisualizationActor final : public AActor
 public:
 	ACityFormRoadVisualizationActor();
 
-	static TArray<FCityFormRoadVisualInstance> BuildVisualInstances(
-		const FCityFormRoadGraphSnapshot& Snapshot);
+	static TArray<FCityFormRoadVisualInstance> BuildVisualInstances(const FCityFormRoadGraphSnapshot& Snapshot);
 	void RebuildFromSimulation();
 
 	const TArray<CityForm::Simulation::FRoadSegmentId>& GetSegmentIdsByInstance() const

@@ -14,20 +14,10 @@ void ACityFormPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	InputComponent->BindKey(
-		EKeys::LeftMouseButton,
-		IE_Pressed,
-		this,
-		&ACityFormPlayerController::HandlePrimaryToolAction);
+		EKeys::LeftMouseButton, IE_Pressed, this, &ACityFormPlayerController::HandlePrimaryToolAction);
 	InputComponent->BindKey(
-		EKeys::RightMouseButton,
-		IE_Pressed,
-		this,
-		&ACityFormPlayerController::HandleCancelToolAction);
-	InputComponent->BindKey(
-		EKeys::Escape,
-		IE_Pressed,
-		this,
-		&ACityFormPlayerController::HandleCancelToolAction);
+		EKeys::RightMouseButton, IE_Pressed, this, &ACityFormPlayerController::HandleCancelToolAction);
+	InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &ACityFormPlayerController::HandleCancelToolAction);
 }
 
 void ACityFormPlayerController::BeginPlay()
@@ -43,9 +33,7 @@ void ACityFormPlayerController::BeginPlay()
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 
-	ToolPalette = CreateWidget<UCityFormToolPaletteWidget>(
-		this,
-		UCityFormToolPaletteWidget::StaticClass());
+	ToolPalette = CreateWidget<UCityFormToolPaletteWidget>(this, UCityFormToolPaletteWidget::StaticClass());
 	if (ensureMsgf(ToolPalette != nullptr, TEXT("City Form could not create its tool palette.")))
 	{
 		ToolPalette->InitializeForController(this);
@@ -141,8 +129,6 @@ void ACityFormPlayerController::SetRoadCategoryOpen(const bool bOpen)
 	{
 		ToolPalette->SetRoadCategoryOpen(bRoadCategoryOpen);
 	}
-	SetToolStatus(
-		bRoadCategoryOpen
-			? TEXT("Choose Basic Two-Way Road to begin placing roads.")
-			: TEXT("Choose Roads to open the road-building tools."));
+	SetToolStatus(bRoadCategoryOpen ? TEXT("Choose Basic Two-Way Road to begin placing roads.")
+									: TEXT("Choose Roads to open the road-building tools."));
 }
