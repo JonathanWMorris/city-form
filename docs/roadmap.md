@@ -70,7 +70,7 @@ Exit criteria:
 
 Deliver:
 
-- A project-owned flat test map
+- A project-owned two-kilometer flat test map with documented metric bounds
 - A smooth ground-focused city-builder camera
 - Pan, zoom, rotation, and tilt controls
 - Minimal project-owned input and game-mode configuration
@@ -80,6 +80,10 @@ Exit criteria:
 - The project launches into the prototype map.
 - A user can navigate the buildable area without character controls.
 - Simulation state remains independent of the map and camera.
+
+The prototype validates the coordinate and buildable-area contract in
+[Map Foundation](map-foundation.md). Procedural terrain, tile acquisition,
+regional gateways, and production-scale streaming remain future work.
 
 ## Stage 4: Interactive Roads
 

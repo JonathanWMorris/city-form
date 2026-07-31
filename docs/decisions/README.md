@@ -18,6 +18,7 @@ implementation details and easily reversible choices do not require an ADR.
 - [0007: Multi-rate millisecond simulation time](0007-multirate-millisecond-time.md)
 - [0008: Global, City-owned microscopic traffic](0008-global-city-owned-microscopic-traffic.md)
 - [0009: Accelerated civil and transit service time](0009-accelerated-civil-and-service-time.md)
+- [0010: Extensible tiled worlds and regional gateways](0010-extensible-tiled-worlds.md)
 
 ## Template
 
