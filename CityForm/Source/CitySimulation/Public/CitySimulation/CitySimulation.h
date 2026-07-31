@@ -58,6 +58,10 @@ public:
 		FRoadNodeId EndpointA,
 		FRoadNodeId EndpointB,
 		FRoadSegmentDefinition Definition);
+	FCreateRoadSegmentResult CreateRoadSegment(
+		FRoadEndpointInput EndpointA,
+		FRoadEndpointInput EndpointB,
+		FRoadSegmentDefinition Definition);
 	FRouteResult FindRoute(const FRouteQuery& Query) const;
 	FValidationReport Validate() const;
 	FCitySummary GetSummary() const;

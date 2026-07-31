@@ -78,6 +78,35 @@ struct FAddRoadSegmentResult
 	}
 };
 
+struct FRoadEndpointInput
+{
+	TOptional<FRoadNodeId> ExistingNodeId;
+	FSimPoint2D PositionMeters;
+
+	static FRoadEndpointInput Existing(const FRoadNodeId NodeId)
+	{
+		return {NodeId, {}};
+	}
+
+	static FRoadEndpointInput New(const FSimPoint2D Position)
+	{
+		return {{}, Position};
+	}
+};
+
+struct FCreateRoadSegmentResult
+{
+	FRoadNodeId EndpointA;
+	FRoadNodeId EndpointB;
+	FRoadSegmentId SegmentId;
+	FSimulationError Error;
+
+	bool IsSuccess() const
+	{
+		return EndpointA.IsValid() && EndpointB.IsValid() && SegmentId.IsValid() && !Error.IsSet();
+	}
+};
+
 class CITYSIMULATION_API FRoadGraph
 {
 public:
@@ -87,6 +116,11 @@ public:
 	FAddRoadSegmentResult AddRoadSegment(
 		FRoadNodeId EndpointA,
 		FRoadNodeId EndpointB,
+		FRoadSegmentDefinition Definition,
+		const FRoadTypeCatalog& RoadTypes);
+	FCreateRoadSegmentResult CreateRoadSegment(
+		FRoadEndpointInput EndpointA,
+		FRoadEndpointInput EndpointB,
 		FRoadSegmentDefinition Definition,
 		const FRoadTypeCatalog& RoadTypes);
 

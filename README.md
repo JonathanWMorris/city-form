@@ -8,11 +8,12 @@ inspectable, scalable, and enjoyable to control.
 > City Form has completed its headless Stage 2 road graph and routing
 > foundation. `CitySimulation` supports validated regional road defaults,
 > logical topology, millisecond time, and vehicle-aware time-dependent A*, but
-> traffic progression, interactive road tools, and city content do not exist
-> yet. Stage 3 is complete with a project-owned flat prototype map and verified
-> C++ city-builder camera. Stage 4 is underway with a game-instance-owned
-> Unreal-to-simulation bridge, explicit unit conversion, and detached road graph
-> snapshots ready for interactive road creation.
+> traffic progression and city content do not exist yet. Stage 3 is complete
+> with a project-owned flat prototype map and verified C++ city-builder camera.
+> Stage 4 now has a game-instance-owned Unreal-to-simulation bridge and a first
+> connected-road interaction: select the Road tool, place two endpoints, and
+> create one validated logical segment with endpoint snapping and live preview.
+> Persistent road visuals remain the next Stage 4 task.
 
 ## Vision
 
@@ -84,6 +85,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
 | [Map Foundation](docs/map-foundation.md) | Prototype coordinates and future extensible-world contract |
 | [City-Builder Camera](docs/camera-controls.md) | Mouse, keyboard, and trackpad navigation controls |
+| [Road Placement Tool](docs/road-tools.md) | Current road-building controls, contracts, and limitations |
 | [Simulation Foundation](docs/simulation-foundation.md) | Current APIs and planned routing contract |
 | [Traffic Model](docs/traffic-model.md) | Global microscopic traffic, prediction, and future incidents |
 | [Gameplay Pacing](docs/gameplay-pacing.md) | Accelerated calendar and ideal construction targets |

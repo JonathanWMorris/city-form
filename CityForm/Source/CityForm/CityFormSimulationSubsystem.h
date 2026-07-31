@@ -29,6 +29,22 @@ struct FCityFormRoadGraphSnapshot
 	TArray<FCityFormRoadSegmentSnapshot> Segments;
 };
 
+struct FCityFormRoadEndpointInput
+{
+	TOptional<CityForm::Simulation::FRoadNodeId> ExistingNodeId;
+	FVector PositionCentimeters = FVector::ZeroVector;
+
+	static FCityFormRoadEndpointInput Existing(const CityForm::Simulation::FRoadNodeId NodeId)
+	{
+		return {NodeId, {}};
+	}
+
+	static FCityFormRoadEndpointInput New(const FVector& Position)
+	{
+		return {{}, Position};
+	}
+};
+
 /**
  * Owns the active authoritative city for the lifetime of the game instance.
  * Actors submit commands and consume detached snapshots; they never own simulation state.
@@ -44,11 +60,9 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	CityForm::Simulation::FAddRoadNodeResult AddRoadNode(
-		const FVector& UnrealPositionCentimeters);
-	CityForm::Simulation::FAddRoadSegmentResult AddRoadSegment(
-		CityForm::Simulation::FRoadNodeId EndpointA,
-		CityForm::Simulation::FRoadNodeId EndpointB,
+	CityForm::Simulation::FCreateRoadSegmentResult CreateRoadSegment(
+		FCityFormRoadEndpointInput EndpointA,
+		FCityFormRoadEndpointInput EndpointB,
 		CityForm::Simulation::FRoadSegmentDefinition Definition);
 
 	FCityFormRoadGraphSnapshot CreateRoadGraphSnapshot() const;

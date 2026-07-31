@@ -94,12 +94,18 @@ regional gateways, and production-scale streaming remain future work.
 
 Status: In progress
 
+The bridge and first connected-road interaction are implemented. The Road tool
+uses a code-built palette, a two-click preview, endpoint-only screen-space
+snapping, and one atomic simulation command. Persistent derived road visuals
+remain before this stage is complete.
+
 Deliver:
 
 - A game-instance-owned bridge between Unreal and the authoritative simulation
 - Explicit meter-to-centimeter conversion and detached road graph snapshots
 - Ground raycasting from the player cursor
 - Two-click road-segment creation and a live preview
+- Endpoint snapping sufficient to connect segments into a routable graph
 - Translation from player input into simulation road commands
 - Simple derived road visuals
 

@@ -88,6 +88,12 @@ public:
 		return {AllocatedId, {}};
 	}
 
+	constexpr bool CanAllocate(const uint64 Count) const
+	{
+		return Count == 0 ||
+			(NextValue != 0 && Count - 1 <= MAX_uint64 - NextValue);
+	}
+
 	uint64 GetNextValueForDiagnostics() const
 	{
 		return NextValue;

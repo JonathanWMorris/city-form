@@ -64,6 +64,18 @@ FAddRoadSegmentResult FCitySimulation::AddRoadSegment(
 		RoadTypes);
 }
 
+FCreateRoadSegmentResult FCitySimulation::CreateRoadSegment(
+	FRoadEndpointInput EndpointA,
+	FRoadEndpointInput EndpointB,
+	FRoadSegmentDefinition Definition)
+{
+	return RoadGraph.CreateRoadSegment(
+		MoveTemp(EndpointA),
+		MoveTemp(EndpointB),
+		MoveTemp(Definition),
+		RoadTypes);
+}
+
 FRouteResult FCitySimulation::FindRoute(const FRouteQuery& Query) const
 {
 	const FFreeFlowTraversalCostProvider CostProvider;

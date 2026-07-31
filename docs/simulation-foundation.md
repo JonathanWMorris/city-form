@@ -102,6 +102,8 @@ facade exposes:
 - `Advance(FSimulationDuration Duration)`
 - `AddRoadNode(...)`
 - `AddRoadSegment(...)`
+- `CreateRoadSegment(...)`, an atomic command that accepts new or existing
+  endpoints
 - `FindRoute(...)`
 - `Validate()`
 - `GetSummary()`
@@ -195,6 +197,8 @@ Stage 2 commands:
 
 - Add one RoadNode at a validated point
 - Add one RoadSegment between existing nodes
+- Create one RoadSegment with any combination of validated existing endpoints
+  and new endpoint positions, without leaving partial nodes on failure
 
 Commands return typed result records containing the created ID on success.
 Segment creation rejects:
