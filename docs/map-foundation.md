@@ -34,6 +34,11 @@ The level owns presentation only: collision ground, lighting, sky, and player
 spawn configuration. It must not own authoritative roads, parcels, citizens,
 trips, time, regional configuration, or procedural-generation state.
 
+The prototype player start is a ground-level focus at the world origin. The
+city-builder camera supplies its own elevation through a spring arm and clamps
+that focus to the buildable bounds above. See
+[City-Builder Camera](camera-controls.md) for controls and tuning.
+
 v0.1 authoritative geometry remains planar. Future elevations and vertical
 road alignments use explicit metric data; they must not be inferred from Actor
 transforms or an implicit Unreal Z convention.
