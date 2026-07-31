@@ -19,6 +19,7 @@ public:
 	virtual void SetupInputComponent() override;
 
 	void SetToolMode(ECityFormToolMode ToolMode);
+	void ToggleRoadCategory();
 	void SetToolStatus(const FString& Message, bool bIsError = false);
 	bool IsPointerOverToolPalette() const;
 
@@ -28,10 +29,13 @@ protected:
 private:
 	void HandlePrimaryToolAction();
 	void HandleCancelToolAction();
+	void SetRoadCategoryOpen(bool bOpen);
 
 	UPROPERTY(VisibleAnywhere, Category = "City Form|Tools")
 	TObjectPtr<class UCityFormRoadPlacementComponent> RoadPlacementTool;
 
 	UPROPERTY(Transient)
 	TObjectPtr<class UCityFormToolPaletteWidget> ToolPalette;
+
+	bool bRoadCategoryOpen = false;
 };

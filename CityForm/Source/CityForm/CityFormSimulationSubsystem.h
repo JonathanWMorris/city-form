@@ -7,6 +7,8 @@
 
 #include "CityFormSimulationSubsystem.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnCityFormRoadGraphChanged);
+
 struct FCityFormRoadNodeSnapshot
 {
 	CityForm::Simulation::FRoadNodeId Id;
@@ -66,6 +68,7 @@ public:
 		CityForm::Simulation::FRoadSegmentDefinition Definition);
 
 	FCityFormRoadGraphSnapshot CreateRoadGraphSnapshot() const;
+	FOnCityFormRoadGraphChanged& OnRoadGraphChanged() { return RoadGraphChanged; }
 	CityForm::Simulation::FCitySummary GetCitySummary() const;
 	CityForm::Simulation::FValidationReport ValidateCity() const;
 
@@ -74,4 +77,5 @@ private:
 	const CityForm::Simulation::FCitySimulation& GetSimulation() const;
 
 	TUniquePtr<CityForm::Simulation::FCitySimulation> Simulation;
+	FOnCityFormRoadGraphChanged RoadGraphChanged;
 };

@@ -92,12 +92,12 @@ regional gateways, and production-scale streaming remain future work.
 
 ## Stage 4: Interactive Roads
 
-Status: In progress
+Status: Complete
 
-The bridge and first connected-road interaction are implemented. The Road tool
-uses a code-built palette, a two-click preview, endpoint-only screen-space
-snapping, and one atomic simulation command. Persistent derived road visuals
-remain before this stage is complete.
+The bridge and connected-road interaction are implemented. The Road tool uses
+a bottom two-layer menu, a two-click preview, endpoint-only screen-space
+snapping, and one atomic simulation command. One world presentation actor
+rebuilds instanced placeholder roads from detached graph snapshots.
 
 Deliver:
 

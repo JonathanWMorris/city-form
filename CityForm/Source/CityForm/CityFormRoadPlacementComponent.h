@@ -51,7 +51,7 @@ public:
 
 	void SetToolMode(ECityFormToolMode InToolMode);
 	void HandlePrimaryAction();
-	void HandleCancelAction();
+	bool CancelPendingPlacement();
 
 	ECityFormToolMode GetToolMode() const { return ToolMode; }
 	ERoadPlacementState GetPlacementState() const { return Placement.State; }

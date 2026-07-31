@@ -104,22 +104,15 @@ void UCityFormRoadPlacementComponent::HandlePrimaryAction()
 		Result.SegmentId.GetValue()));
 }
 
-void UCityFormRoadPlacementComponent::HandleCancelAction()
+bool UCityFormRoadPlacementComponent::CancelPendingPlacement()
 {
-	if (ToolMode != ECityFormToolMode::Road)
-	{
-		return;
-	}
-	if (Placement.State == ERoadPlacementState::StartSelected)
+	if (ToolMode == ECityFormToolMode::Road && Placement.State == ERoadPlacementState::StartSelected)
 	{
 		ClearPendingPlacement();
 		SetStatus(TEXT("Road placement canceled. Click to start another road."));
-		return;
+		return true;
 	}
-	if (ACityFormPlayerController* Controller = Cast<ACityFormPlayerController>(GetOwner()))
-	{
-		Controller->SetToolMode(ECityFormToolMode::None);
-	}
+	return false;
 }
 
 bool UCityFormRoadPlacementComponent::IsLongEnough(const FVector& Start, const FVector& End)

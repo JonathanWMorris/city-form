@@ -85,6 +85,9 @@ bool FCityFormSimulationBridgeCommandsTest::RunTest(const FString& Parameters)
 	}
 
 	TestEqual(TEXT("The prototype city uses the documented seed."), Subsystem->GetCitySummary().Seed, uint64(0));
+	int32 GraphChangeCount = 0;
+	const FDelegateHandle ChangeHandle = Subsystem->OnRoadGraphChanged().AddLambda(
+		[&GraphChangeCount]() { ++GraphChangeCount; });
 	FRoadSegmentDefinition Definition;
 	Definition.RoadTypeId = FRoadTypeCatalog::GetBasicTwoWayRoadTypeId();
 	const FCreateRoadSegmentResult Segment = Subsystem->CreateRoadSegment(
@@ -92,6 +95,7 @@ bool FCityFormSimulationBridgeCommandsTest::RunTest(const FString& Parameters)
 		FCityFormRoadEndpointInput::New(FVector(400.0, 600.0, 90.0)),
 		Definition);
 	TestTrue(TEXT("The segment command succeeds."), Segment.IsSuccess());
+	TestEqual(TEXT("A successful graph command publishes one presentation notification."), GraphChangeCount, 1);
 
 	FCityFormRoadGraphSnapshot Snapshot = Subsystem->CreateRoadGraphSnapshot();
 	TestEqual(TEXT("The snapshot contains both nodes."), Snapshot.Nodes.Num(), 2);
@@ -107,6 +111,7 @@ bool FCityFormSimulationBridgeCommandsTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Changing a snapshot does not remove authoritative nodes."), FreshSnapshot.Nodes.Num(), 2);
 	TestEqual(TEXT("Changing a snapshot does not remove authoritative segments."), FreshSnapshot.Segments.Num(), 1);
 	TestTrue(TEXT("The resulting city passes authoritative validation."), Subsystem->ValidateCity().IsValid());
+	Subsystem->OnRoadGraphChanged().Remove(ChangeHandle);
 	return true;
 }
 
@@ -125,6 +130,9 @@ bool FCityFormSimulationBridgeErrorTest::RunTest(const FString& Parameters)
 	}
 
 	FRoadSegmentDefinition Definition;
+	int32 GraphChangeCount = 0;
+	const FDelegateHandle ChangeHandle = Subsystem->OnRoadGraphChanged().AddLambda(
+		[&GraphChangeCount]() { ++GraphChangeCount; });
 	Definition.RoadTypeId = FRoadTypeCatalog::GetBasicTwoWayRoadTypeId();
 	const FCreateRoadSegmentResult InvalidNode = Subsystem->CreateRoadSegment(
 		FCityFormRoadEndpointInput::New(
@@ -150,6 +158,8 @@ bool FCityFormSimulationBridgeErrorTest::RunTest(const FString& Parameters)
 	const FCitySummary Summary = Subsystem->GetCitySummary();
 	TestEqual(TEXT("Rejected commands do not create nodes."), Summary.RoadNodeCount, 0);
 	TestEqual(TEXT("Rejected commands do not create segments."), Summary.RoadSegmentCount, 0);
+	TestEqual(TEXT("Rejected commands publish no graph-change notification."), GraphChangeCount, 0);
+	Subsystem->OnRoadGraphChanged().Remove(ChangeHandle);
 	return true;
 }
 

@@ -2,6 +2,8 @@
 
 #include "CityFormCameraPawn.h"
 
+#include "CityFormPlayerController.h"
+
 #include "Camera/CameraComponent.h"
 #include "Components/SceneComponent.h"
 #include "EnhancedInputComponent.h"
@@ -212,6 +214,11 @@ FVector2D ACityFormCameraPawn::GetEdgePanInput() const
 	}
 
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	const ACityFormPlayerController* CityFormController = Cast<ACityFormPlayerController>(PlayerController);
+	if (CityFormController != nullptr && CityFormController->IsPointerOverToolPalette())
+	{
+		return FVector2D::ZeroVector;
+	}
 	const ULocalPlayer* LocalPlayer = PlayerController != nullptr ? PlayerController->GetLocalPlayer() : nullptr;
 	const UGameViewportClient* ViewportClient = LocalPlayer != nullptr ? LocalPlayer->ViewportClient : nullptr;
 	if (PlayerController == nullptr || ViewportClient == nullptr || ViewportClient->Viewport == nullptr ||

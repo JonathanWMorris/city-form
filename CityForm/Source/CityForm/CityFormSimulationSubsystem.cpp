@@ -36,10 +36,15 @@ FCreateRoadSegmentResult UCityFormSimulationSubsystem::CreateRoadSegment(
 				FCityFormCoordinateConversion::ToSimulationMeters(Input.PositionCentimeters));
 	};
 
-	return GetSimulation().CreateRoadSegment(
+	FCreateRoadSegmentResult Result = GetSimulation().CreateRoadSegment(
 		ConvertEndpoint(MoveTemp(EndpointA)),
 		ConvertEndpoint(MoveTemp(EndpointB)),
 		MoveTemp(Definition));
+	if (Result.IsSuccess())
+	{
+		RoadGraphChanged.Broadcast();
+	}
+	return Result;
 }
 
 FCityFormRoadGraphSnapshot UCityFormSimulationSubsystem::CreateRoadGraphSnapshot() const

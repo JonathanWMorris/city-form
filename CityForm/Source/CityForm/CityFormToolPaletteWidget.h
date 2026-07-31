@@ -21,6 +21,7 @@ class CITYFORM_API UCityFormToolPaletteWidget final : public UUserWidget
 public:
 	void InitializeForController(ACityFormPlayerController* InController);
 	void SetSelectedTool(ECityFormToolMode ToolMode);
+	void SetRoadCategoryOpen(bool bOpen);
 	void SetStatus(const FString& Message, bool bIsError = false);
 	bool IsPointerOverPalette() const;
 
@@ -29,13 +30,10 @@ protected:
 
 private:
 	UFUNCTION()
-	void HandleRoadClicked();
+	void HandleRoadCategoryClicked();
 
 	UFUNCTION()
-	void HandleResidentialClicked();
-
-	UFUNCTION()
-	void HandleCommercialClicked();
+	void HandleBasicRoadClicked();
 
 	TObjectPtr<ACityFormPlayerController> Controller;
 
@@ -43,16 +41,13 @@ private:
 	TObjectPtr<UBorder> PaletteBorder;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UButton> RoadButton;
+	TObjectPtr<UBorder> RoadTray;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UButton> ResidentialButton;
+	TObjectPtr<UButton> RoadCategoryButton;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UButton> CommercialButton;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTextBlock> ToolText;
+	TObjectPtr<UButton> BasicRoadButton;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> StatusText;

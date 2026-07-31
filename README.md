@@ -10,10 +10,10 @@ inspectable, scalable, and enjoyable to control.
 > logical topology, millisecond time, and vehicle-aware time-dependent A*, but
 > traffic progression and city content do not exist yet. Stage 3 is complete
 > with a project-owned flat prototype map and verified C++ city-builder camera.
-> Stage 4 now has a game-instance-owned Unreal-to-simulation bridge and a first
-> connected-road interaction: select the Road tool, place two endpoints, and
-> create one validated logical segment with endpoint snapping and live preview.
-> Persistent road visuals remain the next Stage 4 task.
+> Stage 4 is complete with a game-instance-owned Unreal-to-simulation bridge,
+> a bottom two-layer road menu, connected two-click placement, endpoint
+> snapping, live preview, and persistent placeholder roads rebuilt from
+> detached logical-graph snapshots.
 
 ## Vision
 
