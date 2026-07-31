@@ -68,12 +68,21 @@ Exit criteria:
 
 ## Stage 3: Prototype Environment
 
-Deliver:
+Status: In progress — implementation complete, final hands-on verification
+pending
+
+Implemented:
 
 - A project-owned two-kilometer flat test map with documented metric bounds
 - A smooth ground-focused city-builder camera
-- Pan, zoom, rotation, and tilt controls
+- Keyboard, mouse, edge-scroll, and trackpad-scroll navigation
 - Minimal project-owned input and game-mode configuration
+
+Remaining:
+
+- Complete the final macOS navigation checklist, including physical trackpad
+  direction and feel
+- Record any tuning follow-ups without expanding this stage into road editing
 
 Exit criteria:
 
@@ -82,7 +91,8 @@ Exit criteria:
 - Simulation state remains independent of the map and camera.
 
 The prototype validates the coordinate and buildable-area contract in
-[Map Foundation](map-foundation.md). Procedural terrain, tile acquisition,
+[Map Foundation](map-foundation.md). The current bindings are documented in
+[City-Builder Camera](camera-controls.md). Procedural terrain, tile acquisition,
 regional gateways, and production-scale streaming remain future work.
 
 ## Stage 4: Interactive Roads

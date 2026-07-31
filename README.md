@@ -8,9 +8,10 @@ inspectable, scalable, and enjoyable to control.
 > City Form has completed its headless Stage 2 road graph and routing
 > foundation. `CitySimulation` supports validated regional road defaults,
 > logical topology, millisecond time, and vehicle-aware time-dependent A*, but
-> traffic progression, interactive road tools, and custom gameplay assets do
-> not exist yet. Stage 3 now has a project-owned flat prototype map and awaits
-> its city-builder camera.
+> traffic progression, interactive road tools, and city content do not exist
+> yet. Stage 3 now has a project-owned flat prototype map and a C++ city-builder
+> camera; final hands-on navigation verification remains before the
+> prototype-environment stage is complete.
 
 ## Vision
 
@@ -81,6 +82,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [Domain Model](docs/domain-model.md) | Shared vocabulary, ownership, and entity relationships |
 | [Architecture](docs/architecture.md) | Simulation boundaries and technical constraints |
 | [Map Foundation](docs/map-foundation.md) | Prototype coordinates and future extensible-world contract |
+| [City-Builder Camera](docs/camera-controls.md) | Mouse, keyboard, and trackpad navigation controls |
 | [Simulation Foundation](docs/simulation-foundation.md) | Current APIs and planned routing contract |
 | [Traffic Model](docs/traffic-model.md) | Global microscopic traffic, prediction, and future incidents |
 | [Gameplay Pacing](docs/gameplay-pacing.md) | Accelerated calendar and ideal construction targets |
@@ -99,6 +101,7 @@ proposals before accepted decisions are reflected here.
 CityForm/
 ├── Build/Mac/Resources/   # Unreal-generated macOS project resources
 ├── Config/                # Initial Unreal project configuration
+├── Content/Input/         # Project-owned Enhanced Input assets
 ├── Content/Maps/          # Project-owned Unreal levels
 ├── Source/CityForm/       # Unreal presentation and gameplay module
 ├── Source/CitySimulation/ # Headless authoritative simulation module
