@@ -46,13 +46,16 @@ void ACityFormPlayerController::BeginPlay()
 	ToolPalette = CreateWidget<UCityFormToolPaletteWidget>(
 		this,
 		UCityFormToolPaletteWidget::StaticClass());
-	if (ToolPalette != nullptr)
+	if (ensureMsgf(ToolPalette != nullptr, TEXT("City Form could not create its tool palette.")))
 	{
 		ToolPalette->InitializeForController(this);
-		ToolPalette->AddToViewport(100);
+		// Unreal 5.8's viewport position helper resets anchors to the top-left, so
+		// establish the offset first and the intended bottom-center anchor afterward.
+		ToolPalette->SetPositionInViewport(FVector2D(0.0, -24.0), false);
 		ToolPalette->SetAnchorsInViewport(FAnchors(0.5f, 1.0f));
 		ToolPalette->SetAlignmentInViewport(FVector2D(0.5, 1.0));
-		ToolPalette->SetPositionInViewport(FVector2D(0.0, -24.0), false);
+		ToolPalette->AddToViewport(100);
+		ensureMsgf(ToolPalette->IsInViewport(), TEXT("City Form could not attach its tool palette to the viewport."));
 		ToolPalette->SetRoadCategoryOpen(false);
 	}
 }

@@ -10,6 +10,7 @@
 class ACityFormPlayerController;
 class UBorder;
 class UButton;
+class USizeBox;
 class UTextBlock;
 
 /** Minimal source-defined build toolbar that can grow with the walking skeleton. */
@@ -39,6 +40,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> PaletteBorder;
+
+	UPROPERTY(Transient)
+	TObjectPtr<USizeBox> DockSize;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> RoadTray;
