@@ -85,21 +85,22 @@ bool FCityFormSimulationBridgeCommandsTest::RunTest(const FString& Parameters)
 	}
 
 	TestEqual(TEXT("The prototype city uses the documented seed."), Subsystem->GetCitySummary().Seed, uint64(0));
-	const FAddRoadNodeResult FirstNode = Subsystem->AddRoadNode(FVector(100.0, 200.0, 30.0));
-	const FAddRoadNodeResult SecondNode = Subsystem->AddRoadNode(FVector(400.0, 600.0, 90.0));
-	TestTrue(TEXT("The first node command succeeds."), FirstNode.IsSuccess());
-	TestTrue(TEXT("The second node command succeeds."), SecondNode.IsSuccess());
-
+	int32 GraphChangeCount = 0;
+	const FDelegateHandle ChangeHandle = Subsystem->OnRoadGraphChanged().AddLambda(
+		[&GraphChangeCount]() { ++GraphChangeCount; });
 	FRoadSegmentDefinition Definition;
 	Definition.RoadTypeId = FRoadTypeCatalog::GetBasicTwoWayRoadTypeId();
-	const FAddRoadSegmentResult Segment =
-		Subsystem->AddRoadSegment(FirstNode.NodeId, SecondNode.NodeId, Definition);
+	const FCreateRoadSegmentResult Segment = Subsystem->CreateRoadSegment(
+		FCityFormRoadEndpointInput::New(FVector(100.0, 200.0, 30.0)),
+		FCityFormRoadEndpointInput::New(FVector(400.0, 600.0, 90.0)),
+		Definition);
 	TestTrue(TEXT("The segment command succeeds."), Segment.IsSuccess());
+	TestEqual(TEXT("A successful graph command publishes one presentation notification."), GraphChangeCount, 1);
 
 	FCityFormRoadGraphSnapshot Snapshot = Subsystem->CreateRoadGraphSnapshot();
 	TestEqual(TEXT("The snapshot contains both nodes."), Snapshot.Nodes.Num(), 2);
 	TestEqual(TEXT("The snapshot contains the segment."), Snapshot.Segments.Num(), 1);
-	TestEqual(TEXT("The first node ID is preserved."), Snapshot.Nodes[0].Id, FirstNode.NodeId);
+	TestEqual(TEXT("The first node ID is preserved."), Snapshot.Nodes[0].Id, Segment.EndpointA);
 	TestEqual(TEXT("The first node is returned in Unreal centimeters."), Snapshot.Nodes[0].PositionCentimeters, FVector(100.0, 200.0, 0.0));
 	TestEqual(TEXT("The segment ID is preserved."), Snapshot.Segments[0].Id, Segment.SegmentId);
 	TestEqual(TEXT("The segment length is returned in Unreal centimeters."), Snapshot.Segments[0].LengthCentimeters, 500.0);
@@ -110,6 +111,7 @@ bool FCityFormSimulationBridgeCommandsTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Changing a snapshot does not remove authoritative nodes."), FreshSnapshot.Nodes.Num(), 2);
 	TestEqual(TEXT("Changing a snapshot does not remove authoritative segments."), FreshSnapshot.Segments.Num(), 1);
 	TestTrue(TEXT("The resulting city passes authoritative validation."), Subsystem->ValidateCity().IsValid());
+	Subsystem->OnRoadGraphChanged().Remove(ChangeHandle);
 	return true;
 }
 
@@ -127,18 +129,26 @@ bool FCityFormSimulationBridgeErrorTest::RunTest(const FString& Parameters)
 		return false;
 	}
 
-	const FAddRoadNodeResult InvalidNode =
-		Subsystem->AddRoadNode(FVector(std::numeric_limits<double>::quiet_NaN(), 0.0, 0.0));
+	FRoadSegmentDefinition Definition;
+	int32 GraphChangeCount = 0;
+	const FDelegateHandle ChangeHandle = Subsystem->OnRoadGraphChanged().AddLambda(
+		[&GraphChangeCount]() { ++GraphChangeCount; });
+	Definition.RoadTypeId = FRoadTypeCatalog::GetBasicTwoWayRoadTypeId();
+	const FCreateRoadSegmentResult InvalidNode = Subsystem->CreateRoadSegment(
+		FCityFormRoadEndpointInput::New(
+			FVector(std::numeric_limits<double>::quiet_NaN(), 0.0, 0.0)),
+		FCityFormRoadEndpointInput::New(FVector(100.0, 0.0, 0.0)),
+		Definition);
 	TestFalse(TEXT("A non-finite position is rejected."), InvalidNode.IsSuccess());
 	TestEqual(
 		TEXT("The simulation error code crosses the presentation boundary."),
 		InvalidNode.Error.Code,
 		ESimulationErrorCode::NonFiniteRoadPosition);
 
-	FRoadSegmentDefinition Definition;
-	Definition.RoadTypeId = FRoadTypeCatalog::GetBasicTwoWayRoadTypeId();
-	const FAddRoadSegmentResult InvalidSegment =
-		Subsystem->AddRoadSegment(FRoadNodeId(1), FRoadNodeId(2), Definition);
+	const FCreateRoadSegmentResult InvalidSegment = Subsystem->CreateRoadSegment(
+		FCityFormRoadEndpointInput::Existing(FRoadNodeId(1)),
+		FCityFormRoadEndpointInput::Existing(FRoadNodeId(2)),
+		Definition);
 	TestFalse(TEXT("Unknown segment endpoints are rejected."), InvalidSegment.IsSuccess());
 	TestEqual(
 		TEXT("Invalid endpoint errors remain typed."),
@@ -148,6 +158,8 @@ bool FCityFormSimulationBridgeErrorTest::RunTest(const FString& Parameters)
 	const FCitySummary Summary = Subsystem->GetCitySummary();
 	TestEqual(TEXT("Rejected commands do not create nodes."), Summary.RoadNodeCount, 0);
 	TestEqual(TEXT("Rejected commands do not create segments."), Summary.RoadSegmentCount, 0);
+	TestEqual(TEXT("Rejected commands publish no graph-change notification."), GraphChangeCount, 0);
+	Subsystem->OnRoadGraphChanged().Remove(ChangeHandle);
 	return true;
 }
 

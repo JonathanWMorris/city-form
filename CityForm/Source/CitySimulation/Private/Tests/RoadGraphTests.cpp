@@ -242,6 +242,58 @@ bool FRoadSegmentCommandTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FCompoundRoadCommandTest,
+	"CityForm.Simulation.RoadGraph.CompoundRoadCommands",
+	RoadGraphTestFlags)
+
+bool FCompoundRoadCommandTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({351});
+	const FCreateRoadSegmentResult First = City.CreateRoadSegment(
+		FRoadEndpointInput::New({0.0, 0.0}),
+		FRoadEndpointInput::New({100.0, 0.0}),
+		MakeBasicRoad());
+	TestTrue(TEXT("A compound command creates two new endpoints."), First.IsSuccess());
+	TestEqual(TEXT("The first endpoint receives ID one."), First.EndpointA.GetValue(), uint64(1));
+	TestEqual(TEXT("The second endpoint receives ID two."), First.EndpointB.GetValue(), uint64(2));
+
+	const FCreateRoadSegmentResult Second = City.CreateRoadSegment(
+		FRoadEndpointInput::Existing(First.EndpointB),
+		FRoadEndpointInput::New({100.0, 100.0}),
+		MakeBasicRoad());
+	TestTrue(TEXT("A compound command can reuse one endpoint."), Second.IsSuccess());
+	TestEqual(TEXT("The existing endpoint identity is retained."), Second.EndpointA, First.EndpointB);
+	TestEqual(TEXT("Only one new node ID is allocated."), Second.EndpointB.GetValue(), uint64(3));
+
+	const FCreateRoadSegmentResult Third = City.CreateRoadSegment(
+		FRoadEndpointInput::Existing(Second.EndpointB),
+		FRoadEndpointInput::Existing(First.EndpointA),
+		MakeBasicRoad());
+	TestTrue(TEXT("A compound command can connect two existing endpoints."), Third.IsSuccess());
+	TestEqual(TEXT("Three connected roads use only three nodes."), City.GetSummary().RoadNodeCount, 3);
+	TestEqual(TEXT("Three connected roads create three segments."), City.GetSummary().RoadSegmentCount, 3);
+	TestTrue(TEXT("The connected graph validates."), City.Validate().IsValid());
+
+	const FCitySummary BeforeFailures = City.GetSummary();
+	FRoadSegmentDefinition InvalidType = MakeBasicRoad();
+	InvalidType.RoadTypeId = FRoadTypeId(999);
+	const FCreateRoadSegmentResult Invalid = City.CreateRoadSegment(
+		FRoadEndpointInput::New({std::numeric_limits<double>::quiet_NaN(), 0.0}),
+		FRoadEndpointInput::New({200.0, 0.0}),
+		InvalidType);
+	TestEqual(TEXT("Endpoint validation runs before mutation."), Invalid.Error.Code, ESimulationErrorCode::NonFiniteRoadPosition);
+	TestTrue(TEXT("A rejected compound command leaves summary counts unchanged."), City.GetSummary() == BeforeFailures);
+
+	const FCreateRoadSegmentResult Duplicate = City.CreateRoadSegment(
+		FRoadEndpointInput::Existing(First.EndpointB),
+		FRoadEndpointInput::Existing(First.EndpointA),
+		MakeBasicRoad());
+	TestEqual(TEXT("Duplicate connections return a typed error."), Duplicate.Error.Code, ESimulationErrorCode::DuplicateRoadConnection);
+	TestTrue(TEXT("A duplicate compound command is atomic."), City.GetSummary() == BeforeFailures);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FInvalidRoadCommandAtomicityTest,
 	"CityForm.Simulation.RoadGraph.InvalidCommandAtomicity",
 	RoadGraphTestFlags)

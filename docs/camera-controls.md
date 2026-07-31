@@ -24,9 +24,12 @@ level never determine which parts of the authoritative city simulation run.
 | `R`, `F` | Tilt toward the horizon or toward top-down |
 | `Home`, `End` | Alternative tilt controls |
 | `Z`, `X` | Zoom in or out without a wheel |
+| Left click or primary trackpad click | Use the selected editing tool |
+| Right click or trackpad secondary click | Step back through pending endpoint, active road type, and open Roads category |
+| `Escape` | Step back through pending endpoint, active road type, and open Roads category |
 
-Right-click and trackpad secondary click are deliberately unassigned. Future
-editing tools will use secondary click to cancel the current operation.
+Primary clicks over the bottom tool dock operate the UI rather than the map.
+The same rule suppresses edge scrolling while the pointer is over the dock.
 
 The initial trackpad contract is two-finger scrolling for zoom plus ordinary
 pointer edge scrolling. Native pinch, rotation, and two-finger pan gestures are
@@ -94,4 +97,6 @@ tuning remains presentation work and must not change simulation outcomes.
   cursor-centered zoom are not implemented.
 - Trackpad scroll feel can vary with operating-system natural-scroll settings
   and should be rechecked when configurable input settings are introduced.
-- Road editing and right-click cancellation are Stage 4 work.
+- The Stage 4 Road tool supports two-layer selection, two-click creation,
+  cancellation, and persistent snapshot-derived placeholder visuals. Advanced
+  editing remains incomplete.

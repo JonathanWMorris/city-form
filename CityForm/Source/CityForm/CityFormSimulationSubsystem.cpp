@@ -23,19 +23,28 @@ void UCityFormSimulationSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-FAddRoadNodeResult UCityFormSimulationSubsystem::AddRoadNode(
-	const FVector& UnrealPositionCentimeters)
-{
-	return GetSimulation().AddRoadNode(
-		FCityFormCoordinateConversion::ToSimulationMeters(UnrealPositionCentimeters));
-}
-
-FAddRoadSegmentResult UCityFormSimulationSubsystem::AddRoadSegment(
-	const FRoadNodeId EndpointA,
-	const FRoadNodeId EndpointB,
+FCreateRoadSegmentResult UCityFormSimulationSubsystem::CreateRoadSegment(
+	FCityFormRoadEndpointInput EndpointA,
+	FCityFormRoadEndpointInput EndpointB,
 	FRoadSegmentDefinition Definition)
 {
-	return GetSimulation().AddRoadSegment(EndpointA, EndpointB, MoveTemp(Definition));
+	auto ConvertEndpoint = [](FCityFormRoadEndpointInput Input)
+	{
+		return Input.ExistingNodeId.IsSet()
+			? FRoadEndpointInput::Existing(Input.ExistingNodeId.GetValue())
+			: FRoadEndpointInput::New(
+				FCityFormCoordinateConversion::ToSimulationMeters(Input.PositionCentimeters));
+	};
+
+	FCreateRoadSegmentResult Result = GetSimulation().CreateRoadSegment(
+		ConvertEndpoint(MoveTemp(EndpointA)),
+		ConvertEndpoint(MoveTemp(EndpointB)),
+		MoveTemp(Definition));
+	if (Result.IsSuccess())
+	{
+		RoadGraphChanged.Broadcast();
+	}
+	return Result;
 }
 
 FCityFormRoadGraphSnapshot UCityFormSimulationSubsystem::CreateRoadGraphSnapshot() const

@@ -17,4 +17,11 @@ class CITYFORM_API ACityFormGameMode : public AGameModeBase
 
 public:
 	ACityFormGameMode();
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(Transient)
+	TObjectPtr<class ACityFormRoadVisualizationActor> RoadVisualization;
 };

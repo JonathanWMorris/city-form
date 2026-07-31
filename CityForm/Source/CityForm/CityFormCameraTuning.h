@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CityFormPrototypeMapContract.h"
 #include "CityFormCameraTuning.generated.h"
 
 /** Tunable presentation values for the prototype city-builder camera. */
@@ -12,10 +13,12 @@ struct CITYFORM_API FCityFormCameraTuning
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Bounds", meta = (Units = "cm"))
-	FVector2D BuildableMinimum = FVector2D(-90000.0, -90000.0);
+	FVector2D BuildableMinimum = FVector2D(
+		FCityFormPrototypeMapContract::BuildableMinimumCentimeters);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Bounds", meta = (Units = "cm"))
-	FVector2D BuildableMaximum = FVector2D(90000.0, 90000.0);
+	FVector2D BuildableMaximum = FVector2D(
+		FCityFormPrototypeMapContract::BuildableMaximumCentimeters);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Movement", meta = (ClampMin = "0.0", Units = "cm/s"))
 	double MinimumPanSpeed = 3000.0;

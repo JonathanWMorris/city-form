@@ -19,6 +19,12 @@ They create a simple road network, zone nearby parcels, observe placeholder
 development, and run the simulation long enough for homes, jobs, commuting, and
 road usage to become visible.
 
+At normal playback speed, the first technical-alpha walking skeleton should
+aim to progress from newly applied eligible zoning to its first visible commute
+in roughly 30 wall-clock seconds. This is an evaluation target for the thin
+vertical slice, not the final construction-time model: short deterministic
+development stages may stand in for the later capacity-constrained lifecycle.
+
 There is no budget, progression tree, win condition, or failure condition. The
 purpose is to build, observe, inspect, and validate the core feedback loop.
 
@@ -74,6 +80,10 @@ vehicles.
 - Bounded rerouting at road nodes
 - A readable congestion or utilization visualization
 - Interpolated placeholder vehicles derived from authoritative snapshots
+
+The first traffic presentation should show both a small number of placeholder
+cars and road utilization. Either view alone is insufficient for evaluating
+whether trips, movement, and network consequences form one coherent loop.
 
 Rendering visibility never determines whether a vehicle advances.
 

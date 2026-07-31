@@ -92,7 +92,12 @@ regional gateways, and production-scale streaming remain future work.
 
 ## Stage 4: Interactive Roads
 
-Status: In progress
+Status: Complete
+
+The bridge and connected-road interaction are implemented. The Road tool uses
+a bottom two-layer menu, a two-click preview, endpoint-only screen-space
+snapping, and one atomic simulation command. One world presentation actor
+rebuilds instanced placeholder roads from detached graph snapshots.
 
 Deliver:
 
@@ -100,6 +105,7 @@ Deliver:
 - Explicit meter-to-centimeter conversion and detached road graph snapshots
 - Ground raycasting from the player cursor
 - Two-click road-segment creation and a live preview
+- Endpoint snapping sufficient to connect segments into a routable graph
 - Translation from player input into simulation road commands
 - Simple derived road visuals
 
