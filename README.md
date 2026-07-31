@@ -103,6 +103,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [Roadmap](docs/roadmap.md) | Ordered milestones and exit criteria |
 | [Unreal MCP Workflow](docs/unreal-mcp.md) | Optional editor automation setup and troubleshooting |
 | [Contributing](CONTRIBUTING.md) | Setup, workflow, testing, and contribution expectations |
+| [Code of Conduct](CODE_OF_CONDUCT.md) | Community standards and confidential reporting |
 
 Repository Markdown is the source of truth. GitHub issues can be used for
 proposals before accepted decisions are reflected here.
@@ -126,6 +127,10 @@ and `Saved` are excluded from version control. Unreal binary assets and common
 large source-asset formats use Git LFS.
 
 ## Getting Started
+
+City Form is source-first pre-alpha software. There is no packaged release or
+compatibility guarantee yet; contributors currently build the project from
+source with Unreal Engine 5.8.
 
 ### Requirements
 
@@ -154,7 +159,11 @@ module.
 
 Contributions from programmers, designers, researchers, artists, testers, and
 technical writers are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
-before beginning substantial work.
+and the [Code of Conduct](CODE_OF_CONDUCT.md) before beginning substantial
+work. Setup and architecture questions belong in
+[GitHub Discussions Q&A](https://github.com/JonathanWMorris/city-form/discussions/categories/q-a),
+while early ideas can be explored in
+[GitHub Discussions Ideas](https://github.com/JonathanWMorris/city-form/discussions/categories/ideas).
 
 ## License
 

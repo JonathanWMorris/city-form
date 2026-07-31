@@ -8,6 +8,45 @@ The most valuable early contributions are small, well-explained changes that
 strengthen the v0.1 loop or make the project easier for the next contributor to
 understand.
 
+Participation in the project is governed by the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Your First Contribution
+
+Start with the [README current focus](README.md#current-focus) and the GitHub
+issue for the task you want to help with. Check its dependencies and existing
+conversation. Before substantial work, comment with the slice you intend to
+take so the maintainer can confirm the scope and contributors can avoid
+duplicating effort.
+
+You do not need to read every design document before contributing. Use the
+smallest relevant path:
+
+| Contribution | Read first |
+| --- | --- |
+| Authoritative simulation or data | [Architecture](docs/architecture.md) and [Simulation Foundation](docs/simulation-foundation.md) |
+| Unreal interaction or presentation | [Architecture](docs/architecture.md) and the relevant camera, map, or road-tool document |
+| Product or system design | [Project Values](docs/project-values.md), [v0.1 Product Scope](docs/product-scope.md), and [Roadmap](docs/roadmap.md) |
+| Documentation or repository tooling | This guide and the issue or document being changed |
+
+Keep a first pull request narrowly scoped. Follow the branch, formatting, and
+testing workflow below, and state clearly in the pull request when a relevant
+build or test could not be run.
+
+### Where to Coordinate
+
+- Use [Discussions Q&A](https://github.com/JonathanWMorris/city-form/discussions/categories/q-a)
+  for setup help and architecture questions.
+- Use [Discussions Ideas](https://github.com/JonathanWMorris/city-form/discussions/categories/ideas)
+  to explore an idea before it becomes a scoped proposal.
+- Use [GitHub issues](https://github.com/JonathanWMorris/city-form/issues) for
+  accepted tasks, substantial proposals, and reproducible bugs.
+- Use pull requests for focused changes that are ready for review.
+
+The roadmap defines milestone order and issues are the task-level todo list.
+Future-stage issues preserve requirements but are not automatically ready to
+implement; coordinate before taking one on.
+
 ## Start with the Project Direction
 
 Before proposing implementation work, read:
