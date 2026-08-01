@@ -4,8 +4,8 @@
 
 The Stage 1 simulation skeleton and Stage 2 millisecond time, logical road
 graph, and time-dependent routing contract are implemented. The Stage 5
-deterministic roadside parcel slice is implemented; zoning, buildings, and
-capacities remain future Stage 5 work.
+deterministic roadside parcel slice and zoning commands are implemented;
+buildings and capacities remain future Stage 5 work.
 
 ## Module Boundary
 
@@ -107,11 +107,15 @@ facade exposes:
 - `AddRoadSegment(...)`
 - `CreateRoadSegment(...)`, an atomic command that accepts new or existing
   endpoints
-- `RegenerateParcels()`, a deterministic, idempotent, full-recompute command
-  that derives the entire parcel set from the current RoadGraph. It is
+- `RegenerateParcels()`, a deterministic command that recomputes parcel
+  geometry from the current RoadGraph and reconciles it against the previous
+  parcel set, preserving each unchanged parcel's ID and Zone. It is
   automatically invoked after a successful `AddRoadSegment` or
   `CreateRoadSegment`, and is also safe to call directly at any time by future
   callers.
+- `ApplyZone(FParcelId, EZoneCategory)`, rejecting `None` as a target and an
+  invalid parcel ID, atomically
+- `ClearZone(FParcelId)`, a no-op success on an already-unzoned parcel
 - `FindRoute(...)`
 - `Validate()`
 - `GetSummary()`
@@ -165,9 +169,10 @@ stable code, entity category and ID when applicable, and an explanation.
 `IsValid()` is true when the report contains no error-severity issues.
 
 `FCitySummary` reports seed, current time in milliseconds, VehicleClass count,
-RoadType count, RoadNode count, RoadSegment count, and Parcel count. Later
-systems add their own counts as they become authoritative. Summary generation
-is read-only and deterministically ordered.
+RoadType count, RoadNode count, RoadSegment count, Parcel count, and
+Residential/Commercial/Unzoned parcel counts. Later systems add their own
+counts as they become authoritative. Summary generation is read-only and
+deterministically ordered.
 
 ## Stage 2 Road Graph
 
@@ -340,16 +345,39 @@ see [Domain Model](domain-model.md).
 
 ### Regeneration Semantics
 
-`RegenerateParcels()` is a full replace: it recomputes the entire parcel set
-from the current RoadGraph and discards the previous set, rather than
-appending incrementally. Parcel ID allocation restarts at one on every call,
-which is required for "the same road graph produces the same ordered parcel
-set" to hold across repeated calls on an unchanged graph. A future feature
-that gives a Building a persistent reference to a `FParcelId` will need its
-own strategy for reconciling that reference across a regenerate; this is
-recorded as an accepted open question in
-[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md), not solved by
-Stage 5.
+`RegenerateParcels()` recomputes candidate geometry for the entire parcel set
+from current RoadGraph state on every call — it is not an incremental
+per-segment append. Each freshly-computed candidate is then reconciled
+against the previously stored parcel set by a stable footprint key
+(`RoadSegmentId`, `Side`, `ColumnIndex`, `RowIndex`, `CellsWide`,
+`CellsDeep`): a candidate whose key matches a previous parcel keeps that
+parcel's `FParcelId` and `Zone`; a candidate with no match allocates a new
+`FParcelId` from `FParcelLayout`'s own persistent allocator and starts
+unzoned. Calling `RegenerateParcels()` repeatedly on an unchanged RoadGraph
+therefore reproduces the exact same parcel set, including identical IDs and
+Zones, not merely the same count.
+
+Because no road-removal or road-edit command exists yet, a previously-seen
+footprint key can never disappear on a later call. A future road-removal
+feature must define what happens to a parcel — and its Zone — whose footprint
+key stops appearing; this is not solved here. See
+[ADR 0012](decisions/0012-persistent-parcel-identity-and-zoning-commands.md),
+which resolves the open question left by
+[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md).
+
+### Zoning
+
+`EZoneCategory` is `None`, `Residential`, or `Commercial`. `FParcel::Zone`
+defaults to `None` and persists across `RegenerateParcels()` per the
+reconciliation rule above. `ApplyZone(FParcelId, EZoneCategory)` assigns
+Residential or Commercial, overwriting any prior Zone unconditionally — v0.1
+has no capacity or Building yet to conflict with a rezone. `ClearZone
+(FParcelId)` returns a parcel to `None`, succeeding as a no-op if it is
+already unassigned. Both reject an unknown `FParcelId`
+(`ESimulationErrorCode::InvalidParcel`); `ApplyZone` additionally rejects
+`None` and any unrecognized category
+(`ESimulationErrorCode::InvalidZoneCategory`). Both fail atomically: no
+mutation occurs on a rejected command.
 
 ### Accepted v0.1 Limitation
 
@@ -397,6 +425,15 @@ Unreal Automation Tests currently cover:
 - Automatic parcel regeneration after a successful road command
 - Malformed hand-built parcel records reported for each parcel validation code
 - RegionProfile parcel-sizing defaults and their validation
+- Zoning commands apply, clear, and freely re-apply Residential/Commercial
+  categories on valid parcels
+- Zoning commands reject an unassigned target category and an invalid parcel
+  ID atomically
+- Parcel identity and Zone persist across a RegenerateParcels triggered by an
+  unrelated road command elsewhere in the graph
+- Summary zoning counts reflect Apply/Clear commands and always sum to the
+  total parcel count
+- Malformed hand-built parcel Zone values are reported by validation
 
 Tests must compare meaningful state and diagnostics rather than memory layout or
 unordered container iteration.

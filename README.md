@@ -13,15 +13,16 @@ inspectable, scalable, and enjoyable to control.
 > Stage 4 is complete with a game-instance-owned Unreal-to-simulation bridge,
 > a bottom two-layer road menu, connected two-click placement, endpoint
 > snapping, live preview, and persistent placeholder roads rebuilt from
-> detached logical-graph snapshots. Stage 5 has begun with deterministic,
-> segment-aligned roadside parcel generation.
+> detached logical-graph snapshots. Stage 5 is underway with deterministic,
+> segment-aligned roadside parcel generation and residential/commercial
+> zoning commands.
 
 ## Current Focus
 
 Development is in
 [Stage 5: Parcels, Zoning, and Development](https://github.com/JonathanWMorris/city-form/issues/30).
 The next implementation packet is
-[residential and commercial zoning commands](https://github.com/JonathanWMorris/city-form/issues/32).
+[placeholder buildings, development rules, and capacities](https://github.com/JonathanWMorris/city-form/issues/33).
 GitHub issues are the task-level todo list; this repository documentation
 records accepted behavior, architecture, and milestone outcomes.
 

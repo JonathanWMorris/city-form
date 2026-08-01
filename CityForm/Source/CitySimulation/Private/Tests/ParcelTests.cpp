@@ -284,6 +284,252 @@ bool FParcelAutoRegenerateAfterRoadCommandsTest::RunTest(const FString& Paramete
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FParcelApplyZoneSucceedsOnValidParcelTest, "CityForm.Simulation.Parcel.ApplyZoneSucceedsOnValidParcel", ParcelTestFlags)
+
+bool FParcelApplyZoneSucceedsOnValidParcelTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({609});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const FParcelId Id = City.GetParcelLayout().GetParcels()[0].Id;
+	const FApplyZoneResult Result = City.ApplyZone(Id, EZoneCategory::Residential);
+	TestTrue(TEXT("Applying a valid category to a valid parcel succeeds."), Result.IsSuccess());
+
+	const FParcel* Parcel = City.GetParcelLayout().FindParcel(Id);
+	TestNotNull(TEXT("The zoned parcel can still be found."), Parcel);
+	if (Parcel != nullptr)
+	{
+		TestTrue(TEXT("The parcel's Zone is Residential."), Parcel->Zone == EZoneCategory::Residential);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FParcelApplyZoneRejectsNoneTest, "CityForm.Simulation.Parcel.ApplyZoneRejectsNone", ParcelTestFlags)
+
+bool FParcelApplyZoneRejectsNoneTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({610});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const FParcelId Id = City.GetParcelLayout().GetParcels()[0].Id;
+	TestTrue(TEXT("Zoning the parcel Residential first succeeds."),
+		City.ApplyZone(Id, EZoneCategory::Residential).IsSuccess());
+
+	const FApplyZoneResult Result = City.ApplyZone(Id, EZoneCategory::None);
+	TestFalse(TEXT("Applying None is rejected."), Result.IsSuccess());
+	TestTrue(TEXT("Rejecting None reports a stable error code."),
+		Result.Error.Code == ESimulationErrorCode::InvalidZoneCategory);
+
+	const FParcel* Parcel = City.GetParcelLayout().FindParcel(Id);
+	TestNotNull(TEXT("The parcel can still be found."), Parcel);
+	if (Parcel != nullptr)
+	{
+		TestTrue(
+			TEXT("The rejected call left the parcel's Zone untouched."), Parcel->Zone == EZoneCategory::Residential);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FParcelApplyZoneRejectsInvalidParcelIdAtomicallyTest,
+	"CityForm.Simulation.Parcel.ApplyZoneRejectsInvalidParcelIdAtomically",
+	ParcelTestFlags)
+
+bool FParcelApplyZoneRejectsInvalidParcelIdAtomicallyTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({611});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const FParcelId RealId = City.GetParcelLayout().GetParcels()[0].Id;
+	TestTrue(
+		TEXT("Zoning the real parcel first succeeds."), City.ApplyZone(RealId, EZoneCategory::Residential).IsSuccess());
+	const int32 CountBefore = City.GetParcelLayout().GetParcels().Num();
+
+	const FApplyZoneResult Result = City.ApplyZone(FParcelId(), EZoneCategory::Commercial);
+	TestFalse(TEXT("An invalid parcel ID is rejected."), Result.IsSuccess());
+	TestTrue(TEXT("Rejecting an invalid parcel ID reports a stable error code."),
+		Result.Error.Code == ESimulationErrorCode::InvalidParcel);
+	TestEqual(TEXT("The rejected command does not change the parcel count."),
+		City.GetParcelLayout().GetParcels().Num(),
+		CountBefore);
+
+	const FParcel* RealParcel = City.GetParcelLayout().FindParcel(RealId);
+	TestNotNull(TEXT("The real parcel is unaffected."), RealParcel);
+	if (RealParcel != nullptr)
+	{
+		TestTrue(TEXT("The real parcel's Zone is unchanged."), RealParcel->Zone == EZoneCategory::Residential);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FParcelClearZoneSucceedsOnZonedParcelTest, "CityForm.Simulation.Parcel.ClearZoneSucceedsOnZonedParcel", ParcelTestFlags)
+
+bool FParcelClearZoneSucceedsOnZonedParcelTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({612});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const FParcelId Id = City.GetParcelLayout().GetParcels()[0].Id;
+	TestTrue(TEXT("Zoning the parcel Commercial first succeeds."),
+		City.ApplyZone(Id, EZoneCategory::Commercial).IsSuccess());
+
+	const FClearZoneResult Result = City.ClearZone(Id);
+	TestTrue(TEXT("Clearing a zoned parcel succeeds."), Result.IsSuccess());
+
+	const FParcel* Parcel = City.GetParcelLayout().FindParcel(Id);
+	TestNotNull(TEXT("The cleared parcel can still be found."), Parcel);
+	if (Parcel != nullptr)
+	{
+		TestTrue(TEXT("The parcel's Zone is None."), Parcel->Zone == EZoneCategory::None);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FParcelClearZoneOnUnzonedParcelIsNoOpSuccessTest,
+	"CityForm.Simulation.Parcel.ClearZoneOnUnzonedParcelIsNoOpSuccess",
+	ParcelTestFlags)
+
+bool FParcelClearZoneOnUnzonedParcelIsNoOpSuccessTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({613});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const FParcelId Id = City.GetParcelLayout().GetParcels()[0].Id;
+	const FClearZoneResult Result = City.ClearZone(Id);
+	TestTrue(TEXT("Clearing an already-unzoned parcel succeeds as a no-op."), Result.IsSuccess());
+
+	const FParcel* Parcel = City.GetParcelLayout().FindParcel(Id);
+	TestNotNull(TEXT("The parcel can still be found."), Parcel);
+	if (Parcel != nullptr)
+	{
+		TestTrue(TEXT("The parcel's Zone is still None."), Parcel->Zone == EZoneCategory::None);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FParcelRezoningOverwritesFreelyTest, "CityForm.Simulation.Parcel.RezoningOverwritesFreely", ParcelTestFlags)
+
+bool FParcelRezoningOverwritesFreelyTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({614});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const FParcelId Id = City.GetParcelLayout().GetParcels()[0].Id;
+	TestTrue(TEXT("The first ApplyZone succeeds."), City.ApplyZone(Id, EZoneCategory::Residential).IsSuccess());
+	TestTrue(TEXT("Rezoning directly to a different category succeeds, with no ClearZone in between."),
+		City.ApplyZone(Id, EZoneCategory::Commercial).IsSuccess());
+
+	const FParcel* Parcel = City.GetParcelLayout().FindParcel(Id);
+	TestNotNull(TEXT("The parcel can still be found."), Parcel);
+	if (Parcel != nullptr)
+	{
+		TestTrue(TEXT("The parcel's Zone is the most recently applied category."),
+			Parcel->Zone == EZoneCategory::Commercial);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FParcelIdAndZoneStableAcrossUnrelatedRegenerateTest,
+	"CityForm.Simulation.Parcel.IdAndZoneStableAcrossUnrelatedRegenerate",
+	ParcelTestFlags)
+
+bool FParcelIdAndZoneStableAcrossUnrelatedRegenerateTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({615});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const FParcel* Original = City.GetParcelLayout().GetParcels().FindByPredicate(
+		[](const FParcel& Candidate)
+		{
+			return Candidate.Side == ERoadSide::Left && Candidate.ColumnIndex == 0 && Candidate.RowIndex == 0;
+		});
+	TestNotNull(TEXT("The origin parcel on the first segment exists."), Original);
+	if (Original == nullptr)
+	{
+		return false;
+	}
+	const FParcelId OriginalId = Original->Id;
+
+	TestTrue(
+		TEXT("Zoning the origin parcel succeeds."), City.ApplyZone(OriginalId, EZoneCategory::Residential).IsSuccess());
+	const int32 CountBeforeUnrelatedSegment = City.GetParcelLayout().GetParcels().Num();
+
+	// An unrelated segment elsewhere in the graph triggers an automatic RegenerateParcels.
+	const FRoadNodeId NodeC = City.AddRoadNode({0.0, 200.0}).NodeId;
+	const FRoadNodeId NodeD = City.AddRoadNode({100.0, 200.0}).NodeId;
+	City.AddRoadSegment(NodeC, NodeD, MakeBasicRoad());
+
+	TestTrue(TEXT("The unrelated segment adds new parcels."),
+		City.GetParcelLayout().GetParcels().Num() > CountBeforeUnrelatedSegment);
+
+	const FParcel* AfterRegenerate = City.GetParcelLayout().FindParcel(OriginalId);
+	TestNotNull(TEXT("The original parcel's ID still resolves after the unrelated regenerate."), AfterRegenerate);
+	if (AfterRegenerate != nullptr)
+	{
+		TestTrue(TEXT("The original parcel's ID is unchanged."), AfterRegenerate->Id == OriginalId);
+		TestTrue(TEXT("The original parcel's Zone survives the unrelated regenerate."),
+			AfterRegenerate->Zone == EZoneCategory::Residential);
+		TestTrue(TEXT("The original parcel's Side is unchanged."), AfterRegenerate->Side == ERoadSide::Left);
+		TestEqual(TEXT("The original parcel's ColumnIndex is unchanged."), AfterRegenerate->ColumnIndex, 0);
+		TestEqual(TEXT("The original parcel's RowIndex is unchanged."), AfterRegenerate->RowIndex, 0);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FParcelSummaryZoningCountsUpdateAfterApplyAndClearTest,
+	"CityForm.Simulation.Parcel.SummaryZoningCountsUpdateAfterApplyAndClear",
+	ParcelTestFlags)
+
+bool FParcelSummaryZoningCountsUpdateAfterApplyAndClearTest::RunTest(const FString& Parameters)
+{
+	FCitySimulation City({616});
+	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
+	const FRoadNodeId NodeB = City.AddRoadNode({20.0, 0.0}).NodeId;
+	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
+
+	const TArray<FParcel>& Parcels = City.GetParcelLayout().GetParcels();
+	TestEqual(TEXT("The fixture produces sixteen parcels."), Parcels.Num(), 16);
+
+	FCitySummary Summary = City.GetSummary();
+	TestEqual(TEXT("All parcels start unzoned."), Summary.UnzonedParcelCount, 16);
+	TestEqual(TEXT("No residential parcels yet."), Summary.ResidentialParcelCount, 0);
+	TestEqual(TEXT("No commercial parcels yet."), Summary.CommercialParcelCount, 0);
+
+	City.ApplyZone(Parcels[0].Id, EZoneCategory::Residential);
+	City.ApplyZone(Parcels[1].Id, EZoneCategory::Commercial);
+	Summary = City.GetSummary();
+	TestEqual(TEXT("One residential parcel after Apply."), Summary.ResidentialParcelCount, 1);
+	TestEqual(TEXT("One commercial parcel after Apply."), Summary.CommercialParcelCount, 1);
+	TestEqual(TEXT("Fourteen unzoned parcels remain."), Summary.UnzonedParcelCount, 14);
+
+	City.ClearZone(Parcels[0].Id);
+	Summary = City.GetSummary();
+	TestEqual(TEXT("Zero residential parcels after Clear."), Summary.ResidentialParcelCount, 0);
+	TestEqual(TEXT("Commercial count is unaffected by clearing a different parcel."), Summary.CommercialParcelCount, 1);
+	TestEqual(TEXT("Fifteen unzoned parcels remain."), Summary.UnzonedParcelCount, 15);
+	TestEqual(TEXT("The three zoning counts always sum to the parcel count."),
+		Summary.ResidentialParcelCount + Summary.CommercialParcelCount + Summary.UnzonedParcelCount,
+		Summary.ParcelCount);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FParcelRecordValidationCatchesEachNewIssueCodeTest,
 	"CityForm.Simulation.Parcel.RecordValidationCatchesEachNewIssueCode",
 	ParcelTestFlags)
@@ -350,6 +596,20 @@ bool FParcelRecordValidationCatchesEachNewIssueCodeTest::RunTest(const FString& 
 	// Deliberately wrong cached center position for an otherwise fully valid parcel.
 	Parcels.Add({FParcelId(10), SegmentId, ERoadSide::Left, 0, 0, 1, 1, 8.0, 8.0, {999.0, 999.0}, 0.0});
 
+	// Invalid zone (out-of-range enum value), otherwise self-consistent geometry.
+	Parcels.Add({FParcelId(11),
+		SegmentId,
+		ERoadSide::Left,
+		0,
+		0,
+		1,
+		1,
+		8.0,
+		8.0,
+		{4.0, 8.0},
+		0.0,
+		static_cast<EZoneCategory>(99)});
+
 	const FValidationReport Report = FParcelLayout::ValidateRecords(Parcels, Graph, RegionProfile);
 	TestFalse(TEXT("Malformed parcel records fail validation."), Report.IsValid());
 	TestEqual(
@@ -380,6 +640,9 @@ bool FParcelRecordValidationCatchesEachNewIssueCodeTest::RunTest(const FString& 
 		1);
 	TestEqual(TEXT("A parcel geometry mismatch is reported."),
 		CountParcelIssues(Report, EValidationIssueCode::ParcelGeometryMismatch),
+		1);
+	TestEqual(TEXT("An invalid parcel zone is reported."),
+		CountParcelIssues(Report, EValidationIssueCode::InvalidParcelZone),
 		1);
 	return true;
 }

@@ -21,7 +21,9 @@ enum class ESimulationErrorCode : uint8
 	ZeroLengthRoadSegment,
 	DuplicateRoadConnection,
 	InvalidRoadType,
-	InvalidSpeedLimit
+	InvalidSpeedLimit,
+	InvalidParcel,
+	InvalidZoneCategory
 };
 
 struct FSimulationError

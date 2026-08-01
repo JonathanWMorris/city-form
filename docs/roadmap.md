@@ -124,9 +124,10 @@ Tracker:
 
 Completed:
 [#31 — Generate deterministic roadside parcels](https://github.com/JonathanWMorris/city-form/issues/31)
+[#32 — Add residential and commercial zoning commands](https://github.com/JonathanWMorris/city-form/issues/32)
 
 Next task:
-[#32 — Add residential and commercial zoning commands](https://github.com/JonathanWMorris/city-form/issues/32)
+[#33 — Add placeholder buildings, development rules, and capacities](https://github.com/JonathanWMorris/city-form/issues/33)
 
 Deliver:
 
