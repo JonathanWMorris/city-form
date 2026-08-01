@@ -117,13 +117,16 @@ Exit criteria:
 
 ## Stage 5: Parcels, Zoning, and Development
 
-Status: Next
+Status: In Progress
 
 Tracker:
 [#30 — Stage 5: Parcels, zoning, and development](https://github.com/JonathanWMorris/city-form/issues/30)
 
-Next task:
+Completed:
 [#31 — Generate deterministic roadside parcels](https://github.com/JonathanWMorris/city-form/issues/31)
+
+Next task:
+[#32 — Add residential and commercial zoning commands](https://github.com/JonathanWMorris/city-form/issues/32)
 
 Deliver:
 
@@ -220,8 +223,8 @@ Potential later milestones include save/load with migrations, advanced object
 editing, construction-constraint overrides, lane and junction management,
 freight and truck demand, detailed signals and vehicle control, stochastic
 traffic incidents, public transit, utilities and services, a deeper economy,
-modding and research interfaces, million-citizen benchmark scenarios, improved
-visuals, and packaged releases.
+demand-driven zoning density, modding and research interfaces, million-citizen
+benchmark scenarios, improved visuals, and packaged releases.
 
 Their order is intentionally not fixed until v0.1 provides evidence about the
 simulation, player experience, performance, and contributor priorities.

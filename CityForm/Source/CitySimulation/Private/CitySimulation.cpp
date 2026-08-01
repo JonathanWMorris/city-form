@@ -40,6 +40,11 @@ const FRoadGraph& FCitySimulation::GetRoadGraph() const
 	return RoadGraph;
 }
 
+const FParcelLayout& FCitySimulation::GetParcelLayout() const
+{
+	return Parcels;
+}
+
 FAdvanceTimeResult FCitySimulation::Advance(const FSimulationDuration Duration)
 {
 	return Clock.Advance(Duration);
@@ -53,13 +58,30 @@ FAddRoadNodeResult FCitySimulation::AddRoadNode(const FSimPoint2D PositionMeters
 FAddRoadSegmentResult FCitySimulation::AddRoadSegment(
 	const FRoadNodeId EndpointA, const FRoadNodeId EndpointB, FRoadSegmentDefinition Definition)
 {
-	return RoadGraph.AddRoadSegment(EndpointA, EndpointB, MoveTemp(Definition), RoadTypes);
+	const FAddRoadSegmentResult Result =
+		RoadGraph.AddRoadSegment(EndpointA, EndpointB, MoveTemp(Definition), RoadTypes);
+	if (Result.IsSuccess())
+	{
+		Parcels.RegenerateParcels(RoadGraph, Config.RegionProfile);
+	}
+	return Result;
 }
 
 FCreateRoadSegmentResult FCitySimulation::CreateRoadSegment(
 	FRoadEndpointInput EndpointA, FRoadEndpointInput EndpointB, FRoadSegmentDefinition Definition)
 {
-	return RoadGraph.CreateRoadSegment(MoveTemp(EndpointA), MoveTemp(EndpointB), MoveTemp(Definition), RoadTypes);
+	const FCreateRoadSegmentResult Result =
+		RoadGraph.CreateRoadSegment(MoveTemp(EndpointA), MoveTemp(EndpointB), MoveTemp(Definition), RoadTypes);
+	if (Result.IsSuccess())
+	{
+		Parcels.RegenerateParcels(RoadGraph, Config.RegionProfile);
+	}
+	return Result;
+}
+
+FRegenerateParcelsResult FCitySimulation::RegenerateParcels()
+{
+	return Parcels.RegenerateParcels(RoadGraph, Config.RegionProfile);
 }
 
 FRouteResult FCitySimulation::FindRoute(const FRouteQuery& Query) const
@@ -84,6 +106,7 @@ FValidationReport FCitySimulation::Validate() const
 	Report.Append(VehicleClasses.Validate());
 	Report.Append(RoadTypes.Validate());
 	Report.Append(RoadGraph.Validate(RoadTypes));
+	Report.Append(Parcels.Validate(RoadGraph, Config.RegionProfile));
 	return Report;
 }
 
@@ -94,7 +117,8 @@ FCitySummary FCitySimulation::GetSummary() const
 		VehicleClasses.GetDefinitions().Num(),
 		RoadTypes.GetDefinitions().Num(),
 		RoadGraph.GetNodes().Num(),
-		RoadGraph.GetSegments().Num()};
+		RoadGraph.GetSegments().Num(),
+		Parcels.GetParcels().Num()};
 }
 
 } // namespace CityForm::Simulation

@@ -3,7 +3,9 @@
 ## Status
 
 The Stage 1 simulation skeleton and Stage 2 millisecond time, logical road
-graph, and time-dependent routing contract are implemented.
+graph, and time-dependent routing contract are implemented. The Stage 5
+deterministic roadside parcel slice is implemented; zoning, buildings, and
+capacities remain future Stage 5 work.
 
 ## Module Boundary
 
@@ -53,6 +55,7 @@ types such as:
 - `FRoadSegmentId`
 - `FRoadTypeId`
 - `FVehicleClassId`
+- `FParcelId`
 - Later v0.1 entity IDs listed in the
   [domain model](domain-model.md)
 
@@ -98,12 +101,17 @@ facade exposes:
 
 - Construction from a validated `FSimulationConfig`
 - Read access to configuration, time, deterministic random state, the
-  VehicleClass and RoadType catalogs, and the RoadGraph
+  VehicleClass and RoadType catalogs, the RoadGraph, and the parcel layout
 - `Advance(FSimulationDuration Duration)`
 - `AddRoadNode(...)`
 - `AddRoadSegment(...)`
 - `CreateRoadSegment(...)`, an atomic command that accepts new or existing
   endpoints
+- `RegenerateParcels()`, a deterministic, idempotent, full-recompute command
+  that derives the entire parcel set from the current RoadGraph. It is
+  automatically invoked after a successful `AddRoadSegment` or
+  `CreateRoadSegment`, and is also safe to call directly at any time by future
+  callers.
 - `FindRoute(...)`
 - `Validate()`
 - `GetSummary()`
@@ -157,9 +165,9 @@ stable code, entity category and ID when applicable, and an explanation.
 `IsValid()` is true when the report contains no error-severity issues.
 
 `FCitySummary` reports seed, current time in milliseconds, VehicleClass count,
-RoadType count, RoadNode count, and RoadSegment count. Later systems add their
-own counts as they become authoritative. Summary generation is read-only and
-deterministically ordered.
+RoadType count, RoadNode count, RoadSegment count, and Parcel count. Later
+systems add their own counts as they become authoritative. Summary generation
+is read-only and deterministically ordered.
 
 ## Stage 2 Road Graph
 
@@ -290,7 +298,71 @@ When equal-cost paths reach the same node, predecessor selection orders by
 RoadSegment ID and then predecessor RoadNode ID. Route reconstruction must
 therefore produce the same result for the same graph, query, and cost provider.
 
-## Stage 1–2 Test Contract
+## Stage 5 Roadside Parcels
+
+### Grid and Sizing Defaults
+
+Parcel sizing lives on `FRegionProfile`, alongside the Basic Two-Way Road
+default speed limit: `ParcelCellSizeMeters` (8.0), `ParcelMaxDepthRows` (4),
+and `ParcelSetbackMeters` (4.0). These defaults intentionally match real
+Cities Skylines' zoning-grid constants. `ParcelSetbackMeters` is an
+authoritative simulation value defined independently of CityForm's visual
+road-placeholder strip width; the two currently coincide numerically but
+neither depends on the other, per the architecture's presentation-independence
+rule.
+
+### Segment-Aligned Generation
+
+Parcels tile as fixed-size cells **aligned to each generating RoadSegment's
+own heading**, not to a world-space axis-aligned grid. This is a deliberate
+fix for a well-known city-builder failure mode: a world-space grid does not
+follow diagonal or curved roads, leaving unusable jagged slivers. A
+per-segment grid instead hugs the road it fronts regardless of its angle.
+
+For each RoadSegment (in `RoadGraph::GetSegments()` order), for each side of
+the segment (Left before Right, a fixed counterclockwise-rotation convention
+used purely for deterministic ordering, not a real-world claim), cells tile
+contiguously along the segment's direction with no gap between them. A
+leftover span shorter than one full cell is simply not populated — no
+undersized cell is generated. Depth extends away from the road, offset by the
+setback, up to `ParcelMaxDepthRows` rows.
+
+### `FParcel`
+
+Each `FParcel` has a stable `FParcelId`, its generating `FRoadSegmentId` and
+`ERoadSide`, a `ColumnIndex`/`RowIndex` position (in whole cells, along the
+segment and away from the road respectively), and a `CellsWide`/`CellsDeep`
+footprint (both at least one). Stage 5 generation always produces `1x1`
+parcels; the footprint fields exist so a future feature can combine
+contiguous `1x1` parcels into a larger footprint without a schema migration.
+A Parcel may still contain at most one Building regardless of footprint size —
+see [Domain Model](domain-model.md).
+
+### Regeneration Semantics
+
+`RegenerateParcels()` is a full replace: it recomputes the entire parcel set
+from the current RoadGraph and discards the previous set, rather than
+appending incrementally. Parcel ID allocation restarts at one on every call,
+which is required for "the same road graph produces the same ordered parcel
+set" to hold across repeated calls on an unchanged graph. A future feature
+that gives a Building a persistent reference to a `FParcelId` will need its
+own strategy for reconciling that reference across a regenerate; this is
+recorded as an accepted open question in
+[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md), not solved by
+Stage 5.
+
+### Accepted v0.1 Limitation
+
+Because each RoadSegment generates its own independently-aligned grid, two
+segments meeting at a shared RoadNode at different angles produce parcel
+rectangles that are not mitered or trimmed against each other, and may
+visually or geometrically overlap near intersections. This is accepted v0.1
+scope under the documented non-goal of avoiding irregular subdivision
+optimization; parcel validation does not attempt cross-parcel overlap
+detection between parcels of different segments. See
+[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md).
+
+## Test Contract
 
 ### Implemented Coverage
 
@@ -315,6 +387,16 @@ Unreal Automation Tests currently cover:
 - Heuristic lower-bound and zero-heuristic behavior
 - Vehicle-dependent feasibility and free-flow cost
 - FIFO cost-provider acceptance
+- Deterministic, repeatable parcel generation from an identical road graph
+- Both-sides parcel generation with a centerline-symmetric setback
+- Segment-aligned (not world-axis-aligned) tiling on a diagonal segment
+- Leftover frontage shorter than one cell is skipped, not undersized
+- Parcel depth capped at the configured maximum row count
+- A too-short segment produces zero parcels without an error
+- Regeneration replaces the parcel set rather than accumulating duplicates
+- Automatic parcel regeneration after a successful road command
+- Malformed hand-built parcel records reported for each parcel validation code
+- RegionProfile parcel-sizing defaults and their validation
 
 Tests must compare meaningful state and diagnostics rather than memory layout or
 unordered container iteration.

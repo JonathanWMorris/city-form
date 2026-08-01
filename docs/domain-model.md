@@ -104,10 +104,21 @@ and observations belong to traversals rather than to the undirected segment.
 ### Parcel
 
 A Parcel is a bounded piece of developable land associated with road access. It
-has a stable `FParcelId`, may receive a Zone, and may contain a Building.
+has a stable `FParcelId`, references the RoadSegment and side it fronts, may
+receive a Zone, and may contain at most one Building — this 1:1 relationship
+holds regardless of a Parcel's footprint size.
 
-v0.1 parcel generation is intentionally simple. A Parcel is still authoritative
-simulation data rather than procedural mesh state.
+A Parcel's footprint is a variable, whole-cell-aligned width and depth
+(`CellsWide`/`CellsDeep`, both at least one) rather than a single fixed size.
+v0.1 generation always produces `1x1` parcels; the variable footprint exists
+so a future feature can combine contiguous `1x1` parcels into a larger
+footprint — for example to represent a bigger building — without changing this
+schema. v0.1 parcel generation is intentionally simple. A Parcel is still
+authoritative simulation data rather than procedural mesh state. See
+[Simulation Foundation](simulation-foundation.md#stage-5-roadside-parcels) for
+the concrete generation contract and
+[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md) for the
+rationale.
 
 ### Zone
 
@@ -247,6 +258,8 @@ Actors authoritative.
 - RoadSegment endpoints reference valid, distinct RoadNodes.
 - Traversals use a valid RoadSegment and one of its two endpoint directions.
 - Parcels reference valid road access where required.
+- A Parcel's column and row position are non-negative, and its footprint
+  spans a positive whole number of cells in width and depth.
 - Buildings occupy compatible Parcels and Zones.
 - Capacities and occupancy counts are never negative.
 - Occupancy and assignments do not exceed capacity.
@@ -267,6 +280,7 @@ The following are intentionally not defined as concrete v0.1 records:
 - Lanes, traffic signals, parking spaces, and junction conflicts
 - Freight orders, cargo, deliveries, and vehicle fleets
 - Utilities, services, budgets, land value, and detailed economics
+- Demand-driven zone density and building growth over time
 - Save-file schemas and migration records
 - Lane-changing, detailed junction conflicts, and collision state
 - Traffic incidents and emergency-response records
