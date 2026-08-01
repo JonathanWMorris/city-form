@@ -51,6 +51,7 @@ enum class EValidationIssueCode : uint8
 	DuplicateParcelId,
 	InvalidParcelRoadSegment,
 	InvalidParcelSide,
+	InvalidParcelZone,
 	NegativeParcelIndex,
 	NonPositiveParcelCellCount,
 	NonFiniteParcelPosition,

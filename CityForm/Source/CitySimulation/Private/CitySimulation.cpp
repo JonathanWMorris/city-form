@@ -84,6 +84,16 @@ FRegenerateParcelsResult FCitySimulation::RegenerateParcels()
 	return Parcels.RegenerateParcels(RoadGraph, Config.RegionProfile);
 }
 
+FApplyZoneResult FCitySimulation::ApplyZone(const FParcelId Id, const EZoneCategory Zone)
+{
+	return Parcels.ApplyZone(Id, Zone);
+}
+
+FClearZoneResult FCitySimulation::ClearZone(const FParcelId Id)
+{
+	return Parcels.ClearZone(Id);
+}
+
 FRouteResult FCitySimulation::FindRoute(const FRouteQuery& Query) const
 {
 	const FFreeFlowTraversalCostProvider CostProvider;
@@ -112,13 +122,36 @@ FValidationReport FCitySimulation::Validate() const
 
 FCitySummary FCitySimulation::GetSummary() const
 {
+	int32 ResidentialCount = 0;
+	int32 CommercialCount = 0;
+	int32 UnzonedCount = 0;
+	for (const FParcel& Parcel : Parcels.GetParcels())
+	{
+		switch (Parcel.Zone)
+		{
+		case EZoneCategory::Residential:
+			++ResidentialCount;
+			break;
+		case EZoneCategory::Commercial:
+			++CommercialCount;
+			break;
+		case EZoneCategory::None:
+		default:
+			++UnzonedCount;
+			break;
+		}
+	}
+
 	return {Config.Seed,
 		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
 		VehicleClasses.GetDefinitions().Num(),
 		RoadTypes.GetDefinitions().Num(),
 		RoadGraph.GetNodes().Num(),
 		RoadGraph.GetSegments().Num(),
-		Parcels.GetParcels().Num()};
+		Parcels.GetParcels().Num(),
+		ResidentialCount,
+		CommercialCount,
+		UnzonedCount};
 }
 
 } // namespace CityForm::Simulation

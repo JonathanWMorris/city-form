@@ -123,7 +123,13 @@ rationale.
 ### Zone
 
 A Zone is the allowed development category assigned to a Parcel. v0.1 supports
-Residential and Commercial.
+an explicit unassigned `None`, Residential, and Commercial. The `ApplyZone`
+command assigns Residential or Commercial to a valid Parcel, overwriting any
+existing Zone; `ClearZone` returns a Parcel to `None` and succeeds as a no-op
+if it is already unassigned. Both commands reject an invalid Parcel reference
+atomically. See
+[ADR 0012](decisions/0012-persistent-parcel-identity-and-zoning-commands.md)
+for the command design and how a Parcel's Zone survives parcel regeneration.
 
 Zoning does not itself create capacity. It permits compatible development to
 create a Building.

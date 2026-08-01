@@ -44,19 +44,54 @@ void GetPerpendicular(const FSegmentDirection& Direction, const ERoadSide Side, 
 	}
 }
 
+/** A parcel's geometric identity, independent of any allocated FParcelId. Zone is deliberately excluded: it is
+ *  carried-forward state, not identity. */
+struct FParcelFootprintKey
+{
+	FRoadSegmentId RoadSegmentId;
+	ERoadSide Side = ERoadSide::Left;
+	int32 ColumnIndex = 0;
+	int32 RowIndex = 0;
+	int32 CellsWide = 1;
+	int32 CellsDeep = 1;
+
+	friend bool operator==(const FParcelFootprintKey& Left, const FParcelFootprintKey& Right)
+	{
+		return Left.RoadSegmentId == Right.RoadSegmentId && Left.Side == Right.Side &&
+			Left.ColumnIndex == Right.ColumnIndex && Left.RowIndex == Right.RowIndex &&
+			Left.CellsWide == Right.CellsWide && Left.CellsDeep == Right.CellsDeep;
+	}
+
+	friend uint32 GetTypeHash(const FParcelFootprintKey& Key)
+	{
+		uint32 Hash = GetTypeHash(Key.RoadSegmentId);
+		Hash = HashCombine(Hash, GetTypeHash(static_cast<uint8>(Key.Side)));
+		Hash = HashCombine(Hash, GetTypeHash(Key.ColumnIndex));
+		Hash = HashCombine(Hash, GetTypeHash(Key.RowIndex));
+		Hash = HashCombine(Hash, GetTypeHash(Key.CellsWide));
+		Hash = HashCombine(Hash, GetTypeHash(Key.CellsDeep));
+		return Hash;
+	}
+};
+
+FParcelFootprintKey MakeFootprintKey(const FParcel& Parcel)
+{
+	return {Parcel.RoadSegmentId, Parcel.Side, Parcel.ColumnIndex, Parcel.RowIndex, Parcel.CellsWide, Parcel.CellsDeep};
+}
+
 } // namespace
 
-FGenerateParcelRecordsResult FParcelLayout::GenerateRecords(
+TArray<FParcel> FParcelLayout::GenerateCandidates(
 	const TArray<FRoadNode>& Nodes, const TArray<FRoadSegment>& Segments, const FRegionProfile& RegionProfile)
 {
-	FGenerateParcelRecordsResult Result;
+	TArray<FParcel> Candidates;
 
 	const double CellSizeMeters = RegionProfile.ParcelCellSizeMeters;
 	const double SetbackMeters = RegionProfile.ParcelSetbackMeters;
 	const int32 MaxDepthRows = RegionProfile.ParcelMaxDepthRows;
 	if (!std::isfinite(CellSizeMeters) || CellSizeMeters <= 0.0 || !std::isfinite(SetbackMeters) || MaxDepthRows <= 0)
 	{
-		return Result;
+		return Candidates;
 	}
 
 	TMap<FRoadNodeId, const FRoadNode*> NodesById;
@@ -64,8 +99,6 @@ FGenerateParcelRecordsResult FParcelLayout::GenerateRecords(
 	{
 		NodesById.Add(Node.Id, &Node);
 	}
-
-	TStrongIdAllocator<FParcelId> ParcelIdAllocator;
 
 	for (const FRoadSegment& Segment : Segments)
 	{
@@ -113,13 +146,7 @@ FGenerateParcelRecordsResult FParcelLayout::GenerateRecords(
 					const FSimPoint2D Center{
 						ColumnCenterX + PerpX * AcrossMeters, ColumnCenterY + PerpY * AcrossMeters};
 
-					const TStrongIdAllocationResult<FParcelId> Allocation = ParcelIdAllocator.Allocate();
-					if (!Allocation.IsSuccess())
-					{
-						return {{}, Allocation.Error};
-					}
-
-					Result.Parcels.Add({Allocation.Id,
+					Candidates.Add({FParcelId(),
 						Segment.Id,
 						Side,
 						Column,
@@ -135,22 +162,89 @@ FGenerateParcelRecordsResult FParcelLayout::GenerateRecords(
 		}
 	}
 
-	return Result;
+	return Candidates;
 }
 
 FRegenerateParcelsResult FParcelLayout::RegenerateParcels(
 	const FRoadGraph& RoadGraph, const FRegionProfile& RegionProfile)
 {
-	FGenerateParcelRecordsResult Generated =
-		GenerateRecords(RoadGraph.GetNodes(), RoadGraph.GetSegments(), RegionProfile);
-	if (!Generated.IsSuccess())
+	TArray<FParcel> Candidates = GenerateCandidates(RoadGraph.GetNodes(), RoadGraph.GetSegments(), RegionProfile);
+
+	TMap<FParcelFootprintKey, int32> PreviousIndexByFootprint;
+	PreviousIndexByFootprint.Reserve(Parcels.Num());
+	for (int32 Index = 0; Index < Parcels.Num(); ++Index)
 	{
-		return {0, Generated.Error};
+		PreviousIndexByFootprint.Add(MakeFootprintKey(Parcels[Index]), Index);
 	}
 
-	Parcels = MoveTemp(Generated.Parcels);
+	// First pass: resolve matches and count how many brand-new IDs this call would need, without
+	// mutating anything yet, so a would-be exhaustion failure is fully atomic.
+	TArray<int32> MatchedPreviousIndex;
+	MatchedPreviousIndex.Reserve(Candidates.Num());
+	uint64 NewCandidateCount = 0;
+	for (const FParcel& Candidate : Candidates)
+	{
+		const int32* Found = PreviousIndexByFootprint.Find(MakeFootprintKey(Candidate));
+		MatchedPreviousIndex.Add(Found != nullptr ? *Found : INDEX_NONE);
+		if (Found == nullptr)
+		{
+			++NewCandidateCount;
+		}
+	}
+
+	if (!ParcelIdAllocator.CanAllocate(NewCandidateCount))
+	{
+		return {0, {ESimulationErrorCode::IdExhausted, TEXT("The strong-ID allocator is exhausted.")}};
+	}
+
+	// Second pass: commit. Every element either reuses a previous Id/Zone or allocates a new Id,
+	// which is guaranteed to succeed since CanAllocate already confirmed capacity for all of them.
+	for (int32 Index = 0; Index < Candidates.Num(); ++Index)
+	{
+		if (MatchedPreviousIndex[Index] != INDEX_NONE)
+		{
+			Candidates[Index].Id = Parcels[MatchedPreviousIndex[Index]].Id;
+			Candidates[Index].Zone = Parcels[MatchedPreviousIndex[Index]].Zone;
+		}
+		else
+		{
+			Candidates[Index].Id = ParcelIdAllocator.Allocate().Id;
+		}
+	}
+
+	Parcels = MoveTemp(Candidates);
 	RebuildIndex();
 	return {Parcels.Num(), {}};
+}
+
+FApplyZoneResult FParcelLayout::ApplyZone(const FParcelId Id, const EZoneCategory Zone)
+{
+	if (Zone != EZoneCategory::Residential && Zone != EZoneCategory::Commercial)
+	{
+		return {{ESimulationErrorCode::InvalidZoneCategory,
+			TEXT("ApplyZone requires Residential or Commercial; use ClearZone to unassign a parcel.")}};
+	}
+
+	const int32* Index = ParcelIndexes.Find(Id);
+	if (Index == nullptr || !Parcels.IsValidIndex(*Index))
+	{
+		return {{ESimulationErrorCode::InvalidParcel, TEXT("ApplyZone requires an existing parcel ID.")}};
+	}
+
+	Parcels[*Index].Zone = Zone;
+	return {};
+}
+
+FClearZoneResult FParcelLayout::ClearZone(const FParcelId Id)
+{
+	const int32* Index = ParcelIndexes.Find(Id);
+	if (Index == nullptr || !Parcels.IsValidIndex(*Index))
+	{
+		return {{ESimulationErrorCode::InvalidParcel, TEXT("ClearZone requires an existing parcel ID.")}};
+	}
+
+	Parcels[*Index].Zone = EZoneCategory::None;
+	return {};
 }
 
 const FParcel* FParcelLayout::FindParcel(const FParcelId Id) const
@@ -215,6 +309,16 @@ FValidationReport FParcelLayout::ValidateRecords(
 				TEXT("Parcel"),
 				Parcel.Id.GetValue(),
 				TEXT("A parcel side must be Left or Right.")});
+		}
+
+		if (Parcel.Zone != EZoneCategory::None && Parcel.Zone != EZoneCategory::Residential &&
+			Parcel.Zone != EZoneCategory::Commercial)
+		{
+			Report.Add({EValidationSeverity::Error,
+				EValidationIssueCode::InvalidParcelZone,
+				TEXT("Parcel"),
+				Parcel.Id.GetValue(),
+				TEXT("A parcel zone must be None, Residential, or Commercial.")});
 		}
 
 		if (Parcel.ColumnIndex < 0 || Parcel.RowIndex < 0)

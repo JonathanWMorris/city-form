@@ -100,7 +100,8 @@ issue #34.
   regeneration. That future feature must define its own strategy — such as
   preserving IDs for geometrically-unchanged parcels, or reconciling Building
   references explicitly across a regenerate. This issue does not assume the
-  problem is already solved.
+  problem is already solved — resolved by
+  [ADR 0012](0012-persistent-parcel-identity-and-zoning-commands.md).
 - A related, larger idea explored alongside this decision — letting zoned
   density be driven by demand and location rather than only by a painted
   zone tier — is tracked separately in

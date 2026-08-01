@@ -22,6 +22,8 @@ implementation details and easily reversible choices do not require an ADR.
 - [0009: Accelerated civil and transit service time](0009-accelerated-civil-and-service-time.md)
 - [0010: Extensible tiled worlds and regional gateways](0010-extensible-tiled-worlds.md)
 - [0011: Segment-aligned deterministic roadside parcels](0011-segment-aligned-roadside-parcels.md)
+  — ID-persistence open question resolved by ADR 0012
+- [0012: Persistent parcel identity and zoning commands](0012-persistent-parcel-identity-and-zoning-commands.md)
 
 ## Template
 
