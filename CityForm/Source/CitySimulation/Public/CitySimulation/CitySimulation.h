@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CitySimulation/DeterministicRandom.h"
+#include "CitySimulation/Parcel.h"
 #include "CitySimulation/RegionProfile.h"
 #include "CitySimulation/RoadGraph.h"
 #include "CitySimulation/RoadType.h"
@@ -28,12 +29,14 @@ struct FCitySummary
 	int32 RoadTypeCount = 0;
 	int32 RoadNodeCount = 0;
 	int32 RoadSegmentCount = 0;
+	int32 ParcelCount = 0;
 
 	friend bool operator==(const FCitySummary& Left, const FCitySummary& Right)
 	{
 		return Left.Seed == Right.Seed && Left.CurrentTimeMilliseconds == Right.CurrentTimeMilliseconds &&
 			Left.VehicleClassCount == Right.VehicleClassCount && Left.RoadTypeCount == Right.RoadTypeCount &&
-			Left.RoadNodeCount == Right.RoadNodeCount && Left.RoadSegmentCount == Right.RoadSegmentCount;
+			Left.RoadNodeCount == Right.RoadNodeCount && Left.RoadSegmentCount == Right.RoadSegmentCount &&
+			Left.ParcelCount == Right.ParcelCount;
 	}
 };
 
@@ -48,6 +51,7 @@ public:
 	const FVehicleClassCatalog& GetVehicleClasses() const;
 	const FRoadTypeCatalog& GetRoadTypes() const;
 	const FRoadGraph& GetRoadGraph() const;
+	const FParcelLayout& GetParcelLayout() const;
 
 	FAdvanceTimeResult Advance(FSimulationDuration Duration);
 	FAddRoadNodeResult AddRoadNode(FSimPoint2D PositionMeters);
@@ -55,6 +59,12 @@ public:
 		FRoadNodeId EndpointA, FRoadNodeId EndpointB, FRoadSegmentDefinition Definition);
 	FCreateRoadSegmentResult CreateRoadSegment(
 		FRoadEndpointInput EndpointA, FRoadEndpointInput EndpointB, FRoadSegmentDefinition Definition);
+	/**
+	 * Deterministically recomputes the full parcel set from the current road graph, replacing
+	 * any previous set. Automatically invoked after a successful AddRoadSegment or
+	 * CreateRoadSegment; also safe to call directly at any time by future callers.
+	 */
+	FRegenerateParcelsResult RegenerateParcels();
 	FRouteResult FindRoute(const FRouteQuery& Query) const;
 	FValidationReport Validate() const;
 	FCitySummary GetSummary() const;
@@ -66,6 +76,7 @@ private:
 	FVehicleClassCatalog VehicleClasses;
 	FRoadTypeCatalog RoadTypes;
 	FRoadGraph RoadGraph;
+	FParcelLayout Parcels;
 };
 
 } // namespace CityForm::Simulation

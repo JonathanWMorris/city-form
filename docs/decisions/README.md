@@ -21,6 +21,7 @@ implementation details and easily reversible choices do not require an ADR.
 - [0008: Global, City-owned microscopic traffic](0008-global-city-owned-microscopic-traffic.md)
 - [0009: Accelerated civil and transit service time](0009-accelerated-civil-and-service-time.md)
 - [0010: Extensible tiled worlds and regional gateways](0010-extensible-tiled-worlds.md)
+- [0011: Segment-aligned deterministic roadside parcels](0011-segment-aligned-roadside-parcels.md)
 
 ## Template
 

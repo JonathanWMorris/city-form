@@ -46,7 +46,17 @@ enum class EValidationIssueCode : uint8
 	RoadSegmentLengthMismatch,
 	MissingRoadType,
 	NonFiniteSpeedLimitOverride,
-	NonPositiveSpeedLimitOverride
+	NonPositiveSpeedLimitOverride,
+	InvalidParcelId,
+	DuplicateParcelId,
+	InvalidParcelRoadSegment,
+	InvalidParcelSide,
+	NegativeParcelIndex,
+	NonPositiveParcelCellCount,
+	NonFiniteParcelPosition,
+	NonFiniteParcelDimensions,
+	NonPositiveParcelDimensions,
+	ParcelGeometryMismatch
 };
 
 struct FValidationIssue

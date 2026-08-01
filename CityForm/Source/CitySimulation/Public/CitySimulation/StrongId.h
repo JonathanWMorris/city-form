@@ -99,10 +99,12 @@ struct FRoadNodeIdTag;
 struct FRoadSegmentIdTag;
 struct FRoadTypeIdTag;
 struct FVehicleClassIdTag;
+struct FParcelIdTag;
 
 using FRoadNodeId = TStrongId<FRoadNodeIdTag>;
 using FRoadSegmentId = TStrongId<FRoadSegmentIdTag>;
 using FRoadTypeId = TStrongId<FRoadTypeIdTag>;
 using FVehicleClassId = TStrongId<FVehicleClassIdTag>;
+using FParcelId = TStrongId<FParcelIdTag>;
 
 } // namespace CityForm::Simulation

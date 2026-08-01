@@ -42,6 +42,49 @@ FValidationReport FRegionProfile::Validate() const
 			TEXT("The Basic Two-Way Road speed limit must be greater than zero.")});
 	}
 
+	if (!std::isfinite(ParcelCellSizeMeters))
+	{
+		Report.Add({EValidationSeverity::Error,
+			EValidationIssueCode::NonFiniteRegionalValue,
+			TEXT("RegionProfile"),
+			0,
+			TEXT("The parcel cell size must be finite.")});
+	}
+	else if (ParcelCellSizeMeters <= 0.0)
+	{
+		Report.Add({EValidationSeverity::Error,
+			EValidationIssueCode::NonPositiveRegionalValue,
+			TEXT("RegionProfile"),
+			0,
+			TEXT("The parcel cell size must be greater than zero.")});
+	}
+
+	if (ParcelMaxDepthRows <= 0)
+	{
+		Report.Add({EValidationSeverity::Error,
+			EValidationIssueCode::NonPositiveRegionalValue,
+			TEXT("RegionProfile"),
+			0,
+			TEXT("The parcel max depth rows must be greater than zero.")});
+	}
+
+	if (!std::isfinite(ParcelSetbackMeters))
+	{
+		Report.Add({EValidationSeverity::Error,
+			EValidationIssueCode::NonFiniteRegionalValue,
+			TEXT("RegionProfile"),
+			0,
+			TEXT("The parcel setback distance must be finite.")});
+	}
+	else if (ParcelSetbackMeters <= 0.0)
+	{
+		Report.Add({EValidationSeverity::Error,
+			EValidationIssueCode::NonPositiveRegionalValue,
+			TEXT("RegionProfile"),
+			0,
+			TEXT("The parcel setback distance must be greater than zero.")});
+	}
+
 	return Report;
 }
 
