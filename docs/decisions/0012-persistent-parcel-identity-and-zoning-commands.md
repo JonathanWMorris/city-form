@@ -4,6 +4,11 @@
 
 Accepted
 
+The original no-Building rezoning consequences are amended by
+[ADR 0014](0014-placeholder-building-development.md): same-zone application is
+idempotent, rezoning replaces the unoccupied placeholder, and clearing removes
+it. The Parcel identity and Zone persistence decisions remain in force.
+
 ## Context
 
 Issue #32 needs explicit, inspectable commands for a player to designate

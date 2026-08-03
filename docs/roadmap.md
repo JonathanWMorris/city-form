@@ -126,9 +126,10 @@ Completed:
 [#31 — Generate deterministic roadside parcels](https://github.com/JonathanWMorris/city-form/issues/31)
 [#32 — Add residential and commercial zoning commands](https://github.com/JonathanWMorris/city-form/issues/32)
 [#92 — Refine roadside parcels into road-fronting development lots](https://github.com/JonathanWMorris/city-form/issues/92)
+[#33 — Add placeholder buildings, development rules, and capacities](https://github.com/JonathanWMorris/city-form/issues/33)
 
 Next task:
-[#33 — Add placeholder buildings, development rules, and capacities](https://github.com/JonathanWMorris/city-form/issues/33)
+[#34 — Add Unreal zoning interaction and parcel/building visualization](https://github.com/JonathanWMorris/city-form/issues/34)
 
 Deliver:
 

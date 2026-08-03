@@ -6,7 +6,7 @@ namespace CityForm::Simulation
 {
 
 FCitySimulation::FCitySimulation(const FSimulationConfig InConfig)
-	: Config(InConfig), Random(InConfig.Seed), RoadTypes(InConfig.RegionProfile)
+	: Config(InConfig), Random(InConfig.Seed), RoadTypes(InConfig.RegionProfile), BuildingTypes(InConfig.Development)
 {
 }
 
@@ -45,9 +45,24 @@ const FParcelLayout& FCitySimulation::GetParcelLayout() const
 	return Parcels;
 }
 
+const FBuildingTypeCatalog& FCitySimulation::GetBuildingTypes() const
+{
+	return BuildingTypes;
+}
+
+const FBuildingCollection& FCitySimulation::GetBuildings() const
+{
+	return Buildings;
+}
+
 FAdvanceTimeResult FCitySimulation::Advance(const FSimulationDuration Duration)
 {
-	return Clock.Advance(Duration);
+	const FAdvanceTimeResult Result = Clock.Advance(Duration);
+	if (Result.IsSuccess())
+	{
+		Buildings.AdvanceTo(Clock.GetCurrentInstant(), BuildingTypes);
+	}
+	return Result;
 }
 
 FAddRoadNodeResult FCitySimulation::AddRoadNode(const FSimPoint2D PositionMeters)
@@ -86,12 +101,43 @@ FRegenerateParcelsResult FCitySimulation::RegenerateParcels()
 
 FApplyZoneResult FCitySimulation::ApplyZone(const FParcelId Id, const EZoneCategory Zone)
 {
-	return Parcels.ApplyZone(Id, Zone);
+	if (Zone != EZoneCategory::Residential && Zone != EZoneCategory::Commercial)
+	{
+		return {{ESimulationErrorCode::InvalidZoneCategory,
+			TEXT("ApplyZone requires Residential or Commercial; use ClearZone to unassign a parcel.")}};
+	}
+
+	const FParcel* Parcel = Parcels.FindParcel(Id);
+	if (Parcel == nullptr)
+	{
+		return {{ESimulationErrorCode::InvalidParcel, TEXT("ApplyZone requires an existing parcel ID.")}};
+	}
+	if (Parcel->Zone == Zone && Buildings.FindBuildingForParcel(Id) != nullptr)
+	{
+		return {};
+	}
+
+	const FPrepareBuildingResult Prepared =
+		Buildings.PrepareReplacement(Zone, Clock.GetCurrentInstant(), BuildingTypes, Config.Development);
+	if (!Prepared.IsSuccess())
+	{
+		return {Prepared.Error};
+	}
+
+	const FApplyZoneResult ZoneResult = Parcels.ApplyZone(Id, Zone);
+	check(ZoneResult.IsSuccess());
+	Buildings.CommitReplacement(Id, Prepared.Plan);
+	return {};
 }
 
 FClearZoneResult FCitySimulation::ClearZone(const FParcelId Id)
 {
-	return Parcels.ClearZone(Id);
+	const FClearZoneResult Result = Parcels.ClearZone(Id);
+	if (Result.IsSuccess())
+	{
+		Buildings.RemoveForParcel(Id);
+	}
+	return Result;
 }
 
 FRouteResult FCitySimulation::FindRoute(const FRouteQuery& Query) const
@@ -113,10 +159,13 @@ FValidationReport FCitySimulation::Validate() const
 	}
 
 	Report.Append(Config.RegionProfile.Validate());
+	Report.Append(Config.Development.Validate());
 	Report.Append(VehicleClasses.Validate());
 	Report.Append(RoadTypes.Validate());
+	Report.Append(BuildingTypes.Validate());
 	Report.Append(RoadGraph.Validate(RoadTypes));
 	Report.Append(Parcels.Validate(RoadGraph, Config.RegionProfile));
+	Report.Append(Buildings.Validate(Parcels, BuildingTypes));
 	return Report;
 }
 
@@ -142,6 +191,31 @@ FCitySummary FCitySimulation::GetSummary() const
 		}
 	}
 
+	int32 PlannedCount = 0;
+	int32 UnderConstructionCount = 0;
+	int32 CompletedCount = 0;
+	int32 ActiveHouseholdCapacity = 0;
+	int32 ActiveJobCapacity = 0;
+	for (const FBuilding& Building : Buildings.GetBuildings())
+	{
+		switch (Building.Stage)
+		{
+		case EDevelopmentStage::Planned:
+			++PlannedCount;
+			break;
+		case EDevelopmentStage::UnderConstruction:
+			++UnderConstructionCount;
+			break;
+		case EDevelopmentStage::Complete:
+			++CompletedCount;
+			break;
+		default:
+			break;
+		}
+		ActiveHouseholdCapacity += Building.HouseholdCapacity;
+		ActiveJobCapacity += Building.JobCapacity;
+	}
+
 	return {Config.Seed,
 		Clock.GetCurrentInstant().GetMillisecondsSinceStart(),
 		VehicleClasses.GetDefinitions().Num(),
@@ -151,7 +225,14 @@ FCitySummary FCitySimulation::GetSummary() const
 		Parcels.GetParcels().Num(),
 		ResidentialCount,
 		CommercialCount,
-		UnzonedCount};
+		UnzonedCount,
+		BuildingTypes.GetDefinitions().Num(),
+		Buildings.GetBuildings().Num(),
+		PlannedCount,
+		UnderConstructionCount,
+		CompletedCount,
+		ActiveHouseholdCapacity,
+		ActiveJobCapacity};
 }
 
 } // namespace CityForm::Simulation

@@ -137,11 +137,18 @@ create a Building.
 ### Building
 
 A Building is a developed structure on one Parcel. It has a stable
-`FBuildingId`, one v0.1 use, and capacity appropriate to that use.
+`FBuildingId`, references one catalogued `FBuildingTypeId`, and has capacity
+appropriate to that type. v0.1 starts with `DetachedHouse` (Residential, one
+household) and `SmallCommercial` (Commercial, eight jobs).
 
-Residential buildings provide household or dwelling capacity. Commercial
-buildings provide space for Businesses and their Jobs. Placeholder meshes
-visualize Buildings but do not own them.
+Zoning creates a `Planned` placeholder at the current simulation instant. It
+becomes `UnderConstruction` after two simulated minutes and `Complete` after
+three more. Household or job capacity remains zero until completion. Applying
+the same zone is idempotent. Rezoning replaces the unoccupied placeholder with
+a new identity and timeline; clearing zoning removes it. Stage 6 introduces
+occupants and the restrictions needed once removal is no longer unconditional.
+Placeholder meshes visualize Buildings but do not own them. See
+[ADR 0014](decisions/0014-placeholder-building-development.md).
 
 ## People and Organizations
 

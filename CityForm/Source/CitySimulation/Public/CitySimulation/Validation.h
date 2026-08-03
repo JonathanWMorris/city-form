@@ -57,7 +57,23 @@ enum class EValidationIssueCode : uint8
 	NonFiniteParcelPosition,
 	NonFiniteParcelDimensions,
 	NonPositiveParcelDimensions,
-	ParcelGeometryMismatch
+	ParcelGeometryMismatch,
+	NonPositiveDevelopmentDuration,
+	InvalidBuildingTypeId,
+	DuplicateBuildingTypeId,
+	EmptyBuildingTypeKey,
+	DuplicateBuildingTypeKey,
+	InvalidBuildingTypeZone,
+	NegativeBuildingCapacity,
+	InvalidBuildingId,
+	DuplicateBuildingId,
+	InvalidBuildingParcel,
+	DuplicateBuildingParcel,
+	MissingBuildingType,
+	InvalidDevelopmentStage,
+	InvalidBuildingTimeline,
+	IncompatibleBuildingZone,
+	InvalidActiveBuildingCapacity
 };
 
 struct FValidationIssue

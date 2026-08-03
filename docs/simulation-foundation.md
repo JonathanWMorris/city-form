@@ -4,8 +4,9 @@
 
 The Stage 1 simulation skeleton and Stage 2 millisecond time, logical road
 graph, and time-dependent routing contract are implemented. The Stage 5
-deterministic roadside parcel slice and zoning commands are implemented;
-buildings and capacities remain future Stage 5 work.
+deterministic roadside parcel, zoning, and placeholder-building development
+slice is implemented; Unreal parcel and building interaction remains Stage 5
+work.
 
 ## Module Boundary
 
@@ -371,11 +372,12 @@ which resolves the open question left by
 
 `EZoneCategory` is `None`, `Residential`, or `Commercial`. `FParcel::Zone`
 defaults to `None` and persists across `RegenerateParcels()` per the
-reconciliation rule above. `ApplyZone(FParcelId, EZoneCategory)` assigns
-Residential or Commercial, overwriting any prior Zone unconditionally — v0.1
-has no capacity or Building yet to conflict with a rezone. `ClearZone
-(FParcelId)` returns a parcel to `None`, succeeding as a no-op if it is
-already unassigned. Both reject an unknown `FParcelId`
+reconciliation rule above. The `FCitySimulation` commands coordinate zoning
+with placeholder development: `ApplyZone(FParcelId, EZoneCategory)` assigns
+Residential or Commercial and creates or replaces a compatible Building;
+applying the current category is idempotent. `ClearZone(FParcelId)` returns a
+parcel to `None` and removes its unoccupied placeholder, succeeding as a no-op
+if already unassigned. Both reject an unknown `FParcelId`
 (`ESimulationErrorCode::InvalidParcel`); `ApplyZone` additionally rejects
 `None` and any unrecognized category
 (`ESimulationErrorCode::InvalidZoneCategory`). Both fail atomically: no
@@ -391,6 +393,36 @@ scope under the documented non-goal of avoiding irregular subdivision
 optimization; parcel validation does not attempt cross-parcel overlap
 detection between parcels of different segments. See
 [ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md).
+
+## Stage 5 Placeholder Development
+
+`FDevelopmentConfig` owns the deliberately short walking-skeleton timings and
+starter capacities. Planning lasts 120,000 ms and construction lasts 180,000
+ms, for five simulated minutes from zoning to completion. The catalog contains
+two stable types: `DetachedHouse` (Residential, one household) and
+`SmallCommercial` (Commercial, eight jobs).
+
+Applying eligible zoning creates an authoritative `FBuilding` in `Planned` at
+the current simulation instant. Its stored construction and completion
+instants are computed before mutation, including overflow checks. `Advance`
+derives the stage from the new authoritative clock instant, so a large time
+jump can cross both boundaries without requiring per-frame stepping. Capacity
+is zero in `Planned` and `UnderConstruction`; only `Complete` activates the
+catalogued household or job capacity.
+
+Applying the same zone to a parcel that already owns a Building is an
+idempotent success and preserves identity, timestamps, and progress. Changing
+the zone preflights the replacement, then replaces the old unoccupied
+placeholder with a new ID, type, and timeline. Clearing zoning removes the
+placeholder. These operations are intentionally unrestricted until Stage 6
+adds occupants; later removal and rezoning rules must protect household and
+business references.
+
+Validation checks unique Building IDs, one Building per valid Parcel, valid
+catalog references, zone/type compatibility, ordered timelines, nonnegative
+capacity, and zero capacity before completion. Summary metrics expose counts
+by development stage plus active household and job capacity. See
+[ADR 0014](decisions/0014-placeholder-building-development.md).
 
 ## Test Contract
 
@@ -420,15 +452,15 @@ Unreal Automation Tests currently cover:
 - Deterministic, repeatable parcel generation from an identical road graph
 - Both-sides parcel generation with a centerline-symmetric setback
 - Segment-aligned (not world-axis-aligned) tiling on a diagonal segment
-- Leftover frontage shorter than one cell is skipped, not undersized
-- Parcel depth capped at the configured maximum row count
+- Complete 16 m × 32 m default footprints with incomplete frontage skipped
+- Explicit RegionProfile width/depth cell defaults and their validation
 - A too-short segment produces zero parcels without an error
 - Regeneration replaces the parcel set rather than accumulating duplicates
 - Automatic parcel regeneration after a successful road command
 - Malformed hand-built parcel records reported for each parcel validation code
 - RegionProfile parcel-sizing defaults and their validation
-- Zoning commands apply, clear, and freely re-apply Residential/Commercial
-  categories on valid parcels
+- Zoning commands create, replace, preserve, or remove compatible placeholder
+  Buildings according to explicit idempotency rules
 - Zoning commands reject an unassigned target category and an invalid parcel
   ID atomically
 - Parcel identity and Zone persist across a RegenerateParcels triggered by an
@@ -436,6 +468,11 @@ Unreal Automation Tests currently cover:
 - Summary zoning counts reflect Apply/Clear commands and always sum to the
   total parcel count
 - Malformed hand-built parcel Zone values are reported by validation
+- Starter BuildingType catalog values and validation
+- Building creation from zoning, exact stage boundaries, and large time jumps
+- Zero pre-completion capacity and category-appropriate completed capacity
+- Same-zone idempotency, rezone replacement, and clear-zone removal
+- Building stage and active-capacity summary metrics
 
 Tests must compare meaningful state and diagnostics rather than memory layout or
 unordered container iteration.

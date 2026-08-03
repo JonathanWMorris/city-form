@@ -23,7 +23,8 @@ enum class ESimulationErrorCode : uint8
 	InvalidRoadType,
 	InvalidSpeedLimit,
 	InvalidParcel,
-	InvalidZoneCategory
+	InvalidZoneCategory,
+	InvalidBuildingType
 };
 
 struct FSimulationError
