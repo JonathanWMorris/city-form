@@ -9,6 +9,11 @@ civil-calendar projection, playback controls, and construction capacity remain
 future work. The placeholder timing is a walking-skeleton value, not the final
 construction model described below.
 
+Until playback controls exist, the Stage 5 Zoning tray exposes a clearly
+temporary **+5 Minutes** action. It advances the authoritative clock by exactly
+300,000 ms through the normal simulation command; presentation does not change
+Building stages directly.
+
 ## Calendar and Playback Defaults
 
 The initial pacing target is:

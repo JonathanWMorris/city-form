@@ -13,17 +13,17 @@ inspectable, scalable, and enjoyable to control.
 > Stage 4 is complete with a game-instance-owned Unreal-to-simulation bridge,
 > a bottom two-layer road menu, connected two-click placement, endpoint
 > snapping, live preview, and persistent placeholder roads rebuilt from
-> detached logical-graph snapshots. Stage 5 is underway with deterministic,
-> segment-aligned 16 m × 32 m road-fronting parcels, residential/commercial
-> zoning, and deterministic placeholder-building development with validated
-> household and job capacity.
+> detached logical-graph snapshots. Stage 5 is complete with deterministic
+> road-fronting parcels, single-click zoning, tool-active overlays, and
+> authoritative placeholder-building development visualized from detached
+> snapshots.
 
 ## Current Focus
 
-Development is in
-[Stage 5: Parcels, Zoning, and Development](https://github.com/JonathanWMorris/city-form/issues/30).
+Development is moving into
+[Stage 6: Population and Employment](https://github.com/JonathanWMorris/city-form/issues/35).
 The next implementation packet is
-[Unreal zoning interaction and parcel/building visualization](https://github.com/JonathanWMorris/city-form/issues/34).
+[households, residents, move-in behavior, and home assignments](https://github.com/JonathanWMorris/city-form/issues/36).
 GitHub issues are the task-level todo list; this repository documentation
 records accepted behavior, architecture, and milestone outcomes.
 
@@ -98,6 +98,7 @@ determinism rules, performance strategy, and future persistence boundary.
 | [Map Foundation](docs/map-foundation.md) | Prototype coordinates and future extensible-world contract |
 | [City-Builder Camera](docs/camera-controls.md) | Mouse, keyboard, and trackpad navigation controls |
 | [Road Placement Tool](docs/road-tools.md) | Current road-building controls, contracts, and limitations |
+| [Zoning and Development Tools](docs/zoning-tools.md) | Parcel zoning, overlays, placeholder visuals, and debug time control |
 | [Simulation Foundation](docs/simulation-foundation.md) | Current APIs and planned routing contract |
 | [Traffic Model](docs/traffic-model.md) | Global microscopic traffic, prediction, and future incidents |
 | [Gameplay Pacing](docs/gameplay-pacing.md) | Accelerated calendar and ideal construction targets |

@@ -2,12 +2,18 @@
 
 #include "CityFormPlayerController.h"
 
+#include "CityFormDevelopmentVisualizationActor.h"
+#include "CityFormGameMode.h"
 #include "CityFormRoadPlacementComponent.h"
+#include "CityFormSimulationSubsystem.h"
 #include "CityFormToolPaletteWidget.h"
+#include "CityFormZoningToolComponent.h"
+#include "Engine/GameInstance.h"
 
 ACityFormPlayerController::ACityFormPlayerController()
 {
 	RoadPlacementTool = CreateDefaultSubobject<UCityFormRoadPlacementComponent>(TEXT("RoadPlacementTool"));
+	ZoningTool = CreateDefaultSubobject<UCityFormZoningToolComponent>(TEXT("ZoningTool"));
 }
 
 void ACityFormPlayerController::SetupInputComponent()
@@ -44,15 +50,25 @@ void ACityFormPlayerController::BeginPlay()
 		ToolPalette->SetAlignmentInViewport(FVector2D(0.5, 1.0));
 		ToolPalette->AddToViewport(100);
 		ensureMsgf(ToolPalette->IsInViewport(), TEXT("City Form could not attach its tool palette to the viewport."));
-		ToolPalette->SetRoadCategoryOpen(false);
+		ToolPalette->SetOpenCategory(ECityFormToolCategory::None);
+	}
+
+	if (ACityFormGameMode* GameMode = GetWorld()->GetAuthGameMode<ACityFormGameMode>())
+	{
+		DevelopmentVisualization = GameMode->GetDevelopmentVisualization();
 	}
 }
 
 void ACityFormPlayerController::SetToolMode(const ECityFormToolMode ToolMode)
 {
+	ActiveToolMode = ToolMode;
 	if (RoadPlacementTool != nullptr)
 	{
 		RoadPlacementTool->SetToolMode(ToolMode);
+	}
+	if (ZoningTool != nullptr)
+	{
+		ZoningTool->SetToolMode(ToolMode);
 	}
 	if (ToolPalette != nullptr)
 	{
@@ -62,7 +78,38 @@ void ACityFormPlayerController::SetToolMode(const ECityFormToolMode ToolMode)
 
 void ACityFormPlayerController::ToggleRoadCategory()
 {
-	SetRoadCategoryOpen(!bRoadCategoryOpen);
+	SetOpenCategory(
+		OpenCategory == ECityFormToolCategory::Roads ? ECityFormToolCategory::None : ECityFormToolCategory::Roads);
+}
+
+void ACityFormPlayerController::ToggleZoningCategory()
+{
+	SetOpenCategory(
+		OpenCategory == ECityFormToolCategory::Zoning ? ECityFormToolCategory::None : ECityFormToolCategory::Zoning);
+}
+
+void ACityFormPlayerController::AdvanceFiveMinutes()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UCityFormSimulationSubsystem* Simulation =
+		GameInstance != nullptr ? GameInstance->GetSubsystem<UCityFormSimulationSubsystem>() : nullptr;
+	if (Simulation == nullptr)
+	{
+		SetToolStatus(TEXT("The city simulation is unavailable."), true);
+		return;
+	}
+	const CityForm::Simulation::FAdvanceTimeResult Result =
+		Simulation->AdvanceSimulation(CityForm::Simulation::FSimulationDuration(300000));
+	if (!Result.IsSuccess())
+	{
+		SetToolStatus(Result.Error.Message, true);
+		return;
+	}
+	const CityForm::Simulation::FCitySummary Summary = Simulation->GetCitySummary();
+	SetToolStatus(FString::Printf(TEXT("Advanced 5 minutes. Complete: %d, homes: %d, jobs: %d."),
+		Summary.CompletedBuildingCount,
+		Summary.ActiveHouseholdCapacity,
+		Summary.ActiveJobCapacity));
 }
 
 void ACityFormPlayerController::SetToolStatus(const FString& Message, const bool bIsError)
@@ -73,7 +120,7 @@ void ACityFormPlayerController::SetToolStatus(const FString& Message, const bool
 	}
 	if (bIsError)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Road tool: %s"), *Message);
+		UE_LOG(LogTemp, Warning, TEXT("City Form tool: %s"), *Message);
 	}
 }
 
@@ -84,9 +131,17 @@ bool ACityFormPlayerController::IsPointerOverToolPalette() const
 
 void ACityFormPlayerController::HandlePrimaryToolAction()
 {
-	if (!IsPointerOverToolPalette() && RoadPlacementTool != nullptr)
+	if (IsPointerOverToolPalette())
+	{
+		return;
+	}
+	if (ActiveToolMode == ECityFormToolMode::Road && RoadPlacementTool != nullptr)
 	{
 		RoadPlacementTool->HandlePrimaryAction();
+	}
+	else if (ZoningTool != nullptr)
+	{
+		ZoningTool->HandlePrimaryAction();
 	}
 }
 
@@ -96,39 +151,62 @@ void ACityFormPlayerController::HandleCancelToolAction()
 	{
 		return;
 	}
-	if (RoadPlacementTool != nullptr && RoadPlacementTool->GetToolMode() != ECityFormToolMode::None)
+	if (ActiveToolMode != ECityFormToolMode::None)
 	{
 		SetToolMode(ECityFormToolMode::None);
-		SetToolStatus(TEXT("Basic Two-Way Road deselected. Choose a road type."));
+		SetToolStatus(OpenCategory == ECityFormToolCategory::Roads
+				? TEXT("Tool deselected. Choose a road type.")
+				: TEXT("Tool deselected. Choose Residential, Commercial, or Clear Zone."));
 		return;
 	}
-	if (bRoadCategoryOpen)
+	if (OpenCategory != ECityFormToolCategory::None)
 	{
-		SetRoadCategoryOpen(false);
+		SetOpenCategory(ECityFormToolCategory::None);
 	}
 }
 
-void ACityFormPlayerController::SetRoadCategoryOpen(const bool bOpen)
+void ACityFormPlayerController::SetOpenCategory(const ECityFormToolCategory Category)
 {
-	if (bRoadCategoryOpen == bOpen)
+	if (OpenCategory == Category)
 	{
 		if (ToolPalette != nullptr)
 		{
-			ToolPalette->SetRoadCategoryOpen(bOpen);
+			ToolPalette->SetOpenCategory(Category);
 		}
 		return;
 	}
 
-	bRoadCategoryOpen = bOpen;
-	if (!bRoadCategoryOpen && RoadPlacementTool != nullptr &&
-		RoadPlacementTool->GetToolMode() != ECityFormToolMode::None)
+	OpenCategory = Category;
+	if (ActiveToolMode != ECityFormToolMode::None)
 	{
 		SetToolMode(ECityFormToolMode::None);
 	}
 	if (ToolPalette != nullptr)
 	{
-		ToolPalette->SetRoadCategoryOpen(bRoadCategoryOpen);
+		ToolPalette->SetOpenCategory(OpenCategory);
 	}
-	SetToolStatus(bRoadCategoryOpen ? TEXT("Choose Basic Two-Way Road to begin placing roads.")
-									: TEXT("Choose Roads to open the road-building tools."));
+	if (DevelopmentVisualization == nullptr)
+	{
+		if (ACityFormGameMode* GameMode = GetWorld()->GetAuthGameMode<ACityFormGameMode>())
+		{
+			DevelopmentVisualization = GameMode->GetDevelopmentVisualization();
+		}
+	}
+	if (DevelopmentVisualization != nullptr)
+	{
+		DevelopmentVisualization->SetParcelOverlayVisible(OpenCategory == ECityFormToolCategory::Zoning);
+	}
+	switch (OpenCategory)
+	{
+	case ECityFormToolCategory::Roads:
+		SetToolStatus(TEXT("Choose Basic Two-Way Road to begin placing roads."));
+		break;
+	case ECityFormToolCategory::Zoning:
+		SetToolStatus(TEXT("Choose Residential, Commercial, or Clear Zone. +5 Minutes advances development."));
+		break;
+	case ECityFormToolCategory::None:
+	default:
+		SetToolStatus(TEXT("Choose Roads or Zoning to open build tools."));
+		break;
+	}
 }
