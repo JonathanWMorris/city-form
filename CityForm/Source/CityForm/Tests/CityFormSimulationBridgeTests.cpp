@@ -166,4 +166,81 @@ bool FCityFormSimulationBridgeErrorTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCityFormDevelopmentBridgeTest,
+	"CityForm.Presentation.SimulationBridge.DevelopmentCommandsAndSnapshot",
+	SimulationBridgeTestFlags)
+
+bool FCityFormDevelopmentBridgeTest::RunTest(const FString& Parameters)
+{
+	FScopedTestGameInstance TestGameInstance;
+	UCityFormSimulationSubsystem* Subsystem = TestGameInstance.GetSubsystem();
+	if (!TestNotNull(TEXT("The game instance owns a simulation subsystem."), Subsystem))
+	{
+		return false;
+	}
+
+	int32 GraphChanges = 0;
+	int32 DevelopmentChanges = 0;
+	const FDelegateHandle GraphHandle = Subsystem->OnRoadGraphChanged().AddLambda(
+		[&GraphChanges]()
+		{
+			++GraphChanges;
+		});
+	const FDelegateHandle DevelopmentHandle = Subsystem->OnDevelopmentChanged().AddLambda(
+		[&DevelopmentChanges]()
+		{
+			++DevelopmentChanges;
+		});
+	FRoadSegmentDefinition Definition;
+	Definition.RoadTypeId = FRoadTypeCatalog::GetBasicTwoWayRoadTypeId();
+	const FCreateRoadSegmentResult Road =
+		Subsystem->CreateRoadSegment(FCityFormRoadEndpointInput::New(FVector::ZeroVector),
+			FCityFormRoadEndpointInput::New(FVector(3200.0, 0.0, 0.0)),
+			Definition);
+	TestTrue(TEXT("The road command succeeds."), Road.IsSuccess());
+	TestEqual(TEXT("Road creation notifies the graph once."), GraphChanges, 1);
+	TestEqual(TEXT("Road creation notifies parcel presentation once."), DevelopmentChanges, 1);
+
+	FCityFormDevelopmentSnapshot Snapshot = Subsystem->CreateDevelopmentSnapshot();
+	TestEqual(TEXT("A 32m road produces four default parcels."), Snapshot.Parcels.Num(), 4);
+	TestEqual(TEXT("No Buildings exist before zoning."), Snapshot.Buildings.Num(), 0);
+	const FParcelId ParcelId = Snapshot.Parcels[0].Id;
+	TestTrue(
+		TEXT("Residential zoning succeeds."), Subsystem->ApplyZone(ParcelId, EZoneCategory::Residential).IsSuccess());
+	TestEqual(TEXT("Zoning publishes a development notification."), DevelopmentChanges, 2);
+	Snapshot = Subsystem->CreateDevelopmentSnapshot();
+	TestTrue(TEXT("The detached parcel reports Residential zoning."),
+		Snapshot.Parcels[0].Zone == EZoneCategory::Residential);
+	TestEqual(TEXT("Zoning creates one detached Building record."), Snapshot.Buildings.Num(), 1);
+	TestTrue(TEXT("The detached Building starts Planned."), Snapshot.Buildings[0].Stage == EDevelopmentStage::Planned);
+
+	Snapshot.Parcels.Reset();
+	Snapshot.Buildings.Reset();
+	TestEqual(TEXT("Mutating a detached snapshot does not remove authoritative parcels."),
+		Subsystem->CreateDevelopmentSnapshot().Parcels.Num(),
+		4);
+
+	TestTrue(TEXT("Five-minute advancement succeeds."),
+		Subsystem->AdvanceSimulation(FSimulationDuration(300000)).IsSuccess());
+	TestEqual(TEXT("Time advancement publishes a development notification."), DevelopmentChanges, 3);
+	Snapshot = Subsystem->CreateDevelopmentSnapshot();
+	TestTrue(
+		TEXT("The detached Building reports completion."), Snapshot.Buildings[0].Stage == EDevelopmentStage::Complete);
+	TestEqual(
+		TEXT("The completed detached house exposes one household slot."), Snapshot.Buildings[0].HouseholdCapacity, 1);
+
+	TestFalse(TEXT("An invalid parcel is rejected."),
+		Subsystem->ApplyZone(FParcelId(), EZoneCategory::Commercial).IsSuccess());
+	TestEqual(TEXT("A rejected command publishes no notification."), DevelopmentChanges, 3);
+	TestTrue(TEXT("Clearing zoning succeeds."), Subsystem->ClearZone(ParcelId).IsSuccess());
+	TestEqual(TEXT("Clearing publishes a development notification."), DevelopmentChanges, 4);
+	TestEqual(
+		TEXT("Clearing removes the detached Building."), Subsystem->CreateDevelopmentSnapshot().Buildings.Num(), 0);
+	TestTrue(TEXT("The authoritative city remains valid."), Subsystem->ValidateCity().IsValid());
+
+	Subsystem->OnRoadGraphChanged().Remove(GraphHandle);
+	Subsystem->OnDevelopmentChanged().Remove(DevelopmentHandle);
+	return true;
+}
+
 #endif // WITH_DEV_AUTOMATION_TESTS

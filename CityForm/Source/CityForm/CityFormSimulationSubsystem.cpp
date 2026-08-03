@@ -38,6 +38,64 @@ FCreateRoadSegmentResult UCityFormSimulationSubsystem::CreateRoadSegment(
 	if (Result.IsSuccess())
 	{
 		RoadGraphChanged.Broadcast();
+		DevelopmentChanged.Broadcast();
+	}
+	return Result;
+}
+
+FCityFormDevelopmentSnapshot UCityFormSimulationSubsystem::CreateDevelopmentSnapshot() const
+{
+	const FCitySimulation& City = GetSimulation();
+	FCityFormDevelopmentSnapshot Snapshot;
+	Snapshot.Parcels.Reserve(City.GetParcelLayout().GetParcels().Num());
+	Snapshot.Buildings.Reserve(City.GetBuildings().GetBuildings().Num());
+	for (const FParcel& Parcel : City.GetParcelLayout().GetParcels())
+	{
+		Snapshot.Parcels.Add({Parcel.Id,
+			FCityFormCoordinateConversion::ToUnrealCentimeters(Parcel.CenterPositionMeters),
+			Parcel.HeadingRadians,
+			FCityFormCoordinateConversion::ToUnrealCentimeters(Parcel.WidthMeters),
+			FCityFormCoordinateConversion::ToUnrealCentimeters(Parcel.DepthMeters),
+			Parcel.Zone});
+	}
+	for (const FBuilding& Building : City.GetBuildings().GetBuildings())
+	{
+		Snapshot.Buildings.Add({Building.Id,
+			Building.ParcelId,
+			Building.BuildingTypeId,
+			Building.Stage,
+			Building.HouseholdCapacity,
+			Building.JobCapacity});
+	}
+	return Snapshot;
+}
+
+FApplyZoneResult UCityFormSimulationSubsystem::ApplyZone(const FParcelId ParcelId, const EZoneCategory Zone)
+{
+	const FApplyZoneResult Result = GetSimulation().ApplyZone(ParcelId, Zone);
+	if (Result.IsSuccess())
+	{
+		DevelopmentChanged.Broadcast();
+	}
+	return Result;
+}
+
+FClearZoneResult UCityFormSimulationSubsystem::ClearZone(const FParcelId ParcelId)
+{
+	const FClearZoneResult Result = GetSimulation().ClearZone(ParcelId);
+	if (Result.IsSuccess())
+	{
+		DevelopmentChanged.Broadcast();
+	}
+	return Result;
+}
+
+FAdvanceTimeResult UCityFormSimulationSubsystem::AdvanceSimulation(const FSimulationDuration Duration)
+{
+	const FAdvanceTimeResult Result = GetSimulation().Advance(Duration);
+	if (Result.IsSuccess())
+	{
+		DevelopmentChanged.Broadcast();
 	}
 	return Result;
 }

@@ -20,6 +20,8 @@ public:
 
 	void SetToolMode(ECityFormToolMode ToolMode);
 	void ToggleRoadCategory();
+	void ToggleZoningCategory();
+	void AdvanceFiveMinutes();
 	void SetToolStatus(const FString& Message, bool bIsError = false);
 	bool IsPointerOverToolPalette() const;
 
@@ -29,13 +31,20 @@ protected:
 private:
 	void HandlePrimaryToolAction();
 	void HandleCancelToolAction();
-	void SetRoadCategoryOpen(bool bOpen);
+	void SetOpenCategory(ECityFormToolCategory Category);
 
 	UPROPERTY(VisibleAnywhere, Category = "City Form|Tools")
 	TObjectPtr<class UCityFormRoadPlacementComponent> RoadPlacementTool;
 
+	UPROPERTY(VisibleAnywhere, Category = "City Form|Tools")
+	TObjectPtr<class UCityFormZoningToolComponent> ZoningTool;
+
 	UPROPERTY(Transient)
 	TObjectPtr<class UCityFormToolPaletteWidget> ToolPalette;
 
-	bool bRoadCategoryOpen = false;
+	UPROPERTY(Transient)
+	TObjectPtr<class ACityFormDevelopmentVisualizationActor> DevelopmentVisualization;
+
+	ECityFormToolCategory OpenCategory = ECityFormToolCategory::None;
+	ECityFormToolMode ActiveToolMode = ECityFormToolMode::None;
 };

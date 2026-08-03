@@ -2,20 +2,22 @@
 
 ## Status
 
-This document defines the architectural boundaries for City Form. Stages 1–4
+This document defines the architectural boundaries for City Form. Stages 1–5
 now implement the dependency boundary from deterministic simulation primitives
 through logical roads, routing, the prototype environment, and a game-instance-
-owned Unreal bridge. The bridge accepts typed road commands and publishes
-detached presentation snapshots without exposing mutable simulation state.
+owned Unreal bridge. The bridge accepts typed road, zoning, and time commands
+and publishes detached road/development snapshots without exposing mutable
+simulation state.
 Later systems may evolve the concrete APIs, but changes must preserve the
 responsibilities and dependency direction below.
 
 The concrete simulation contract is documented in
 [Simulation Foundation](simulation-foundation.md), while the current editing
-boundary is documented in [Road Placement Tool](road-tools.md). Accepted
+boundary is documented in [Road Placement Tool](road-tools.md) and
+[Zoning and Development Tools](zoning-tools.md). Accepted
 architectural choices and their consequences live in [Architecture Decision
-Records](decisions/README.md). Stage 5 parcels and zoning are the next planned
-extension of these boundaries.
+Records](decisions/README.md). Stage 6 population extends the authoritative
+simulation without changing these boundaries.
 
 ## System Boundary
 

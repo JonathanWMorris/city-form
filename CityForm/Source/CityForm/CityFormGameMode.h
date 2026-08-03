@@ -17,6 +17,10 @@ class CITYFORM_API ACityFormGameMode : public AGameModeBase
 
 public:
 	ACityFormGameMode();
+	class ACityFormDevelopmentVisualizationActor* GetDevelopmentVisualization() const
+	{
+		return DevelopmentVisualization;
+	}
 
 protected:
 	virtual void BeginPlay() override;
@@ -24,4 +28,7 @@ protected:
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<class ACityFormRoadVisualizationActor> RoadVisualization;
+
+	UPROPERTY(Transient)
+	TObjectPtr<class ACityFormDevelopmentVisualizationActor> DevelopmentVisualization;
 };

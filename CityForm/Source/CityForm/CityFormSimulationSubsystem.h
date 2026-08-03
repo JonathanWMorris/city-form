@@ -8,6 +8,7 @@
 #include "CityFormSimulationSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnCityFormRoadGraphChanged);
+DECLARE_MULTICAST_DELEGATE(FOnCityFormDevelopmentChanged);
 
 struct FCityFormRoadNodeSnapshot
 {
@@ -29,6 +30,33 @@ struct FCityFormRoadGraphSnapshot
 {
 	TArray<FCityFormRoadNodeSnapshot> Nodes;
 	TArray<FCityFormRoadSegmentSnapshot> Segments;
+};
+
+struct FCityFormParcelSnapshot
+{
+	CityForm::Simulation::FParcelId Id;
+	FVector CenterCentimeters = FVector::ZeroVector;
+	double HeadingRadians = 0.0;
+	double WidthCentimeters = 0.0;
+	double DepthCentimeters = 0.0;
+	CityForm::Simulation::EZoneCategory Zone = CityForm::Simulation::EZoneCategory::None;
+};
+
+struct FCityFormBuildingSnapshot
+{
+	CityForm::Simulation::FBuildingId Id;
+	CityForm::Simulation::FParcelId ParcelId;
+	CityForm::Simulation::FBuildingTypeId BuildingTypeId;
+	CityForm::Simulation::EDevelopmentStage Stage = CityForm::Simulation::EDevelopmentStage::Planned;
+	int32 HouseholdCapacity = 0;
+	int32 JobCapacity = 0;
+};
+
+/** A detached presentation copy of authoritative parcels and buildings. */
+struct FCityFormDevelopmentSnapshot
+{
+	TArray<FCityFormParcelSnapshot> Parcels;
+	TArray<FCityFormBuildingSnapshot> Buildings;
 };
 
 struct FCityFormRoadEndpointInput
@@ -68,11 +96,21 @@ public:
 
 	/** Returns a detached copy whose lifetime and mutations cannot affect authoritative state. */
 	FCityFormRoadGraphSnapshot CreateRoadGraphSnapshot() const;
+	FCityFormDevelopmentSnapshot CreateDevelopmentSnapshot() const;
+	CityForm::Simulation::FApplyZoneResult ApplyZone(
+		CityForm::Simulation::FParcelId ParcelId, CityForm::Simulation::EZoneCategory Zone);
+	CityForm::Simulation::FClearZoneResult ClearZone(CityForm::Simulation::FParcelId ParcelId);
+	CityForm::Simulation::FAdvanceTimeResult AdvanceSimulation(CityForm::Simulation::FSimulationDuration Duration);
 
 	/** Broadcasts synchronously after a road command succeeds, never after a rejected command. */
 	FOnCityFormRoadGraphChanged& OnRoadGraphChanged()
 	{
 		return RoadGraphChanged;
+	}
+	/** Broadcasts after successful commands that may change parcel or building presentation. */
+	FOnCityFormDevelopmentChanged& OnDevelopmentChanged()
+	{
+		return DevelopmentChanged;
 	}
 	CityForm::Simulation::FCitySummary GetCitySummary() const;
 	CityForm::Simulation::FValidationReport ValidateCity() const;
@@ -83,4 +121,5 @@ private:
 
 	TUniquePtr<CityForm::Simulation::FCitySimulation> Simulation;
 	FOnCityFormRoadGraphChanged RoadGraphChanged;
+	FOnCityFormDevelopmentChanged DevelopmentChanged;
 };

@@ -10,5 +10,13 @@ enum class ECityFormToolMode : uint8
 	None,
 	Road,
 	ResidentialZone,
-	CommercialZone
+	CommercialZone,
+	ClearZone
+};
+
+enum class ECityFormToolCategory : uint8
+{
+	None,
+	Roads,
+	Zoning
 };

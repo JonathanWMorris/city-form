@@ -424,6 +424,21 @@ capacity, and zero capacity before completion. Summary metrics expose counts
 by development stage plus active household and job capacity. See
 [ADR 0014](decisions/0014-placeholder-building-development.md).
 
+## Unreal Development Bridge
+
+The game-instance simulation subsystem exposes a detached development snapshot
+for Unreal presentation. Parcel copies contain stable identity, oriented
+geometry, and zoning; Building copies contain identity, Parcel/type references,
+stage, and active capacities. Mutating or discarding a snapshot cannot affect
+the authoritative city.
+
+The bridge accepts typed zoning, clear-zone, and duration-advance commands and
+publishes a synchronous development-change notification after success. A
+successful road command also publishes it because road creation regenerates
+Parcels. Rejected commands publish no notification. Presentation rebuilds from
+a fresh snapshot and never writes stages, capacity, geometry, or time directly.
+See [Zoning and Development Tools](zoning-tools.md).
+
 ## Test Contract
 
 ### Implemented Coverage
@@ -473,6 +488,9 @@ Unreal Automation Tests currently cover:
 - Zero pre-completion capacity and category-appropriate completed capacity
 - Same-zone idempotency, rezone replacement, and clear-zone removal
 - Building stage and active-capacity summary metrics
+- Detached development snapshots and success-only change notifications
+- Rotated parcel picking with deterministic overlap resolution
+- Derived parcel-boundary and Building transforms for each placeholder stage
 
 Tests must compare meaningful state and diagnostics rather than memory layout or
 unordered container iteration.

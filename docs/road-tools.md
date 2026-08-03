@@ -21,10 +21,11 @@ states: cancel a pending first endpoint, deactivate Basic Two-Way Road while
 leaving Roads open, and then close the Roads tray. Clicking or hovering the
 dock never places a road or triggers bottom-edge camera scrolling.
 
-The lower menu layer contains categories and currently exposes only Roads. The
-upper layer contains concrete tools for the open category. Unimplemented
-categories are not shown. The road symbol is composed from source-defined UMG
-shapes rather than editor-only icons or binary artwork.
+The lower menu layer exposes Roads and Zoning. The upper layer contains
+concrete tools for the open category. Switching categories cancels an active
+or pending incompatible tool. The road symbol is composed from source-defined
+UMG shapes rather than editor-only icons or binary artwork. See
+[Zoning and Development Tools](zoning-tools.md) for the second category.
 
 The 720-pixel-wide dock stays bottom-center, 24 pixels above the viewport edge.
 Its root container changes from 118 pixels high when closed to 190 pixels high
@@ -61,8 +62,8 @@ presentation cannot modify the graph.
   editing work.
 - The preview uses transient debug drawing. Successful segments remain visible
   as simple 8-meter-wide, 0.2-meter-thick placeholder strips.
-- Production meshes, markings, intersections, curves, selection, deletion, and
-  zoning categories remain future work.
+- Production meshes, markings, intersections, curves, selection, and deletion
+  remain future work.
 
 ## Verification
 

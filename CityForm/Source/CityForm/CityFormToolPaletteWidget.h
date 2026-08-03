@@ -22,7 +22,7 @@ class CITYFORM_API UCityFormToolPaletteWidget final : public UUserWidget
 public:
 	void InitializeForController(ACityFormPlayerController* InController);
 	void SetSelectedTool(ECityFormToolMode ToolMode);
-	void SetRoadCategoryOpen(bool bOpen);
+	void SetOpenCategory(ECityFormToolCategory Category);
 	void SetStatus(const FString& Message, bool bIsError = false);
 	bool IsPointerOverPalette() const;
 
@@ -36,6 +36,21 @@ private:
 	UFUNCTION()
 	void HandleBasicRoadClicked();
 
+	UFUNCTION()
+	void HandleZoningCategoryClicked();
+
+	UFUNCTION()
+	void HandleResidentialClicked();
+
+	UFUNCTION()
+	void HandleCommercialClicked();
+
+	UFUNCTION()
+	void HandleClearZoneClicked();
+
+	UFUNCTION()
+	void HandleAdvanceFiveMinutesClicked();
+
 	TObjectPtr<ACityFormPlayerController> Controller;
 
 	UPROPERTY(Transient)
@@ -48,10 +63,25 @@ private:
 	TObjectPtr<UBorder> RoadTray;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UBorder> ZoningTray;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UButton> RoadCategoryButton;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UButton> BasicRoadButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> ZoningCategoryButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> ResidentialButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> CommercialButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> ClearZoneButton;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> StatusText;

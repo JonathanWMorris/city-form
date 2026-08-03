@@ -63,6 +63,19 @@ UButton* AddRoadButton(UWidgetTree* WidgetTree, UHorizontalBox* Row, const TCHAR
 	Row->AddChildToHorizontalBox(Button);
 	return Button;
 }
+
+UButton* AddTextButton(UWidgetTree* WidgetTree, UHorizontalBox* Row, const TCHAR* ButtonName, const TCHAR* Label)
+{
+	UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), ButtonName);
+	Button->SetBackgroundColor(InactiveColor);
+	UTextBlock* Text = WidgetTree->ConstructWidget<UTextBlock>();
+	Text->SetText(FText::FromString(Label));
+	Text->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+	SetFontSize(Text, 17);
+	Button->AddChild(Text);
+	Row->AddChildToHorizontalBox(Button)->SetPadding(FMargin(4.0f));
+	return Button;
+}
 } // namespace
 
 void UCityFormToolPaletteWidget::NativeOnInitialized()
@@ -100,14 +113,32 @@ void UCityFormToolPaletteWidget::NativeOnInitialized()
 	UVerticalBoxSlot* TraySlot = DockColumn->AddChildToVerticalBox(RoadTray);
 	TraySlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
 
+	ZoningTray = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ZoningTray"));
+	ZoningTray->SetBrushColor(TrayColor);
+	ZoningTray->SetPadding(FMargin(8.0f));
+	UHorizontalBox* ZoningToolRow = WidgetTree->ConstructWidget<UHorizontalBox>();
+	ZoningTray->AddChild(ZoningToolRow);
+	ResidentialButton = AddTextButton(WidgetTree, ZoningToolRow, TEXT("ResidentialButton"), TEXT("Residential"));
+	CommercialButton = AddTextButton(WidgetTree, ZoningToolRow, TEXT("CommercialButton"), TEXT("Commercial"));
+	ClearZoneButton = AddTextButton(WidgetTree, ZoningToolRow, TEXT("ClearZoneButton"), TEXT("Clear Zone"));
+	UButton* AdvanceButton = AddTextButton(WidgetTree, ZoningToolRow, TEXT("AdvanceButton"), TEXT("+5 Minutes"));
+	ResidentialButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleResidentialClicked);
+	CommercialButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleCommercialClicked);
+	ClearZoneButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleClearZoneClicked);
+	AdvanceButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleAdvanceFiveMinutesClicked);
+	UVerticalBoxSlot* ZoningTraySlot = DockColumn->AddChildToVerticalBox(ZoningTray);
+	ZoningTraySlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+
 	UHorizontalBox* CategoryRow = WidgetTree->ConstructWidget<UHorizontalBox>();
 	DockColumn->AddChildToVerticalBox(CategoryRow);
 	RoadCategoryButton = AddRoadButton(WidgetTree, CategoryRow, TEXT("RoadCategoryButton"), TEXT("Roads"));
 	RoadCategoryButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleRoadCategoryClicked);
+	ZoningCategoryButton = AddTextButton(WidgetTree, CategoryRow, TEXT("ZoningCategoryButton"), TEXT("Zoning"));
+	ZoningCategoryButton->OnClicked.AddDynamic(this, &UCityFormToolPaletteWidget::HandleZoningCategoryClicked);
 
-	SetRoadCategoryOpen(false);
+	SetOpenCategory(ECityFormToolCategory::None);
 	SetSelectedTool(ECityFormToolMode::None);
-	SetStatus(TEXT("Choose Roads to open the road-building tools."));
+	SetStatus(TEXT("Choose Roads or Zoning to open build tools."));
 }
 
 void UCityFormToolPaletteWidget::InitializeForController(ACityFormPlayerController* InController)
@@ -121,21 +152,35 @@ void UCityFormToolPaletteWidget::SetSelectedTool(const ECityFormToolMode ToolMod
 	{
 		BasicRoadButton->SetBackgroundColor(ToolMode == ECityFormToolMode::Road ? ActiveColor : InactiveColor);
 	}
+	if (ResidentialButton != nullptr)
+	{
+		ResidentialButton->SetBackgroundColor(
+			ToolMode == ECityFormToolMode::ResidentialZone ? ActiveColor : InactiveColor);
+		CommercialButton->SetBackgroundColor(
+			ToolMode == ECityFormToolMode::CommercialZone ? ActiveColor : InactiveColor);
+		ClearZoneButton->SetBackgroundColor(ToolMode == ECityFormToolMode::ClearZone ? ActiveColor : InactiveColor);
+	}
 }
 
-void UCityFormToolPaletteWidget::SetRoadCategoryOpen(const bool bOpen)
+void UCityFormToolPaletteWidget::SetOpenCategory(const ECityFormToolCategory Category)
 {
+	const bool bOpen = Category != ECityFormToolCategory::None;
 	if (DockSize != nullptr)
 	{
 		DockSize->SetHeightOverride(bOpen ? OpenDockHeight : ClosedDockHeight);
 	}
 	if (RoadTray != nullptr)
 	{
-		RoadTray->SetVisibility(bOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		RoadTray->SetVisibility(
+			Category == ECityFormToolCategory::Roads ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		ZoningTray->SetVisibility(
+			Category == ECityFormToolCategory::Zoning ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 	if (RoadCategoryButton != nullptr)
 	{
-		RoadCategoryButton->SetBackgroundColor(bOpen ? ActiveColor : InactiveColor);
+		RoadCategoryButton->SetBackgroundColor(Category == ECityFormToolCategory::Roads ? ActiveColor : InactiveColor);
+		ZoningCategoryButton->SetBackgroundColor(
+			Category == ECityFormToolCategory::Zoning ? ActiveColor : InactiveColor);
 	}
 }
 
@@ -167,5 +212,45 @@ void UCityFormToolPaletteWidget::HandleBasicRoadClicked()
 	if (Controller != nullptr)
 	{
 		Controller->SetToolMode(ECityFormToolMode::Road);
+	}
+}
+
+void UCityFormToolPaletteWidget::HandleZoningCategoryClicked()
+{
+	if (Controller != nullptr)
+	{
+		Controller->ToggleZoningCategory();
+	}
+}
+
+void UCityFormToolPaletteWidget::HandleResidentialClicked()
+{
+	if (Controller != nullptr)
+	{
+		Controller->SetToolMode(ECityFormToolMode::ResidentialZone);
+	}
+}
+
+void UCityFormToolPaletteWidget::HandleCommercialClicked()
+{
+	if (Controller != nullptr)
+	{
+		Controller->SetToolMode(ECityFormToolMode::CommercialZone);
+	}
+}
+
+void UCityFormToolPaletteWidget::HandleClearZoneClicked()
+{
+	if (Controller != nullptr)
+	{
+		Controller->SetToolMode(ECityFormToolMode::ClearZone);
+	}
+}
+
+void UCityFormToolPaletteWidget::HandleAdvanceFiveMinutesClicked()
+{
+	if (Controller != nullptr)
+	{
+		Controller->AdvanceFiveMinutes();
 	}
 }

@@ -117,7 +117,7 @@ Exit criteria:
 
 ## Stage 5: Parcels, Zoning, and Development
 
-Status: In Progress
+Status: Complete
 
 Tracker:
 [#30 — Stage 5: Parcels, zoning, and development](https://github.com/JonathanWMorris/city-form/issues/30)
@@ -127,8 +127,6 @@ Completed:
 [#32 — Add residential and commercial zoning commands](https://github.com/JonathanWMorris/city-form/issues/32)
 [#92 — Refine roadside parcels into road-fronting development lots](https://github.com/JonathanWMorris/city-form/issues/92)
 [#33 — Add placeholder buildings, development rules, and capacities](https://github.com/JonathanWMorris/city-form/issues/33)
-
-Next task:
 [#34 — Add Unreal zoning interaction and parcel/building visualization](https://github.com/JonathanWMorris/city-form/issues/34)
 
 Deliver:
@@ -145,10 +143,13 @@ Exit criteria:
 
 ## Stage 6: Population and Employment
 
-Status: Planned
+Status: Next
 
 Tracker:
 [#35 — Stage 6: Population and employment](https://github.com/JonathanWMorris/city-form/issues/35)
+
+Next task:
+[#36 — Add households, residents, move-in behavior, and home assignments](https://github.com/JonathanWMorris/city-form/issues/36)
 
 Deliver:
 

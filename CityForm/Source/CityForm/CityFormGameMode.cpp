@@ -2,6 +2,7 @@
 
 #include "CityFormGameMode.h"
 #include "CityFormCameraPawn.h"
+#include "CityFormDevelopmentVisualizationActor.h"
 #include "CityFormPlayerController.h"
 #include "CityFormRoadVisualizationActor.h"
 #include "Engine/World.h"
@@ -17,4 +18,7 @@ void ACityFormGameMode::BeginPlay()
 	Super::BeginPlay();
 	RoadVisualization = GetWorld()->SpawnActor<ACityFormRoadVisualizationActor>();
 	ensureMsgf(RoadVisualization != nullptr, TEXT("City Form could not create its derived road presentation."));
+	DevelopmentVisualization = GetWorld()->SpawnActor<ACityFormDevelopmentVisualizationActor>();
+	ensureMsgf(
+		DevelopmentVisualization != nullptr, TEXT("City Form could not create its derived development presentation."));
 }
