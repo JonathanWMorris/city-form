@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CitySimulation/Building.h"
 #include "CitySimulation/DeterministicRandom.h"
 #include "CitySimulation/Parcel.h"
 #include "CitySimulation/RegionProfile.h"
@@ -19,6 +20,7 @@ struct FSimulationConfig
 {
 	uint64 Seed = 0;
 	FRegionProfile RegionProfile = FRegionProfile::MakeCalifornia();
+	FDevelopmentConfig Development;
 };
 
 struct FCitySummary
@@ -33,6 +35,13 @@ struct FCitySummary
 	int32 ResidentialParcelCount = 0;
 	int32 CommercialParcelCount = 0;
 	int32 UnzonedParcelCount = 0;
+	int32 BuildingTypeCount = 0;
+	int32 BuildingCount = 0;
+	int32 PlannedBuildingCount = 0;
+	int32 UnderConstructionBuildingCount = 0;
+	int32 CompletedBuildingCount = 0;
+	int32 ActiveHouseholdCapacity = 0;
+	int32 ActiveJobCapacity = 0;
 
 	friend bool operator==(const FCitySummary& Left, const FCitySummary& Right)
 	{
@@ -41,7 +50,12 @@ struct FCitySummary
 			Left.RoadNodeCount == Right.RoadNodeCount && Left.RoadSegmentCount == Right.RoadSegmentCount &&
 			Left.ParcelCount == Right.ParcelCount && Left.ResidentialParcelCount == Right.ResidentialParcelCount &&
 			Left.CommercialParcelCount == Right.CommercialParcelCount &&
-			Left.UnzonedParcelCount == Right.UnzonedParcelCount;
+			Left.UnzonedParcelCount == Right.UnzonedParcelCount && Left.BuildingTypeCount == Right.BuildingTypeCount &&
+			Left.BuildingCount == Right.BuildingCount && Left.PlannedBuildingCount == Right.PlannedBuildingCount &&
+			Left.UnderConstructionBuildingCount == Right.UnderConstructionBuildingCount &&
+			Left.CompletedBuildingCount == Right.CompletedBuildingCount &&
+			Left.ActiveHouseholdCapacity == Right.ActiveHouseholdCapacity &&
+			Left.ActiveJobCapacity == Right.ActiveJobCapacity;
 	}
 };
 
@@ -57,6 +71,8 @@ public:
 	const FRoadTypeCatalog& GetRoadTypes() const;
 	const FRoadGraph& GetRoadGraph() const;
 	const FParcelLayout& GetParcelLayout() const;
+	const FBuildingTypeCatalog& GetBuildingTypes() const;
+	const FBuildingCollection& GetBuildings() const;
 
 	FAdvanceTimeResult Advance(FSimulationDuration Duration);
 	FAddRoadNodeResult AddRoadNode(FSimPoint2D PositionMeters);
@@ -72,11 +88,12 @@ public:
 	 */
 	FRegenerateParcelsResult RegenerateParcels();
 	/**
-	 * Assigns Residential or Commercial to an existing parcel, overwriting any prior Zone.
-	 * Rejects EZoneCategory::None and an unknown FParcelId, atomically.
+	 * Assigns Residential or Commercial and creates a Planned placeholder Building. Applying
+	 * the existing zone is idempotent; changing it replaces any unoccupied placeholder with a
+	 * new identity and timeline. All validation occurs before parcel or building mutation.
 	 */
 	FApplyZoneResult ApplyZone(FParcelId Id, EZoneCategory Zone);
-	/** Returns an existing parcel's Zone to None. Succeeds as a no-op if already unzoned. */
+	/** Returns a parcel to None and removes its unoccupied placeholder Building. */
 	FClearZoneResult ClearZone(FParcelId Id);
 	FRouteResult FindRoute(const FRouteQuery& Query) const;
 	FValidationReport Validate() const;
@@ -88,8 +105,10 @@ private:
 	FDeterministicRandom Random;
 	FVehicleClassCatalog VehicleClasses;
 	FRoadTypeCatalog RoadTypes;
+	FBuildingTypeCatalog BuildingTypes;
 	FRoadGraph RoadGraph;
 	FParcelLayout Parcels;
+	FBuildingCollection Buildings;
 };
 
 } // namespace CityForm::Simulation

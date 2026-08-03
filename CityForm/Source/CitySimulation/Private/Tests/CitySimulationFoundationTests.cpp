@@ -152,6 +152,8 @@ bool FStrongIdTest::RunTest(const FString& Parameters)
 {
 	static_assert(!std::is_convertible_v<FRoadNodeId, FRoadSegmentId>);
 	static_assert(!std::is_constructible_v<FRoadSegmentId, FRoadNodeId>);
+	static_assert(!std::is_convertible_v<FBuildingId, FParcelId>);
+	static_assert(!std::is_constructible_v<FBuildingTypeId, FBuildingId>);
 
 	TestFalse(TEXT("A default ID is invalid."), FRoadNodeId().IsValid());
 

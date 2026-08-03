@@ -3,8 +3,11 @@
 ## Status
 
 This document records accepted future gameplay defaults. The authoritative
-millisecond clock exists today; civil-calendar projection, playback controls,
-development timing, and construction capacity are not yet implemented.
+millisecond clock exists today. Stage 5 implements a deliberately short
+two-minute planning plus three-minute construction placeholder timeline;
+civil-calendar projection, playback controls, and construction capacity remain
+future work. The placeholder timing is a walking-skeleton value, not the final
+construction model described below.
 
 ## Calendar and Playback Defaults
 
