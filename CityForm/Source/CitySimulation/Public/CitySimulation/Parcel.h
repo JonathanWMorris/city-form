@@ -32,10 +32,9 @@ enum class EZoneCategory : uint8
 };
 
 /**
- * A bounded piece of developable land generated beside one road segment. v0.1 generation
- * always produces CellsWide == CellsDeep == 1; the footprint fields exist so a future
- * feature can combine contiguous 1x1 parcels into a larger footprint without a schema
- * change. A Parcel still may contain at most one Building regardless of footprint size.
+ * A bounded, road-fronting piece of developable land generated beside one road segment.
+ * Its footprint uses whole internal grid cells, but the Parcel itself is the zoning and
+ * development unit. A Parcel may contain at most one Building regardless of footprint size.
  */
 struct FParcel
 {
@@ -49,7 +48,7 @@ struct FParcel
 	/** 0-based index of this parcel's first (nearest-road) cell in depth. Row 0 touches the setback line. */
 	int32 RowIndex = 0;
 
-	/** Footprint size in whole RegionProfile::ParcelCellSizeMeters cells. Always 1x1 in v0.1 generation. */
+	/** Footprint size in whole RegionProfile::ParcelCellSizeMeters cells. */
 	int32 CellsWide = 1;
 	int32 CellsDeep = 1;
 

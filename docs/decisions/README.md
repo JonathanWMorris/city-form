@@ -24,6 +24,7 @@ implementation details and easily reversible choices do not require an ADR.
 - [0011: Segment-aligned deterministic roadside parcels](0011-segment-aligned-roadside-parcels.md)
   — ID-persistence open question resolved by ADR 0012
 - [0012: Persistent parcel identity and zoning commands](0012-persistent-parcel-identity-and-zoning-commands.md)
+- [0013: Road-fronting default parcel footprints](0013-road-fronting-default-parcel-footprints.md)
 
 ## Template
 

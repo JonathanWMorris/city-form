@@ -308,9 +308,10 @@ therefore produce the same result for the same graph, query, and cost provider.
 ### Grid and Sizing Defaults
 
 Parcel sizing lives on `FRegionProfile`, alongside the Basic Two-Way Road
-default speed limit: `ParcelCellSizeMeters` (8.0), `ParcelMaxDepthRows` (4),
-and `ParcelSetbackMeters` (4.0). These defaults intentionally match real
-Cities Skylines' zoning-grid constants. `ParcelSetbackMeters` is an
+default speed limit: `ParcelCellSizeMeters` (8.0),
+`ParcelDefaultWidthCells` (2), `ParcelDefaultDepthCells` (4), and
+`ParcelSetbackMeters` (4.0). The cell remains an internal alignment unit;
+the default logical lot is 16 m wide by 32 m deep. `ParcelSetbackMeters` is an
 authoritative simulation value defined independently of CityForm's visual
 road-placeholder strip width; the two currently coincide numerically but
 neither depends on the other, per the architecture's presentation-independence
@@ -326,22 +327,22 @@ per-segment grid instead hugs the road it fronts regardless of its angle.
 
 For each RoadSegment (in `RoadGraph::GetSegments()` order), for each side of
 the segment (Left before Right, a fixed counterclockwise-rotation convention
-used purely for deterministic ordering, not a real-world claim), cells tile
-contiguously along the segment's direction with no gap between them. A
-leftover span shorter than one full cell is simply not populated — no
-undersized cell is generated. Depth extends away from the road, offset by the
-setback, up to `ParcelMaxDepthRows` rows.
+used purely for deterministic ordering, not a real-world claim), complete
+default parcel footprints tile contiguously along the segment's direction.
+Each starts at `RowIndex == 0`, spans two frontage cells and four depth cells,
+and is offset from the road by the setback. A leftover frontage span shorter
+than a complete 16 m lot is not populated; undersized parcels are never
+generated.
 
 ### `FParcel`
 
 Each `FParcel` has a stable `FParcelId`, its generating `FRoadSegmentId` and
 `ERoadSide`, a `ColumnIndex`/`RowIndex` position (in whole cells, along the
 segment and away from the road respectively), and a `CellsWide`/`CellsDeep`
-footprint (both at least one). Stage 5 generation always produces `1x1`
-parcels; the footprint fields exist so a future feature can combine
-contiguous `1x1` parcels into a larger footprint without a schema migration.
-A Parcel may still contain at most one Building regardless of footprint size —
-see [Domain Model](domain-model.md).
+footprint (both at least one). The default Stage 5 generator produces `2x4`
+footprints: one 16 m by 32 m road-fronting lot per Parcel. A Parcel may still
+contain at most one Building regardless of footprint size — see
+[Domain Model](domain-model.md).
 
 ### Regeneration Semantics
 
@@ -363,7 +364,8 @@ feature must define what happens to a parcel — and its Zone — whose footprin
 key stops appearing; this is not solved here. See
 [ADR 0012](decisions/0012-persistent-parcel-identity-and-zoning-commands.md),
 which resolves the open question left by
-[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md).
+[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md), as amended by
+[ADR 0013](decisions/0013-road-fronting-default-parcel-footprints.md).
 
 ### Zoning
 
