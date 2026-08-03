@@ -110,15 +110,15 @@ holds regardless of a Parcel's footprint size.
 
 A Parcel's footprint is a variable, whole-cell-aligned width and depth
 (`CellsWide`/`CellsDeep`, both at least one) rather than a single fixed size.
-v0.1 generation always produces `1x1` parcels; the variable footprint exists
-so a future feature can combine contiguous `1x1` parcels into a larger
-footprint — for example to represent a bigger building — without changing this
-schema. v0.1 parcel generation is intentionally simple. A Parcel is still
-authoritative simulation data rather than procedural mesh state. See
+The default v0.1 lot is `2x4` internal 8 m cells: 16 m of road frontage and
+32 m of depth. `RowIndex` is zero because the whole depth belongs to one
+road-fronting Parcel rather than four separately zonable strips. Incomplete
+frontage remnants are skipped. A Parcel is authoritative simulation data
+rather than procedural mesh state. See
 [Simulation Foundation](simulation-foundation.md#stage-5-roadside-parcels) for
 the concrete generation contract and
-[ADR 0011](decisions/0011-segment-aligned-roadside-parcels.md) for the
-rationale.
+[ADR 0013](decisions/0013-road-fronting-default-parcel-footprints.md) for the
+current footprint rationale.
 
 ### Zone
 

@@ -4,6 +4,11 @@
 
 Accepted
 
+The original `1x1` generated-footprint decision is amended by
+[ADR 0013](0013-road-fronting-default-parcel-footprints.md). Segment alignment,
+the internal 8 m grid, setback, deterministic ordering, and accepted
+intersection-overlap limitation remain in force.
+
 ## Context
 
 Stage 5 zoning and buildings need stable logical land units derived from the

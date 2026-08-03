@@ -88,8 +88,10 @@ TArray<FParcel> FParcelLayout::GenerateCandidates(
 
 	const double CellSizeMeters = RegionProfile.ParcelCellSizeMeters;
 	const double SetbackMeters = RegionProfile.ParcelSetbackMeters;
-	const int32 MaxDepthRows = RegionProfile.ParcelMaxDepthRows;
-	if (!std::isfinite(CellSizeMeters) || CellSizeMeters <= 0.0 || !std::isfinite(SetbackMeters) || MaxDepthRows <= 0)
+	const int32 WidthCells = RegionProfile.ParcelDefaultWidthCells;
+	const int32 DepthCells = RegionProfile.ParcelDefaultDepthCells;
+	if (!std::isfinite(CellSizeMeters) || CellSizeMeters <= 0.0 || !std::isfinite(SetbackMeters) || WidthCells <= 0 ||
+		DepthCells <= 0)
 	{
 		return Candidates;
 	}
@@ -134,30 +136,25 @@ TArray<FParcel> FParcelLayout::GenerateCandidates(
 			double PerpY = 0.0;
 			GetPerpendicular(Direction, Side, PerpX, PerpY);
 
-			for (int32 Column = 0; Column < ColumnCount; ++Column)
+			for (int32 Column = 0; Column + WidthCells <= ColumnCount; Column += WidthCells)
 			{
-				const double AlongMeters = (Column + 0.5) * CellSizeMeters;
+				const double AlongMeters = (Column + WidthCells * 0.5) * CellSizeMeters;
 				const double ColumnCenterX = NodeA.PositionMeters.X + Direction.Ux * AlongMeters;
 				const double ColumnCenterY = NodeA.PositionMeters.Y + Direction.Uy * AlongMeters;
+				const double AcrossMeters = SetbackMeters + DepthCells * CellSizeMeters * 0.5;
+				const FSimPoint2D Center{ColumnCenterX + PerpX * AcrossMeters, ColumnCenterY + PerpY * AcrossMeters};
 
-				for (int32 Row = 0; Row < MaxDepthRows; ++Row)
-				{
-					const double AcrossMeters = SetbackMeters + (Row + 0.5) * CellSizeMeters;
-					const FSimPoint2D Center{
-						ColumnCenterX + PerpX * AcrossMeters, ColumnCenterY + PerpY * AcrossMeters};
-
-					Candidates.Add({FParcelId(),
-						Segment.Id,
-						Side,
-						Column,
-						Row,
-						1,
-						1,
-						CellSizeMeters,
-						CellSizeMeters,
-						Center,
-						Direction.HeadingRadians});
-				}
+				Candidates.Add({FParcelId(),
+					Segment.Id,
+					Side,
+					Column,
+					0,
+					WidthCells,
+					DepthCells,
+					WidthCells * CellSizeMeters,
+					DepthCells * CellSizeMeters,
+					Center,
+					Direction.HeadingRadians});
 			}
 		}
 	}

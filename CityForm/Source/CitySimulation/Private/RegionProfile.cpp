@@ -59,13 +59,22 @@ FValidationReport FRegionProfile::Validate() const
 			TEXT("The parcel cell size must be greater than zero.")});
 	}
 
-	if (ParcelMaxDepthRows <= 0)
+	if (ParcelDefaultWidthCells <= 0)
 	{
 		Report.Add({EValidationSeverity::Error,
 			EValidationIssueCode::NonPositiveRegionalValue,
 			TEXT("RegionProfile"),
 			0,
-			TEXT("The parcel max depth rows must be greater than zero.")});
+			TEXT("The default parcel width in cells must be greater than zero.")});
+	}
+
+	if (ParcelDefaultDepthCells <= 0)
+	{
+		Report.Add({EValidationSeverity::Error,
+			EValidationIssueCode::NonPositiveRegionalValue,
+			TEXT("RegionProfile"),
+			0,
+			TEXT("The default parcel depth in cells must be greater than zero.")});
 	}
 
 	if (!std::isfinite(ParcelSetbackMeters))

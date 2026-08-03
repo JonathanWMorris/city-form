@@ -116,7 +116,7 @@ bool FParcelBothSidesGeneratedTest::RunTest(const FString& Parameters)
 	{
 		const double MidpointX = (LeftOrigin->CenterPositionMeters.X + RightOrigin->CenterPositionMeters.X) * 0.5;
 		const double MidpointY = (LeftOrigin->CenterPositionMeters.Y + RightOrigin->CenterPositionMeters.Y) * 0.5;
-		TestEqual(TEXT("The Left/Right midpoint lands on the segment centerline (X)."), MidpointX, 4.0);
+		TestEqual(TEXT("The Left/Right midpoint lands on the segment centerline (X)."), MidpointX, 8.0);
 		TestEqual(TEXT("The Left/Right midpoint lands on the segment centerline (Y)."), MidpointY, 0.0);
 	}
 	return true;
@@ -141,10 +141,10 @@ bool FParcelDiagonalSegmentAlignedTilingTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Column zero, row zero, Left exists for the diagonal segment."), FirstCell);
 	if (FirstCell != nullptr)
 	{
-		TestTrue(TEXT("The cell center matches the worked segment-aligned example (X)."),
-			std::fabs(FirstCell->CenterPositionMeters.X - (-4.0)) < 1e-9);
-		TestTrue(TEXT("The cell center matches the worked segment-aligned example (Y)."),
-			std::fabs(FirstCell->CenterPositionMeters.Y - 8.0) < 1e-9);
+		TestTrue(TEXT("The parcel center matches the segment-aligned footprint (X)."),
+			std::fabs(FirstCell->CenterPositionMeters.X - (-11.2)) < 1e-9);
+		TestTrue(TEXT("The parcel center matches the segment-aligned footprint (Y)."),
+			std::fabs(FirstCell->CenterPositionMeters.Y - 18.4) < 1e-9);
 		TestTrue(TEXT("The cell heading matches the segment's own direction, not a world-axis grid."),
 			std::fabs(FirstCell->HeadingRadians - std::atan2(40.0, 30.0)) < 1e-9);
 	}
@@ -167,39 +167,29 @@ bool FParcelLeftoverRemainderSkippedTest::RunTest(const FString& Parameters)
 	{
 		MaxColumnIndex = Parcel.ColumnIndex > MaxColumnIndex ? Parcel.ColumnIndex : MaxColumnIndex;
 	}
-	TestEqual(TEXT("A 20m segment with 8m cells produces exactly two columns (16m used, 4m leftover skipped)."),
-		MaxColumnIndex,
-		1);
-	TestEqual(TEXT("Two columns, four rows, two sides produce sixteen parcels total."), Parcels.Num(), 16);
+	TestEqual(
+		TEXT("A 20m segment produces one 16m-wide parcel footprint and skips the 4m remainder."), MaxColumnIndex, 0);
+	TestEqual(TEXT("One complete footprint on each side produces two parcels total."), Parcels.Num(), 2);
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FParcelDepthCappedAtMaxRowsTest, "CityForm.Simulation.Parcel.DepthCappedAtMaxRows", ParcelTestFlags)
+	FParcelDefaultFootprintTest, "CityForm.Simulation.Parcel.DefaultFootprint", ParcelTestFlags)
 
-bool FParcelDepthCappedAtMaxRowsTest::RunTest(const FString& Parameters)
+bool FParcelDefaultFootprintTest::RunTest(const FString& Parameters)
 {
 	FCitySimulation City({605});
 	const FRoadNodeId NodeA = City.AddRoadNode({0.0, 0.0}).NodeId;
 	const FRoadNodeId NodeB = City.AddRoadNode({100.0, 0.0}).NodeId;
 	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
 
-	const int32 MaxDepthRows = FRegionProfile::MakeCalifornia().ParcelMaxDepthRows;
-	bool bAnyRowAtLimit = false;
-	bool bAnyRowBeyondLimit = false;
+	bool bAllMatchDefaultFootprint = true;
 	for (const FParcel& Parcel : City.GetParcelLayout().GetParcels())
 	{
-		if (Parcel.RowIndex >= MaxDepthRows)
-		{
-			bAnyRowBeyondLimit = true;
-		}
-		if (Parcel.RowIndex == MaxDepthRows - 1)
-		{
-			bAnyRowAtLimit = true;
-		}
+		bAllMatchDefaultFootprint = bAllMatchDefaultFootprint && Parcel.RowIndex == 0 && Parcel.CellsWide == 2 &&
+			Parcel.CellsDeep == 4 && Parcel.WidthMeters == 16.0 && Parcel.DepthMeters == 32.0;
 	}
-	TestFalse(TEXT("No parcel exceeds the configured max depth rows."), bAnyRowBeyondLimit);
-	TestTrue(TEXT("The deepest configured row is actually generated."), bAnyRowAtLimit);
+	TestTrue(TEXT("Every generated parcel is one 16m by 32m road-fronting lot."), bAllMatchDefaultFootprint);
 	return true;
 }
 
@@ -217,8 +207,9 @@ bool FParcelSegmentTooShortProducesNoParcelsWithoutErrorTest::RunTest(const FStr
 
 	const FRegenerateParcelsResult Regenerated = City.RegenerateParcels();
 	TestTrue(TEXT("Regenerating parcels for a too-short segment succeeds."), Regenerated.IsSuccess());
-	TestEqual(
-		TEXT("A segment too short for one cell produces zero parcels, not an error."), Regenerated.ParcelCount, 0);
+	TestEqual(TEXT("A segment too short for one full parcel frontage produces zero parcels, not an error."),
+		Regenerated.ParcelCount,
+		0);
 	TestEqual(TEXT("The stored parcel set is empty."), City.GetParcelLayout().GetParcels().Num(), 0);
 	return true;
 }
@@ -505,10 +496,10 @@ bool FParcelSummaryZoningCountsUpdateAfterApplyAndClearTest::RunTest(const FStri
 	City.AddRoadSegment(NodeA, NodeB, MakeBasicRoad());
 
 	const TArray<FParcel>& Parcels = City.GetParcelLayout().GetParcels();
-	TestEqual(TEXT("The fixture produces sixteen parcels."), Parcels.Num(), 16);
+	TestEqual(TEXT("The fixture produces two road-fronting parcels."), Parcels.Num(), 2);
 
 	FCitySummary Summary = City.GetSummary();
-	TestEqual(TEXT("All parcels start unzoned."), Summary.UnzonedParcelCount, 16);
+	TestEqual(TEXT("All parcels start unzoned."), Summary.UnzonedParcelCount, 2);
 	TestEqual(TEXT("No residential parcels yet."), Summary.ResidentialParcelCount, 0);
 	TestEqual(TEXT("No commercial parcels yet."), Summary.CommercialParcelCount, 0);
 
@@ -517,13 +508,13 @@ bool FParcelSummaryZoningCountsUpdateAfterApplyAndClearTest::RunTest(const FStri
 	Summary = City.GetSummary();
 	TestEqual(TEXT("One residential parcel after Apply."), Summary.ResidentialParcelCount, 1);
 	TestEqual(TEXT("One commercial parcel after Apply."), Summary.CommercialParcelCount, 1);
-	TestEqual(TEXT("Fourteen unzoned parcels remain."), Summary.UnzonedParcelCount, 14);
+	TestEqual(TEXT("No unzoned parcels remain."), Summary.UnzonedParcelCount, 0);
 
 	City.ClearZone(Parcels[0].Id);
 	Summary = City.GetSummary();
 	TestEqual(TEXT("Zero residential parcels after Clear."), Summary.ResidentialParcelCount, 0);
 	TestEqual(TEXT("Commercial count is unaffected by clearing a different parcel."), Summary.CommercialParcelCount, 1);
-	TestEqual(TEXT("Fifteen unzoned parcels remain."), Summary.UnzonedParcelCount, 15);
+	TestEqual(TEXT("One unzoned parcel remains."), Summary.UnzonedParcelCount, 1);
 	TestEqual(TEXT("The three zoning counts always sum to the parcel count."),
 		Summary.ResidentialParcelCount + Summary.CommercialParcelCount + Summary.UnzonedParcelCount,
 		Summary.ParcelCount);
@@ -655,7 +646,8 @@ bool FParcelRegionProfileDefaultsValidateTest::RunTest(const FString& Parameters
 {
 	const FRegionProfile California = FRegionProfile::MakeCalifornia();
 	TestEqual(TEXT("California defaults to 8m parcel cells."), California.ParcelCellSizeMeters, 8.0);
-	TestEqual(TEXT("California defaults to four parcel depth rows."), California.ParcelMaxDepthRows, 4);
+	TestEqual(TEXT("California defaults to two parcel frontage cells."), California.ParcelDefaultWidthCells, 2);
+	TestEqual(TEXT("California defaults to four parcel depth cells."), California.ParcelDefaultDepthCells, 4);
 	TestEqual(TEXT("California defaults to a 4m parcel setback."), California.ParcelSetbackMeters, 4.0);
 	TestTrue(TEXT("The California profile with parcel defaults validates."), California.Validate().IsValid());
 
@@ -671,10 +663,16 @@ bool FParcelRegionProfileDefaultsValidateTest::RunTest(const FString& Parameters
 		CountParcelIssues(NonPositiveCellSize.Validate(), EValidationIssueCode::NonPositiveRegionalValue),
 		1);
 
-	FRegionProfile NonPositiveDepthRows = California;
-	NonPositiveDepthRows.ParcelMaxDepthRows = 0;
-	TestEqual(TEXT("A non-positive parcel depth-row count is reported."),
-		CountParcelIssues(NonPositiveDepthRows.Validate(), EValidationIssueCode::NonPositiveRegionalValue),
+	FRegionProfile NonPositiveWidthCells = California;
+	NonPositiveWidthCells.ParcelDefaultWidthCells = 0;
+	TestEqual(TEXT("A non-positive parcel width-cell count is reported."),
+		CountParcelIssues(NonPositiveWidthCells.Validate(), EValidationIssueCode::NonPositiveRegionalValue),
+		1);
+
+	FRegionProfile NonPositiveDepthCells = California;
+	NonPositiveDepthCells.ParcelDefaultDepthCells = 0;
+	TestEqual(TEXT("A non-positive parcel depth-cell count is reported."),
+		CountParcelIssues(NonPositiveDepthCells.Validate(), EValidationIssueCode::NonPositiveRegionalValue),
 		1);
 
 	FRegionProfile NonFiniteSetback = California;

@@ -14,14 +14,16 @@ inspectable, scalable, and enjoyable to control.
 > a bottom two-layer road menu, connected two-click placement, endpoint
 > snapping, live preview, and persistent placeholder roads rebuilt from
 > detached logical-graph snapshots. Stage 5 is underway with deterministic,
-> segment-aligned roadside parcel generation and residential/commercial
-> zoning commands.
+> segment-aligned 16 m × 32 m road-fronting parcel generation and
+> residential/commercial zoning commands.
 
 ## Current Focus
 
 Development is in
 [Stage 5: Parcels, Zoning, and Development](https://github.com/JonathanWMorris/city-form/issues/30).
-The next implementation packet is
+The parcel-footprint refinement is tracked in
+[issue #92](https://github.com/JonathanWMorris/city-form/issues/92). The next
+implementation packet after that foundation is
 [placeholder buildings, development rules, and capacities](https://github.com/JonathanWMorris/city-form/issues/33).
 GitHub issues are the task-level todo list; this repository documentation
 records accepted behavior, architecture, and milestone outcomes.
